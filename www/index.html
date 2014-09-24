@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="exoweb"> 
+<head>
+  <meta charset="utf-8">
+  <title>ExoDM Web Service</title>
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="css/exosense.css"/>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+  <script src="js/exoweb.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/ej.js"></script> 
+  <script src="js/wse.js"></script> 
+
+  <script>
+
+    <!-- If not logged in redirect -->
+    window.onload = function() {
+      var cookie = getCookie("id");
+      window.console.debug("Cookie = " +cookie);
+      if (cookie == "") {
+        // location.href = "login.html";
+      } 
+    }
+
+    function getCookie(cname) {
+      var name = cname + "=";
+      var ca = document.cookie.split(';');
+      window.console.debug("Cookie = " +ca);
+      for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length, c.length);
+      }
+    return "";
+}
+
+
+  </script>
+
+</head>
+    <div class="exosense-logo" id="exosense-logo">ExoSense</div>
+    <div ng-controller="LogoutCtrl">
+    <form action="" method="post" name="menuform" class="action-form" 
+	  id="menuform">
+      <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td colspan="2" align="center">
+	    <li class="text-input"><a href="#/devices">devices</a></li>
+	  </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center">
+	    <li class="text-input"><a href="#/users">users</a></li>
+	  </td>
+        </tr>
+        <tr>
+          <td align="center">
+	    <input name="logout" type="submit" class="button-input" 
+		   id="logout" value="Log out" 
+		   ng-click="logout()" />
+	  </td>
+        </tr>
+      </table>
+    </form>
+</div>
+  <div class="push"></div>
+  </div>
+  
+  <div class="footer" id="footer">
+    <hr/>
+    <div style="margin-left: 10%">
+      <table>
+	<tr>
+	  <td><image src="img/icon-fb.png"/></td>
+	  <td><image src="img/icon-tw.png"/></td>
+	  <td><image src="img/icon-in.png"/></td>
+	  <td style="width: 200px;"><p>Feuerlabs inc. 2014</p></td>
+	</tr>
+      </table>
+    </div>
+  </div>
+
+  <div ng-view></div>
+
+</body>
+</html>
+<body>
+
+  <div ng-view></div>
+
+</body>
+</html>

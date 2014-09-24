@@ -1,0 +1,1 @@
+/Users/malotte/erlang/wse/priv/wse.js
