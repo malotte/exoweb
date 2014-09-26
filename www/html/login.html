@@ -1,0 +1,35 @@
+<div class="action-text" id="action-text">Log in</div>
+<div ng-controller="LoginCtrl">
+  <form action="" method="post" name="loginform" class="action-form" 
+	id="loginform">
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2" align="center">
+	  <input name="name" placeholder="name" type="text" 
+		 class="text-input" ng-model="user.name" 
+		 required id="name"/>
+	</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center">
+	  <input name="password" placeholder="password" type="password" 
+		 class="text-input" ng-model="user.password" 
+		 required ng-minlength="6" id="password" />
+	</td>
+      </tr>
+      <tr>
+        <td align="center">
+	  <a href="#/signup">or Sign up</a>
+	</td>
+        <td align="center">
+	  <input name="login" type="submit" class="button-input" 
+		 id="login" value="Log in" 
+		 ng-click="login(user)" ng-disabled="loginform.$invalid"/>
+	</td>
+      </tr>
+    </table>
+  </form>
+  <pre>form = {{user | json}}</pre>
+<div class="push"></div>
+</div>
+

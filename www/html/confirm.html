@@ -1,0 +1,24 @@
+<div class="action-text" id="action-text">Confirm</div>
+<div ng-controller="ConfirmCtrl" >
+  <form action="" method="post" name="confirmform" class="action-form" 
+	id="confirmform">
+    <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td colspan="2" align="center">
+	  <div class="info-text" id="confirm-text">
+	    Confirm creation of account: {{account}}</div>
+	</td>
+      </tr>
+      <tr>
+        <td colspan="2" align="center">
+	  <input name="login" type="submit" class="button-input" 
+		 id="login" value="Confirm" 
+		 ng-click="confirm()"/>
+	</td>
+      </tr>
+    </table>
+  </form>
+  <pre>form = {{user | json}}</pre>
+  <div class="push"></div>
+</div>
+ 

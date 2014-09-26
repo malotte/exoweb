@@ -3,7 +3,7 @@
 /* Controllers */
 
 var exowebControllers = 
-    angular.module('exowebControllers', ['ngRoute','ngCookies']);
+    angular.module('exowebControllers', ['ngRoute']);
 
 
 exowebControllers.controller('ApplyCtrl', ['$scope',
@@ -52,7 +52,7 @@ exowebControllers.controller('ConfirmCtrl',
 		   function(obj,ref,value) {
 		       window.console.debug("Value = " +value);
 		       // parse reply for login name
-		       $window.location = "login.html";
+		       window.location = "#/login";
 		   });
       };
   }]);
@@ -79,25 +79,55 @@ exowebControllers.controller('LoginCtrl', ['$scope', '$routeParams',
 		    function(obj,ref,value) {  
 		       window.console.debug("Value = " +value);
 		    });
+	  // New websession needed
+	  Wse.open("ws://"+(location.hostname||"localhost")+":1234/websession");
 	  var cookie = document.cookies;
-	  window.console.debug("Cookie = " +cookie);
-	  window.location.href ="index.html";
+	  window.console.debug("Cookie created = " +cookie);
+	  window.location.href ="#/index";
       };
 
   }]);
 exowebControllers.controller('LogoutCtrl', ['$scope', '$routeParams',
   function($scope) {
       
+      // If not logged in redirect
+      //$scope.$on('$routeChangeSuccess', function () {
+      var redirect = function() {
+	  var cookie = getCookie("id");
+	  window.console.debug("Cookie = " +cookie);
+	  if (cookie == "") {
+	      window.console.debug("Empty cookie, redirecting!");
+	      window.location.href = "#/login";
+	  } 
+      };
+
       $scope.logout = function() {
 	  var cookie = document.cookie;
  	  window.console.debug("Cookie before reset " +cookie);
 	  document.cookie="id=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-	  /* document.cookie="id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+	  /* document.cookie="id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=//";
 	     If adding path, add in create_cookie (exoweb_js.erl) as well */
 	  cookie = document.cookie;
  	  window.console.debug("Cookie after reset " +cookie);
-	  location.href = "login.html";
+	  window.location.href = "#/login";
       };
+
+
+      // Remove when made ngCookies work
+      var getCookie = function(cname) {
+	  var name = cname + "=";
+	  var ca = document.cookie.split(';');
+	  window.console.debug("getCookie => " +ca);
+	  for(var i=0; i<ca.length; i++) {
+              var c = ca[i];
+              while (c.charAt(0)==' ') c = c.substring(1);
+              if (c.indexOf(name) != -1) 
+		  return c.substring(name.length, c.length);
+	  }
+	  return "";
+      };
+
+      redirect();
 
   }]);
 

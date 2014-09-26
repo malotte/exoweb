@@ -1,0 +1,29 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2">
+      <!--Sidebar content-->
+
+      Search: <input ng-model="query">
+      Sort by:
+      <select ng-model="orderProp">
+        <option value="name">Alphabetical</option>
+        <option value="age">Newest</option>
+      </select>
+
+    </div>
+    <div class="col-md-10">
+      <!--Body content-->
+
+    <table class="devices">
+      <tr ng-repeat="device in devices | filter:query | orderBy:orderProp" 
+	  class="thumbnail device-listing">
+        <td><a href="#/devices/{{device.id}}" class="thumb">
+	    <img ng-src="{{device.imageUrl}}"></a></td>
+        <td><a href="#/devices/{{device.id}}">{{device.name}}</a></td>
+        <td><p>{{device.snippet}}</p></td>
+      </tr>
+    </table>
+
+    </div>
+  </div>
+</div>

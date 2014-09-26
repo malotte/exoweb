@@ -1,0 +1,15 @@
+%% -*- erlang -*-
+{application, exoweb_js,
+ [{description, "Exodm web interface."},
+  {vsn, git},
+  {registered, [exoweb]},
+  {applications, [
+                  kernel,
+                  stdlib,
+		  sasl,
+		  gettext,
+		  gen_smtp
+                 ]},
+  {modules,[exoweb, exoweb_sup, exoweb_index]},
+  {mod, {exoweb, []}}
+]}.

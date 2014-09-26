@@ -58,7 +58,8 @@ create_cookie(WebSocket, Args) ->
 	    ?dbg("create_cookie: cookie ~p.", [WebCookie]),
 	    %% Set cookie at client
 	    ok = wse:set(WebSocket, wse:document(), "cookie", 
-			 "id=" ++ integer_to_list(WebCookie));
+			 "id=" ++ integer_to_list(WebCookie) ++
+			     "; expires=Thu, 01 Jan 2070 00:00:00 UTC");
 	                  %% "id=" ++ integer_to_list(WebCookie) ++ "; path=/");
 	                  %% If adding path, add in logout (controllers.js) 
 	                  %% as well
