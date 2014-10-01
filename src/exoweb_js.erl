@@ -59,15 +59,24 @@ create_cookie(WebSocket, Args) ->
 	    %% Set cookie at client
 	    ok = wse:set(WebSocket, wse:document(), "cookie", 
 			 "id=" ++ integer_to_list(WebCookie) ++
-			     "; expires=Thu, 01 Jan 2070 00:00:00 UTC");
+			     "; expires=Thu, 01 Jan 2070 00:00:00 UTC"),
 	                  %% "id=" ++ integer_to_list(WebCookie) ++ "; path=/");
 	                  %% If adding path, add in logout (controllers.js) 
 	                  %% as well
-	{error, illegal_user} = E ->
+	    %% Change location on client
+	    Path = proplists:get_value(path, Args),
+	    %% {ok, Location} = wse:get(WebSocket, wse:window(), "location"),
+	    %% ok = wse:set(WebSocket, Location, "href", Path);
+	    ok = wse:set(WebSocket,  wse:window(), ["location", "href"], Path);
+ 	{error, illegal_user} = E ->
 	    ?dbg("create_cookie: illegal user ~p.", [User]),
 	    E
     end.
 
+user2account("exodm-admin") ->
+    "exodm";
+user2account("getaround-admin") ->
+    "getaround";
 user2account(User) ->
     case string:tokens(User, "/") of
 	[Account, _Name] -> Account;

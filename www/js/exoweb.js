@@ -12,8 +12,6 @@ var exowebApp = angular.module('exoweb', [
 exowebApp.config(['$routeProvider', '$locationProvider',
 		  function($routeProvider, $locationProvider) {
 		  
-    window.console.debug("hej");
- 		     
     $routeProvider.
      when('/menu', {
           templateUrl: 'html/menu.html',

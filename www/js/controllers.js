@@ -16,13 +16,14 @@ exowebControllers.controller('ApplyCtrl', ['$scope',
 		    [Ei.tuple(Ei.atom('email'), user.email),
 		     Ei.tuple(Ei.atom('password'), user.password)]], 
 		   // reply callback
-		   function(obj,ref,value) {  
-		       window.console.debug("Value = " +value);
-		       if (value == "{ok, ok}") {
+		   function(obj,ref,reply) {  
+		       window.console.debug("Value = " +reply);
+		       if (reply == "{ok, ok}") {
 			   window.alert("Confirm mail sent to " +user.email);}
-		       else {
-			   window.alert("Error: " +value);}
-		   
+		       else if (reply.value[0] == "error") {
+			   // Call not performed => {error, Reason}
+			   window.alert("Error: " +reply.value[1]);
+		       }
 		   });
       };
 
@@ -49,10 +50,29 @@ exowebControllers.controller('ConfirmCtrl',
 		     Ei.tuple(Ei.atom('email'), $scope.email),
 		     Ei.tuple(Ei.atom('session'), $scope.session)]], 
 		   // reply callback
-		   function(obj,ref,value) {
-		       window.console.debug("Value = " +value);
-		       // parse reply for login name
-		       window.location = "#/login";
+		   function(obj,ref,reply) {
+		       window.console.debug("Reply = " +reply);
+		       window.console.debug("Value 0 = " +reply.value[0]);
+		       window.console.debug("Value 1 = " +reply.value[1]);
+		       
+		       if (reply.value[0] == "ok") {
+			   // Call performed
+			   var result = reply.value[1];
+			   window.console.debug("Result = " +result.value[1]);
+			   if (result.value[0] == "ok") {
+			       // call sucessful => {ok,{ok,LoginName}}
+			       window.location = 
+				   "#/login?name="+result.value[1];
+			   }
+			   else if (result.value[0] == "error") {
+			       // Call failed => {ok,{error,Reason}}
+			       window.alert("Error: " +result.value[1]);
+			   }
+		       }
+		       else if (reply.value[0] == "error") {
+			   // Call not performed => {error, Reason}
+			   window.alert("Error: " +reply.value[1]);
+		       }
 		   });
       };
   }]);
@@ -68,25 +88,41 @@ exowebControllers.controller('LoginCtrl', ['$scope', '$routeParams',
 		    [Ei.tuple(Ei.atom('name'), user.name),
 		     Ei.tuple(Ei.atom('password'), user.password)]], 
 		   // reply callback
-		   function(obj,ref,value) {  
-		       window.console.debug("Value = " +value);
+		   function(obj,ref,reply) {  
+		       window.console.debug("Value = " +reply);
+		       parseReply(reply, user);
 		   });
-	  // If successful
+      }
+
+      var parseReply = function(reply, user) {
+	  if (reply.value[0] == "ok") {
+	      // Call performed
+	      var result = reply.value[1];
+	      window.console.debug("Result = " +result);
+	      if (result == "ok") {
+		  // call sucessful => {ok, ok}
+		  createCookie(user);
+	      }
+	      else if (result.value[0] == "error") {
+		  // Call failed => {ok,{error,Reason}}
+		  window.alert("Error: " +result.value[1]);
+	      }
+	  }
+	  else if (reply.value[0] == "error") {
+	      // Call not performed => {error, Reason}
+	      window.alert("Error: " +reply.value[1]);
+	  }
+      };
+
+      var createCookie = function(user) {
 	  Wse.start('exoweb_js', 'create_cookie', 
 		    [[Ei.tuple(Ei.atom('name'), user.name),
-		      Ei.tuple(Ei.atom('password'), user.password)]],
-		    // reply callback
-		    function(obj,ref,value) {  
-		       window.console.debug("Value = " +value);
-		    });
-	  // New websession needed
-	  Wse.open("ws://"+(location.hostname||"localhost")+":1234/websession");
-	  var cookie = document.cookies;
-	  window.console.debug("Cookie created = " +cookie);
-	  window.location.href ="#/index";
+		      Ei.tuple(Ei.atom('password'), user.password),
+		      Ei.tuple(Ei.atom('path'), "#/index")]]);
       };
 
   }]);
+
 exowebControllers.controller('LogoutCtrl', ['$scope', '$routeParams',
   function($scope) {
       
@@ -127,16 +163,19 @@ exowebControllers.controller('LogoutCtrl', ['$scope', '$routeParams',
 	  return "";
       };
 
+      // Call this at load
       redirect();
 
   }]);
 
 
-exowebControllers.controller('DeviceListCtrl', ['$scope', 'Device',
-  function($scope, Device) {
-    $scope.devices = Device.query();
-    $scope.orderProp = 'age';
-  }]);
+exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
+    function($scope, $http) {
+	$http.get('devices/devices.json').success(function(data) {
+	    $scope.devices = data;
+	});
+	$scope.orderProp = 'device-id';
+    }]);
 
 exowebControllers.controller('DeviceDetailCtrl', ['$scope', '$routeParams', 'Device',
   function($scope, $routeParams, Device) {

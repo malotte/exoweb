@@ -6,8 +6,8 @@
       Search: <input ng-model="query">
       Sort by:
       <select ng-model="orderProp">
-        <option value="name">Alphabetical</option>
-        <option value="age">Newest</option>
+        <option value="device-id">Alphabetical</option>
+        <option value="msisdn">Phone</option>
       </select>
 
     </div>
@@ -15,12 +15,10 @@
       <!--Body content-->
 
     <table class="devices">
-      <tr ng-repeat="device in devices | filter:query | orderBy:orderProp" 
-	  class="thumbnail device-listing">
-        <td><a href="#/devices/{{device.id}}" class="thumb">
-	    <img ng-src="{{device.imageUrl}}"></a></td>
-        <td><a href="#/devices/{{device.id}}">{{device.name}}</a></td>
-        <td><p>{{device.snippet}}</p></td>
+      <tr ng-repeat="device in devices | filter:query | orderBy:orderProp">
+        <td><p>{{device.device-id}}</p></td>
+        <td><p>{{device.device-type}}</p></td>
+        <td><p>{{device.msisdn}}</p></td>
       </tr>
     </table>
 

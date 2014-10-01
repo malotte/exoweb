@@ -64,7 +64,7 @@ confirm_account({confirm, Account, Email, PassWord }) ->
 	    ?dbg("event: create of account ~p ok.", [Account]),
 	    %% Get init_admin ??
 	    Admin = Account ++ "/admin",
-	    {ok, Account, Admin};
+	    {ok, Admin};
 	{error, Reason} = E ->
 	    ?dbg("event: create of account ~p failed, reason ~p.", 
 		[Account, Reason]),
