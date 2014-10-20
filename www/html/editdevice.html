@@ -1,0 +1,39 @@
+<div class="tab" ng-controller="EditTabCtrl">
+  Not fully implemented yet
+  <table>
+    <tr> 
+      <td>Device id: </td> 
+      <td>{{deviceid}} </td> 
+    </tr>
+    <tr> 
+      <td>Server Key: </td>
+      <td><input name="skey" placeholder="Server Key" 
+		 value="{{serverkey}}" type = "text" /></td>
+    </tr>
+    <tr> 
+      <td>Device Key:</td>
+      <td><input name="dkey" placeholder="Device Key" 
+		 value="{{devicekey}}" type = "text" /></td>
+    </tr>
+    <tr> 
+      <td>Ms Isdn:</td>
+      <td><input name="msisdn" placeholder="Ms Isdn Key" 
+		 value="{{msisdn}}" type = "text" /></td>
+    </tr>
+    <tr> 
+      <td>Status:</td> 
+      <td>{{status}}</td>
+    </tr>
+    </table> 
+  <input name="connect" type="checkbox" ng-model="connect" />
+  Connect</br>
+  Events in queue: {{inqueue}}</br>
+  <input name="deletequeue" type="checkbox" ng-model="deletequeue" />
+  Delete all events in queue
+  <p style="color: #ff0000">
+    <input name="deletedevice " type="checkbox" ng-model="delete" />
+    Delete this device</p></br>
+  <input name="save" type="submit" class="save-button" 
+	 id="save" value="Save" ng-click="update(device)" />
+</div>
+

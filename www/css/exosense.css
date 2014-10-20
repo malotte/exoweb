@@ -121,16 +121,7 @@ form {
 
 .info {
     font-family: Callibri, Arial, Verdana;
-    color: black;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: bold;
-}
-
-.tab-pane {
-    align: left;
     background-image:url('../img/info_bg.png');
-    font-family: Callibri, Arial, Verdana;
     color: black;
     font-size: 12px;
     font-style: normal;
@@ -157,11 +148,21 @@ form {
     margin-left: 33%;
 }
 
+
 .info-text {
     font-family: Callibri, Arial, Verdana;
     font-size: 24px;
     color: #eeeeee;
     margin-top: 10px;
+}
+
+
+.tab {
+    float: left;
+    text-align: left;
+    margin: 3px 3px 0px 3px;
+    padding: 5px 5px 0px 5px;
+    color: #696969;
 }
 
 .text-input {

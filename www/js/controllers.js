@@ -441,3 +441,16 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
     }]);
 
 
+exowebControllers.controller('ReadTabCtrl', ['$scope', 
+    function ($scope) {
+	console.log('Loading ReadTabCtrl');
+	$scope.title = 'Read';
+    }
+]);
+
+exowebControllers.controller('EditTabCtrl', ['$scope', 
+    function ($scope) {
+	console.log('Loading EditTabCtrl');
+	$scope.title = 'Edit';
+    }
+]);
