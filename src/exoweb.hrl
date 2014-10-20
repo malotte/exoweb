@@ -49,6 +49,7 @@
 %% Cookie data for web session
 -record(exoweb_cookie,
 	{id::integer(),
+	 pid::pid(),
 	 account::string(),
 	 user::string(),
 	 password::string()}).

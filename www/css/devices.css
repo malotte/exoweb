@@ -1,82 +1,82 @@
 * {
-  margin: 0;
+    margin: 0;
 }
 
 html, body {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  font-family: Callibri, Arial, Verdana, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  color: #000000;
-  background-image:url('night_sky1.jpg');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-color: #000000;
+    font-family: Callibri, Arial, Verdana, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    color: #000000;
+    background-image:url('night_sky1.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: #000000;
 }
 
 a {
-  color:#eeeeee;
-  text-decoration:none;
+    color:#eeeeee;
+    text-decoration:none;
 }
 
 form {
-  height: 100%;
+    height: 100%;
 }
 
 .wrapper {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  margin: 0 auto -55px;
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -55px;
 }
 
 .header {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  font-family: Callibri, Arial, Verdana;
-  margin-top: 0px;
-  margin-left: 0px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: Callibri, Arial, Verdana;
+    margin-top: 0px;
+    margin-left: 0px;
 }
 
 .footer, .push {
-  height: 55px;
-  font-family: Callibri, Arial, Verdana;
-  color: #bebfbf;
-  font-size: 12px;
+    height: 55px;
+    font-family: Callibri, Arial, Verdana;
+    color: #bebfbf;
+    font-size: 12px;
 }
 
 .logo {
-  position: relative;
-  align:left;
-  font-family: Callibri, Arial, Verdana;
-  padding-top: 10px;
-  padding-bottom: 5px;
-  margin-top: 0px;
-  margin-left: 20px;
-  font-size: 12px;
+    position: relative;
+    align:left;
+    font-family: Callibri, Arial, Verdana;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    margin-top: 0px;
+    margin-left: 20px;
+    font-size: 12px;
 }
 
 .exosense-logo {
-  font-family: Callibri, Arial, Verdana;
-  font-size: 78px;
-  font-style: normal;
-  font-weight: bold;
-  position: relative;
-  color: #bebfbf;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 78px;
+    font-style: normal;
+    font-weight: bold;
+    position: relative;
+    color: #bebfbf;
 }
 
 .menu {
-  font-family: Callibri, Arial, Verdana;
-  font-size: 18px;
-  font-style: normal;
-  color: #eeeeee;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 18px;
+    font-style: normal;
+    color: #eeeeee;
 }
 
 .menu td {
@@ -87,36 +87,36 @@ form {
 }
 
 .user {
-  display: flex;
-  justify-content: center;
-  background-color: #cccccc;
-  width: 360px;
-  height: 40px;
-  font-family: Callibri, Arial, Verdana;
-  color: #eeeeee;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: bold;
+    display: flex;
+    justify-content: center;
+    background-color: #cccccc;
+    width: 360px;
+    height: 40px;
+    font-family: Callibri, Arial, Verdana;
+    color: #eeeeee;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: bold;
 }
 
 .main {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  font-family: Callibri, Arial, Verdana;
-  margin-top: 0px;
-  margin-left: 0px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: Callibri, Arial, Verdana;
+    margin-top: 0px;
+    margin-left: 0px;
 }
 
 .devices {
-  align: left;
-  font-family: Callibri, Arial, Verdana;
-  color: black;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: bold;
+    align: left;
+    font-family: Callibri, Arial, Verdana;
+    color: black;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: bold;
 }
 
 
@@ -125,55 +125,61 @@ form {
     width: 100px;
 }
 
+.gridStyle {
+    border: 1px solid rgb(212,212,212);
+    width: 500px; 
+    height: 300px;
+}
+
 .action-text {
-  font-family: Callibri, Arial, Verdana;
-  font-size: 48px;
-  color: #eeeeee;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 48px;
+    color: #eeeeee;
 }
 
 .action-form {
-  font-family: Callibri, Arial, Verdana;
-  margin-top: 10px;
-  margin-right: 33%;
-  margin-left: 33%;
+    font-family: Callibri, Arial, Verdana;
+    margin-top: 10px;
+    margin-right: 33%;
+    margin-left: 33%;
 }
 
 .info-text {
-  font-family: Callibri, Arial, Verdana;
-  font-size: 24px;
-  color: #eeeeee;
-  margin-top: 10px;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 24px;
+    color: #eeeeee;
+    margin-top: 10px;
 }
 
 .text-input {
-  border-radius: 5px;
-  moz-border-radius: 5px;
-  webkit-border-radius: 5px;
-  font-size: 18px;
-  font-weight: bold;
-  margin: 15px;
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px;
 }
 
 .button-input {
-  border-radius: 5px;
-  moz-border-radius: 5px;
-  webkit-border-radius: 5px;
-  font-family: Callibri, Arial, Verdana;
-  font-size: 24px;
-  color: #FFF;
-  background-color: #F90;
-  margin: 10px;
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 24px;
+    color: #FFF;
+    background-color: #F90;
+    margin: 10px;
 }
 
 .logout-button {
-  border-radius: 5px;
-  moz-border-radius: 5px;
-  webkit-border-radius: 5px;
-  font-family: Callibri, Arial, Verdana;
-  font-size: 12px;
-  color: #cccccc;
-  background-color: #eeeeee;
-  margin: 10px;
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 12px;
+    color: #cccccc;
+    background-color: #eeeeee;
+    margin: 10px;
 }
 
 hr { 
@@ -189,7 +195,8 @@ hr {
 .action-form input.ng-invalid.ng-dirty {
     background-color: #FA787E;
 }
-  
+
 .action-form input.ng-valid.ng-dirty {
     background-color: #78FA89;
 }
+

@@ -27,18 +27,18 @@
 -include("exoweb.hrl").
 
 %% Callbacks for js
--export([event/2]).
+-export([event/1]).
 
 %%--------------------------------------------------------------------
 %% @doc 
 %% Callback from  js when an event has occured
 %% @end
 %%--------------------------------------------------------------------
--spec event(Tag::atom(), list(tuple())) -> 
+-spec event({Tag::atom(), list(tuple())}) -> 
    ok | {error, Error::term()}.
 
-event(login, Args) ->
-    ?dbg("event: login ~p",[Args]),
+event({login, Args} = Event) ->
+    ?dbg("event:  ~p",[Event]),
     User = proplists:get_value(name, Args),
     Pass = proplists:get_value(password, Args),
 
@@ -49,7 +49,14 @@ event(login, Args) ->
 	{error, Reason} ->
 	    ?dbg("event: login ~p failed, reason ~p.", [User, Reason]),
 		{error, e2string(Reason)}
-    end.
+    end;
+event({user, Args} = Event) ->
+    ?dbg("event:  ~p",[Event]),
+    User = proplists:get_value(user, Args),
+    {ok, User};
+event(Event) ->
+    ?dbg("event: unknown event ~p",[Event]),
+    ok.
 
 
 e2string(Reason) when is_list(Reason) ->

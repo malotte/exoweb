@@ -37,7 +37,8 @@
 	 code_change/3]).
 
 %% test api
--export([dump/0]).
+-export([dump/0,
+	 clean/0]).
 
 -import(exoweb_lib, [get_env/2, sec/0]).
 
@@ -48,6 +49,7 @@
 	{
 	  state = running,
 	  cookies,
+	  pid2cookie,
 	  queue
 	}).
 
@@ -100,12 +102,15 @@ store(Cookie) when is_record(Cookie, exoweb_cookie) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec retreive(Id::integer() | string()) -> 
+-spec retreive(Id::integer() | string() | pid()) -> 
 		      {ok, Cookie::#exoweb_cookie{}} | 
 		      {error, Error::atom()}.
 
 retreive(Id) when is_list(Id) ->
     call(Id, fun retreive/1);
+retreive(Id) when is_pid(Id) ->
+    %% Or execute here, change ets to public??
+    gen_server:call(?SERVER, {retreive, Id});
 retreive(Id) when is_integer(Id) ->
     %% Or execute here, change ets to public??
     gen_server:call(?SERVER, {retreive, Id}).
@@ -116,12 +121,15 @@ retreive(Id) when is_integer(Id) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec read(Id::integer() | string()) -> 
+-spec read(Id::integer() | string() | pid()) -> 
 		      {ok, Cookie::#exoweb_cookie{}} | 
 		      {error, Error::atom()}.
 
 read(Id) when is_list(Id) ->
     call(Id, fun read/1);
+read(Id) when is_pid(Id) ->
+    %% Or execute here, change ets to public ??
+    gen_server:call(?SERVER, {read, Id});
 read(Id) when is_integer(Id) ->
     %% Or execute here, change ets to public ??
     gen_server:call(?SERVER, {read, Id}).
@@ -132,10 +140,21 @@ read(Id) when is_integer(Id) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec dump() -> ok | {error, Error::atom()}.
+-spec dump() -> ok.
 
 dump() ->
     gen_server:call(?SERVER, dump).
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Cleans all data
+%%
+%% @end
+%%--------------------------------------------------------------------
+-spec clean() -> ok.
+
+clean() ->
+    gen_server:call(?SERVER, clean).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -157,9 +176,12 @@ init(_Args) ->
     CookieTable = ets:new(exoweb_cookie_table, 
 			   [private, ordered_set, named_table,
 			    {keypos, #exoweb_cookie.id}]),
+    Pid2Cookie = ets:new(exoweb_pid_table, 
+			   [private, ordered_set, named_table]),
     TimeQueue = ets:new(exoweb_cookie_queue, 
 			[private, ordered_set, named_table]),
-    {ok, #ctx {cookies = CookieTable, queue = TimeQueue}}.
+    {ok, 
+     #ctx {cookies = CookieTable, pid2cookie = Pid2Cookie, queue = TimeQueue}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -167,7 +189,11 @@ init(_Args) ->
 %% Handling call messages.
 %% Request can be the following:
 %% <ul>
+%% <li> store - Saves a new cookie.</li>
+%% <li> retreive - Reads and removes a cookie.</li>
+%% <li> retreive - Reads a cookie.</li>
 %% <li> dump - Writes loop data to standard out (for debugging).</li>
+%% <li> clean - Removes all data (for debugging).</li>
 %% <li> stop - Stops the application.</li>
 %% </ul>
 %%
@@ -178,6 +204,7 @@ init(_Args) ->
 	{retreive, Id::integer()} |
 	{read, Id::integer()} |
 	dump |
+	clean |
 	stop.
 
 -spec handle_call(Request::call_request(), From::{pid(), Tag::term()}, Ctx::#ctx{}) ->
@@ -185,56 +212,83 @@ init(_Args) ->
 			 {noreply, Ctx::#ctx{}} |
 			 {stop, Reason::atom(), Reply::term(), Ctx::#ctx{}}.
 
-handle_call({store, Cookie=#exoweb_cookie{}}, _From, 
-	    Ctx=#ctx {cookies = Cookies, queue = Queue}) ->
+handle_call({store, Cookie=#exoweb_cookie{pid = Pid}}, _From, 
+	    Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) ->
     ?dbg("handle_call: store ~p", [Cookie]),
     <<Id:64>> = crypto:rand_bytes(8),
     
     %% Cookie expiration time set in environment, default 24 hours
-    ets:insert(Queue, {sec() + get_env(cookie_expiration_time,24*60*60), Id}),
+    ets:insert(Queue, {sec() + get_env(cookie_expiration_time, 24*60*60), Id}),
     ets:insert(Cookies, Cookie#exoweb_cookie {id = Id}), 
+    ets:insert(P2C, {Pid, Id}), 
 
     clean_tables(Ctx),
 
     {reply, Id, Ctx};
 
-handle_call({retreive, Id}, _From, 
-	    Ctx=#ctx {cookies = Cookies, queue = Queue}) ->
+handle_call({retreive, Pid}, _From, Ctx=#ctx {pid2cookie = P2C}) 
+  when is_pid(Pid)->
+    ?dbg("handle_call: retreive ~p", [Pid]),
+    
+    Reply = 
+	case ets:lookup(P2C, Pid) of
+	    [{Pid, Id}] ->
+		retreive(Id, Ctx);
+	    [] ->
+		{error, not_found}
+	end,
+    clean_tables(Ctx),
+
+    {reply, Reply, Ctx};
+
+handle_call({retreive, Id}, _From, Ctx) 
+  when is_integer(Id)->
     ?dbg("handle_call: retreive ~p", [Id]),
     
-    Reply = 
-	case ets:lookup(Cookies, Id) of
-	    [Cookie] ->
-		ets:delete(Cookies, Id), 
-		ets:match_delete(Queue, {'_', Id}),
-		{ok, Cookie};
-	    [] ->
-		{error, not_found}
-	end,
+    Reply = retreive(Id, Ctx),
     clean_tables(Ctx),
 
     {reply, Reply, Ctx};
 
-handle_call({read, Id}, _From, Ctx=#ctx {cookies = Cookies}) ->
-    ?dbg("handle_call: read ~p", [Id]),
+handle_call({read, Pid}, _From, Ctx=#ctx {pid2cookie = P2C}) 
+ when is_pid(Pid)->
+    ?dbg("handle_call: read ~p", [Pid]),
     
     Reply = 
-	case ets:lookup(Cookies, Id) of
-	    [Cookie] ->
-		{ok, Cookie};
+	case ets:lookup(P2C, Pid) of
+	    [{Pid, Id}] ->
+		read(Id, Ctx);
 	    [] ->
 		{error, not_found}
 	end,
     clean_tables(Ctx),
+    {reply, Reply, Ctx};
+
+handle_call({read, Id}, _From, Ctx) 
+  when is_integer(Id) ->
+    ?dbg("handle_call: read ~p", [Id]),
+    
+    Reply = read(Id, Ctx),
+    clean_tables(Ctx),
 
     {reply, Reply, Ctx};
 
-handle_call(dump, _From, Ctx=#ctx {cookies = Cookies, queue = Queue}) ->
+handle_call(dump, _From, 
+	    Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) ->
     io:format("Ctx: ~p~n", [Ctx]),
     io:format("Queue:~n",[]),
     ets:foldl(fun(Q, _A) -> io:format("~p~n",[Q]) end, [], Queue),
     io:format("Cookie table:~n",[]),
     ets:foldl(fun(S, _A) -> io:format("~p~n",[S]) end, [], Cookies),
+    io:format("Pid table:~n",[]),
+    ets:foldl(fun(S, _A) -> io:format("~p~n",[S]) end, [], P2C),
+    {reply, ok, Ctx};
+
+handle_call(clean, _From, 
+	    Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) ->
+    ets:delete_all_objects(Cookies),
+    ets:delete_all_objects(P2C),
+    ets:delete_all_objects(Queue),
     {reply, ok, Ctx};
 
 handle_call(stop, _From, Ctx) ->
@@ -243,7 +297,7 @@ handle_call(stop, _From, Ctx) ->
 
 handle_call(_Request, _From, Ctx) ->
     ?dbg("handle_call: unknown request ~p", [_Request]),
-    {reply, {error,bad_call}, Ctx}.
+    {reply, {error, bad_call}, Ctx}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -312,6 +366,26 @@ code_change(_OldVsn, Ctx, _Extra) ->
 %% Internal
 %% 
 %%--------------------------------------------------------------------
+read(Id, _Ctx=#ctx {cookies = Cookies}) ->
+    case ets:lookup(Cookies, Id) of
+	[Cookie] ->
+	    {ok, Cookie};
+	[] ->
+	    {error, not_found}
+    end.
+
+retreive(Id, _Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) 
+  when is_integer(Id)->
+    case ets:lookup(Cookies, Id) of
+	[Cookie=#exoweb_cookie {pid = Pid}] ->
+	    ets:delete(Cookies, Id), 
+	    ets:delete(P2C, Pid), 
+	    ets:match_delete(Queue, {'_', Id}),
+	    {ok, Cookie};
+	[] ->
+	    {error, not_found}
+    end.
+
 %%--------------------------------------------------------------------
 %% @doc
 %% Removes old cookies
@@ -320,14 +394,21 @@ code_change(_OldVsn, Ctx, _Extra) ->
 %%--------------------------------------------------------------------
 -spec clean_tables(Ctx::#ctx{}) -> ok.
 
-clean_tables(_Ctx=#ctx {cookies = Cookies, queue = Queue}) ->
+clean_tables(_Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) ->
     %% Clean away old cookies
     Now = sec(),
     OldCookies = 
-	ets:select(Queue, [{{'$1','$2'},[{'<', '$1', Now}], ['$2']}]),
+	ets:select(Queue, [{{'$1','$2', '_'},[{'<', '$1', Now}], ['$2']}]),
     ?dbg("clean: old cookies ~p.", [OldCookies]),
-    ets:select_delete(Queue, [{{'$1','$2'},[{'<', '$1', Now}], [true]}]),
-    lists:foreach(fun(S) -> ets:delete(Cookies, S) end, OldCookies),
+    lists:foreach(fun(Id) -> 
+			  case ets:lookup(Cookies, Id) of
+			      [_Cookie=#exoweb_cookie {pid = Pid}] ->
+				  ets:delete(Cookies, Id), 
+				  ets:delete(P2C, Pid),
+				  ets:match_delete(Queue, {'_', Id})
+			  end
+		  end,
+		  OldCookies),
     ok.
     
 %%--------------------------------------------------------------------

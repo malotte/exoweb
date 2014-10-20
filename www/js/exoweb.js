@@ -5,6 +5,7 @@
 var exowebApp = angular.module('exoweb', [
     'ngRoute',
     'exowebControllers',
+    'exowebDirectives',
     'exowebServices',
     'exowebFilters'
 ]);
@@ -13,44 +14,32 @@ exowebApp.config(['$routeProvider', '$locationProvider',
 		  function($routeProvider, $locationProvider) {
 		  
     $routeProvider.
-     when('/menu', {
-          templateUrl: 'html/menu.html',
-          controller: 'LogoutCtrl'
-      }).
-     when('/signup', {
-          templateUrl: 'html/signup.html',
-          controller: 'ApplyCtrl'
+      when('/signup', {
+          templateUrl: 'html/signup.html'
       }).
       when('/confirm?account&email&session', {
-          templateUrl: 'html/confirm.html',
-          controller: 'ConfirmCtrl'
+          templateUrl: 'html/confirm.html'
       }).
       when('/confirm', {
-          templateUrl: 'html/confirm.html',
-          controller: 'ConfirmCtrl'
+          templateUrl: 'html/confirm.html'
       }).
       when('/login?name', {
-          templateUrl: 'html/login.html',
-          controller: 'LoginCtrl'
+          templateUrl: 'html/login.html'
       }).
       when('/login', {
-          templateUrl: 'html/login.html',
-          controller: 'LoginCtrl'
+          templateUrl: 'html/login.html'
       }).
-     when('/devices/:deviceId', {
-         templateUrl: 'html/device.html',
-         controller: 'DeviceDetailCtrl'
+      when('/device', {
+          templateUrl: 'html/device.html'
       }).
-      when('/devices', {
-          templateUrl: 'html/devices.html',
-          controller: 'DeviceListCtrl'
+      when('/user', {
+          templateUrl: 'html/user.html'
       }).
-      when('/users', {
-          templateUrl: 'html/users.html',
-          controller: 'UserListCtrl'
+      when('/howto', {
+          templateUrl: 'html/howto.html'
       }).
       otherwise({
-          redirectTo: '/menu'
+          redirectTo: '/device'
       });
  
       // $locationProvider.html5Mode(true);

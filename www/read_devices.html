@@ -75,6 +75,7 @@
 
     <div class="main">
       <div class="devices">
+	<div ng-controller="DeviceListCtrl">
 	<input name="devicename" placeholder="devicename" type="text" 
 	       class="text-input" />
 	  <table>
@@ -94,7 +95,7 @@
 	    </tr>
 	  </table>
 	<p style="width: 500px" ><image src="img/iconbar_blue.png"/></p>
-
+	<div class="gridStyle" ng-grid="gridOptions"></div>
       </div>
       <div class="info">
 	<p><image src="img/info_bg.png"/></p>

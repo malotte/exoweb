@@ -26,7 +26,7 @@
 -include("exoweb.hrl").
 
 %% Callbacks for js
--export([event/2]).
+-export([event/1]).
 
 -import(exoweb_lib, [get_env/2, parse_options/1]).
 
@@ -36,11 +36,11 @@
 %% Callback from js when an event has occured.
 %% @end
 %%--------------------------------------------------------------------
--spec event(Tag::atom(), list(tuple())) -> 
+-spec event({Tag::atom(), list(tuple())}) -> 
    ok | {error, Error::term()}.
 
 
-event(confirm, Args) ->
+event({confirm, Args}) ->
     ?dbg("event: confirm ~p.", [Args]),
     SessionId = proplists:get_value(session, Args),
     Account = proplists:get_value(account, Args),
@@ -56,7 +56,10 @@ event(confirm, Args) ->
 	{error, Reason} ->
 	    ?dbg("confirm_dialog: session error ~p.", [Reason]),
 	    session_nok(Account, Reason)
-    end.
+    end;
+event(Event) ->
+    ?dbg("event: unknown event ~p",[Event]),
+    ok.
 
 confirm_account({confirm, Account, Email, PassWord }) ->
    case create_account(Account, Email, PassWord) of

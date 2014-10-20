@@ -1,0 +1,39 @@
+<ul class="nav nav-tabs">
+  <li class="active"> <a href="#{{contentBaseId}}-1" data-toggle="tab">Read</a></li>
+  <li><a href="#{{contentBaseId}}-2" data-toggle="tab">Edit</a></li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane active" id="{{contentBaseId}}-1">
+	  <p>Device id: {{deviceid}}</p> </br>
+	  <p>Status: {{status}}</p> </br>
+	  <p>Server key: {{serverkey}}</p> </br>
+	  <p>Device key: {{devicekey}}</p> </br>
+	  <p>Ms Isdn: {{msisdn}}</p> </br>
+  </div>
+  <div class="tab-pane" id="{{contentBaseId}}-2">Not fully implemented yet
+	  <p>Device id: {{deviceid}}</p>
+	  Server Key:
+	  <input name="skey" placeholder="Server Key" 
+		 value="{{serverkey}}" type = "text" /></br>
+	  Device Key:
+	  <input name="dkey" placeholder="Device Key" 
+		 value="{{devicekey}}" type = "text" /></br>
+	  Ms Isdn:
+	  <input name="msisdn" placeholder="Ms Isdn Key" 
+		 value="{{msisdn}}" type = "text" /></br>
+	  <input name="connect" type="checkbox" 
+		 ng-model="connect" />
+	  Connect</br>
+	  Events in queue: {{inqueue}}</br>
+	  <input name="deletequeue" type="checkbox" 
+		 ng-model="deletequeue" />
+	  Delete all events in queue
+	  <p style="color: #ff0000">
+	    <input name="deletedevice " type="checkbox" 
+		   ng-model="delete" />
+	    Delete this device</p></br>
+	 <input name="save" type="submit" class="save-button" 
+		id="save" value="Save" ng-click="update(device)" />
+  </div>
+</div>
+

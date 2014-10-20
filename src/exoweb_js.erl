@@ -28,8 +28,8 @@
 
 %% Cookie handling api for js interface
 -export([create_cookie/2,
-	 delete_cookie/2,
-	 wrapper/4]).
+	 delete_cookie/0,
+	 wrapper/3]).
 	 
 
 -export([init_postdata/0,
@@ -52,21 +52,20 @@ create_cookie(WebSocket, Args) ->
 	    ?dbg("create_cookie: ~p, ~p, ~p.", [Account, User, Pass]),
 	    WebCookie = 
 		exoweb_cookie_handler:store(
-		  #exoweb_cookie{user = User, 
+		  #exoweb_cookie{pid = WebSocket,
+		                 user = User, 
 				 account = Account,
 				 password = Pass}),
 	    ?dbg("create_cookie: cookie ~p.", [WebCookie]),
 	    %% Set cookie at client
 	    ok = wse:set(WebSocket, wse:document(), "cookie", 
-			 "id=" ++ integer_to_list(WebCookie) ++
+			 "id=" ++ integer_to_list(WebCookie) ++ "; path=/" ++
 			     "; expires=Thu, 01 Jan 2070 00:00:00 UTC"),
 	                  %% "id=" ++ integer_to_list(WebCookie) ++ "; path=/");
 	                  %% If adding path, add in logout (controllers.js) 
 	                  %% as well
 	    %% Change location on client
 	    Path = proplists:get_value(path, Args),
-	    %% {ok, Location} = wse:get(WebSocket, wse:window(), "location"),
-	    %% ok = wse:set(WebSocket, Location, "href", Path);
 	    ok = wse:set(WebSocket,  wse:window(), ["location", "href"], Path);
  	{error, illegal_user} = E ->
 	    ?dbg("create_cookie: illegal user ~p.", [User]),
@@ -84,58 +83,63 @@ user2account(User) ->
     end.
 	     
 %% Called at logout 
--spec delete_cookie(WebSocket::term(), WebCookie::string()) -> ok.
-delete_cookie(WebSocket, WebCookie) ->
-    ?dbg("delete_cookie: ~p.",[WebCookie]),
-    case exoweb_cookie_handler:retreive(WebCookie) of
+-spec delete_cookie() -> ok.
+delete_cookie() ->
+    ?dbg("delete_cookie: ~p.",[self()]),
+    %% First check if same web session as login
+    case exoweb_cookie_handler:retreive(self()) of
 	{ok, _Cookie=#exoweb_cookie{}} ->
-	    %% Delete cookie at client
-	    ok = wse:set(WebSocket, wse:document(), "cookie", 
-			 "id=; path=/");
-	{error, Reason} ->
-	    ?dbg("delete_cookie: cookie error ~p.", [Reason]),
-	    {error, unknown_cookie}
+	    ok;
+	{error, not_found} ->
+	    %% Second check if websession cookie
+	    exoweb_cookie_handler:retreive(session_cookie()),
+	    ok
     end.
   
 %% Called when accessing exodm
-wrapper(WebSocket, M, F, A) ->
+wrapper(M, F, {Event, Args} = A) ->
     ?dbg("wrapper: ~p, ~p, ~p.",[M, F, A]),
-    %% Check that cookie has not expired
-    case wse:get(WebSocket, wse:document(), 'cookie') of
-	{ok, Cookie} ->
-	    verify_and_call(WebSocket, Cookie, M, F, A);
-	_E ->
-	    ?dbg("wrapper: no cookie ~p.",[_E]),
-	    go_to_login(WebSocket)
-    end.
-
-verify_and_call(WebSocket, [], _M, _F, _A) ->
-    ?dbg("wrapper: no id cookie.",[]),
-    go_to_login(WebSocket);
-verify_and_call(WebSocket, [CookieItem | List], M, F, A) ->
-    case string:tokens(CookieItem, "=") of
-	["id", CookieValue] ->
-	    verify_and_call1(WebSocket, CookieValue, M, F, A);
-	_Other ->
-	    verify_and_call(WebSocket, List, M, F, A)
-    end.
-
-verify_and_call1(WebSocket, CookieValue, M, F, [{Event, Args}]) ->
-    case exoweb_cookie_handler:read(CookieValue) of
+    %% First check if same web session as login
+    case exoweb_cookie_handler:read(self()) of
 	{ok, _Cookie=#exoweb_cookie{ user = User, 
 				     account = Account,
 				     password = PassWord}} ->
-	    apply(M, F, [Event, [{user, User}, 
-				 {account, Account},
-				 {password, PassWord} |Args]]);
+	    ?dbg("wrapper:calling ~p:~p(~p)", [M,F,A]),
+	    apply(M, F, [{Event, [{user, User}, 
+				  {account, Account},
+				  {password, PassWord} |Args]}]);
+	{error, not_found} ->
+	    %% Second check if websession cookie ok
+	    wrapper1(M, F, A)
+    end;
+wrapper(M, F, A) ->
+    ?dbg("wrapper: faulty args ~p, ~p, ~p.",[M, F, A]),
+    {error, faulty_arguments}.
+    
+wrapper1(M, F, {Event, Args} = A) ->
+    ?dbg("wrapper1: ~p, ~p, ~p.",[M, F, A]),
+    case exoweb_cookie_handler:read(session_cookie()) of
+	{ok, #exoweb_cookie{user = User, 
+			    account = Account,
+			    password = PassWord}} ->
+	    ?dbg("wrapper:calling ~p:~p(~p)", [M,F,A]),
+	    apply(M, F, [{Event, [{user, User}, 
+				  {account, Account},
+				  {password, PassWord} |Args]}]);
 	{error, Reason} ->
 	    ?dbg("wrapper: wrong cookie ~p.",[Reason]),
-	    go_to_login(WebSocket)
-    end.
+	    {error, illegal_cookie}
+    end. 
 
-go_to_login(WebSocket)	-> 
-    wse:set(WebSocket, wse:window(), "location", "/login.html"),
-    ok.
+session_cookie() ->
+    case wse:session_header('Cookie') of
+	{ok, Cookie} ->
+	    ["id", CookieId] = string:tokens(Cookie, "="),
+	    CookieId;
+	{error, Reason} = E ->
+	    ?dbg("session_cookie: no cookie!! ~p.",[Reason]),
+	    undefined
+    end.
 
 %%%===================================================================
 %%% Javascript mumbo jumbo handling

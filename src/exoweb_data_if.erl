@@ -30,6 +30,7 @@
 -export([login/1,
 	 contact/0]).
 -export([read/1,
+	 read/2,
 	 create/1,
 	 delete/1,
 	 update/1,
@@ -210,6 +211,24 @@ read(#exoweb_device{id = Id}) ->
 	    E
     end.
 
+read(device, Args) ->
+    Account = proplists:get_value(account, Args),
+    User = proplists:get_value(user, Args),
+    Pass = proplists:get_value(password, Args),
+    Id = proplists:get_value(id, Args),
+    case result(lookup_device_attributes(Account, Id, {User, Pass}),
+		      {list, "attributes"}) of
+	[] ->
+	    ?dbg("read: device ~p not found !!.", [Id]),
+	    {error, "Not found"};
+	AttributesStructList when is_list(AttributesStructList) ->
+	    ?dbg("attributes: ~p.", [AttributesStructList]),
+	    {ok, AttributesStructList};
+	{error, _Reason} = E ->
+	    ?dbg("read: device ~p, error ~p.", [Id, _Reason]),
+	    E
+    end.
+    
 %%--------------------------------------------------------------------
 -spec fetch(Table::atom(),
 	    Rows::integer(),
@@ -233,6 +252,10 @@ fetch(device, Rows, Last, Direction,
       Session=#exoweb_session {account = Account}) 
   when Direction == ascending; Direction == descending ->
     result(list_devices_attributes(Account, Rows, Last, Direction, Session), 
+	   {list, "devices"});
+fetch(device, Rows, Last, Direction, {Account, User, Pass}) 
+  when Direction == ascending; Direction == descending ->
+    result(list_devices_attributes(Account, Rows, Last, Direction, {User, Pass}), 
 	   {list, "devices"}).
 
 
@@ -365,6 +388,11 @@ lookup_device_attributes(Account, Id) ->
     exodm_json_api:lookup_device_attributes(Account, Id,
 	exoweb_device:attributes2fetch(),
 	opts(current_user)).
+lookup_device_attributes(Account, Id, Access) ->
+    %% Ugly solution to exodmapi limitations
+    exodm_json_api:lookup_device_attributes(Account, Id,
+	exoweb_device:attributes2fetch(),
+	opts(Access)).
 
 result(ResultStruct) ->
     result(ResultStruct, ok).
@@ -443,10 +471,6 @@ opts(exoweb) -> %% Should be replaced with a user with only view access
     [{url, get_env(exodm_url, "")},
      {user, get_env(exodm_user, "")},
      {password, get_env(exodm_password, "")}];
-opts(current_user) ->
-    [{url, get_env(exodm_url, "")},
-     {user,  wf:user()},
-     {password, wf:session(login_password)}];
 opts({User, Pass}) ->
     [{url, get_env(exodm_url, "")},
      {user,  User},

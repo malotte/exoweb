@@ -4,14 +4,19 @@
   <meta charset="utf-8">
   <title>ExoDM Web Service</title>
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="bower_components/ng-grid/ng-grid.css">
   <link rel="stylesheet" href="css/exosense.css"/>
+  <script src="bower_components/jquery/dist/jquery.js"></script>
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/angular-route/angular-route.js"></script>
   <script src="bower_components/angular-resource/angular-resource.js"></script>
-  <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+<!--  <script src="bower_components/angular-cookies/angular-cookies.js"></script> !-->
+  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="node_modules/ng-grid/	ng-grid-2.0.1.debug.js"></script>
   <script src="js/exoweb.js"></script>
-  <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>
+  <script src="js/directives.js"></script>
+  <script src="js/services.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/ej.js"></script> 
   <script src="js/wse.js"></script> 
@@ -26,37 +31,10 @@
 
 </head>
 <body>
-
   <div class="wrapper">
-
-    <div class="header" id="header" style="background-color: #dddddd" 
-	 valign="top" align="left">
-      <div class="logo" id="logo" align="left">
-	<image src="img/feuerlabs.png"></image>
-	<div align="left" style="margin-left: 20px">
-	  <p>Connecting the 'internet of Things'</p>
-	</div>
-      </div>
-    </div>
-
-    <div class="exosense-logo" id="exosense-logo">ExoSense</div>
-
     <div class="view-container">
     <div ng-view class="view-frame"></div>
-
-    <div class="footer" id="footer">
-      <hr/>
-      <div style="margin-left: 10%">
-	<table>
-	  <tr>
-	    <td><image src="img/icon-fb.png"/></td>
-	    <td><image src="img/icon-tw.png"/></td>
-	    <td><image src="img/icon-in.png"/></td>
-	    <td style="width: 200px;"><p>Feuerlabs inc. 2014</p></td>
-	  </tr>
-	</table>
-      </div>
-    </div>
+    
   </div>
 
 </body>

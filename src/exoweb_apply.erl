@@ -26,7 +26,7 @@
 -include("exoweb.hrl").
 
 %% Callbacks for js
--export([event/2]).
+-export([event/1]).
 
 -import(exoweb_lib, [get_env/2]).
 
@@ -37,10 +37,10 @@
 %% Callback from js when an event has occored
 %% @end
 %%--------------------------------------------------------------------
--spec event(Tag::atom(), Args::list(tuple())) -> 
+-spec event({Tag::atom(), Args::list(tuple())}) -> 
     ok | {error, Error::term()}.
 
-event(send, Args) ->
+event({send, Args}) ->
     ?dbg("event: send ~p", [Args]),
     Email = proplists:get_value(email, Args),
     PassWord = proplists:get_value(password, Args),
@@ -57,7 +57,10 @@ event(send, Args) ->
 	    end;
 	false ->
 	    {error, email_in_use}
-    end.
+    end;
+event(Event) ->
+    ?dbg("event: unknown event ~p",[Event]),
+    ok.
 	    
 
 %%--------------------------------------------------------------------
