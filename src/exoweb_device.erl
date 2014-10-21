@@ -72,32 +72,27 @@ event({load, Args} = Event) ->
     end;
 event({select, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    exoweb_data_if:read(device, Args);
+    Account = proplists:get_value(account, Args),
+    User = proplists:get_value(user, Args),
+    Pass = proplists:get_value(password, Args),
+    Id = proplists:get_value('device-id', Args),
+    exoweb_data_if:read(device, Account, Id, {User, Pass});
+event({update, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    Account = proplists:get_value(account, Args),
+    User = proplists:get_value(user, Args),
+    Pass = proplists:get_value(password, Args),
+    Id = proplists:get_value('device-id', Args),
+    case proplists:get_value(delete, Args, "false") of
+	false -> 
+	    exoweb_data_if:create(device, Account, Id, attrs(Args, []), {User, Pass});
+	true -> 
+	    exoweb_data_if:delete(device, Account, Id, {User, Pass})
+    end;
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.
 
-fix_list(_Rows, _ReqPage, _Direction, []) ->
-    [];
-fix_list(Rows, ReqPage, Direction, List) ->
-    ?dbg("fix_list: list ~p.", [List]),
-    NoOfRecs = length(List),
-    if NoOfRecs == Rows + 1  ->
-	    %% More data available
-	    %% Throw away extra record at end
-	    lists:droplast(List);
-       NoOfRecs < Rows + 1 andalso Direction  == ascending ->
-	    %% Last data
-	    List;
-       NoOfRecs < Rows + 1 andalso Direction  == descending ->
-	    %% First data 
-	    List;
-      true ->
-	    ?dbg("fix_list: ~p, ~p.", [NoOfRecs, Rows]),
-	    %% Should not happen !!
-	    %% Only  here for trace output.
-	    throw(illegal_no_of_recs)
-    end.
 
 %%--------------------------------------------------------------------
 %% Internal
@@ -127,3 +122,33 @@ direction(LastId, ReqPage, LastPage) ->
     %% Only  here for trace output.
     throw(illegal_direction).
 
+fix_list(_Rows, _ReqPage, _Direction, []) ->
+    [];
+fix_list(Rows, ReqPage, Direction, List) ->
+    ?dbg("fix_list: list ~p.", [List]),
+    NoOfRecs = length(List),
+    if NoOfRecs == Rows + 1  ->
+	    %% More data available
+	    %% Throw away extra record at end
+	    lists:droplast(List);
+       NoOfRecs < Rows + 1 andalso Direction  == ascending ->
+	    %% Last data
+	    List;
+       NoOfRecs < Rows + 1 andalso Direction  == descending ->
+	    %% First data 
+	    List;
+      true ->
+	    ?dbg("fix_list: ~p, ~p.", [NoOfRecs, Rows]),
+	    %% Should not happen !!
+	    %% Only  here for trace output.
+	    throw(illegal_no_of_recs)
+    end.
+
+attrs([], Attrs) ->
+    ?dbg("attrs: ~p.", [Attrs]),
+    Attrs;
+attrs([{Name, Value} | Args], Attrs) ->
+    case lists:member(Name, ?DEVICE_ATTRS) of
+	true -> attrs(Args,  [{atom_to_list(Name), Value} | Attrs]);
+	false -> attrs(Args, Attrs)
+    end.

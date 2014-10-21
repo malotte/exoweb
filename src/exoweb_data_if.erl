@@ -30,9 +30,11 @@
 -export([login/1,
 	 contact/0]).
 -export([read/1,
-	 read/2,
+	 read/4,
 	 create/1,
+	 create/5,
 	 delete/1,
+	 delete/4,
 	 update/1,
 	 fetch/5]).
 
@@ -120,9 +122,6 @@ create(#exoweb_user{name = Name, attributes = Attrs}) ->
 	    ?dbg("create: user ~p, error ~p.", [Name, _Reason]),
 	    E
     end;
-create(#exoweb_device{id = Id, attributes = Attrs}) ->
-    Account = wf:session(login_account),
-    result(create_device(Account, Id, Attrs));
 create(#exoweb_yang{id = File}) when is_list(File) ->
     Account = wf:session(login_account),
     result(create_yang_module(Account, File));
@@ -130,6 +129,8 @@ create({device_type, Account, Access}) ->
     %% Find init-admin
     result(create_device_type(Account, Account, Access)).
 					
+create(device, Account, Id, Attrs, Access) ->
+    result(create_device(Account, Id, Attrs, Access)).
 
 %%--------------------------------------------------------------------
 -spec delete(Record::#exoweb_device{}) ->
@@ -140,10 +141,10 @@ delete(#exoweb_user{name = Name}) ->
     result(delete_user(Name));
 delete(#exoweb_yang{id = File}) when is_list(File) ->
     Account = wf:session(login_account),
-    result(delete_yang_module(Account, File));
-delete(#exoweb_device{id = Id}) ->
-    Account = wf:session(login_account),
-    result(delete_device(Account, Id)).
+    result(delete_yang_module(Account, File)).
+
+delete(device, Account, Id, Access) ->
+    result(delete_device(Account, Id, Access)).
 
 %%--------------------------------------------------------------------
 -spec update(Record::#exoweb_user{} | 
@@ -194,29 +195,10 @@ read(#exoweb_user{name = Name}) ->
 	{error, _Reason} = E ->
 	    ?dbg("read: user ~p, error ~p.", [Name, _Reason]),
 	    E
-    end;
-read(#exoweb_device{id = Id}) ->
-    Account = wf:session(login_account),
-    case result(lookup_device_attributes(Account, Id),
-		      {list, "attributes"}) of
-	[] ->
-	    ?dbg("read: device ~p not found !!.", [Id]),
-	    {error, "Not found"};
-	AttributesStructList when is_list(AttributesStructList) ->
-	    ?dbg("attributes: ~p.", [AttributesStructList]),
-	    set_attributes(AttributesStructList),
-	    ok;
-	{error, _Reason} = E ->
-	    ?dbg("read: device ~p, error ~p.", [Id, _Reason]),
-	    E
     end.
 
-read(device, Args) ->
-    Account = proplists:get_value(account, Args),
-    User = proplists:get_value(user, Args),
-    Pass = proplists:get_value(password, Args),
-    Id = proplists:get_value(id, Args),
-    case result(lookup_device_attributes(Account, Id, {User, Pass}),
+read(device, Account, Id, Access) ->
+    case result(lookup_device_attributes(Account, Id, Access),
 		      {list, "attributes"}) of
 	[] ->
 	    ?dbg("read: device ~p not found !!.", [Id]),
@@ -368,13 +350,13 @@ list_yang_modules(Account, Rows, Last, Direction, Access) ->
 				     atom_to_list(Direction), opts(Access)).
 %%				     opts(Access)).
 
-create_device(Acc, Id, Attrs) ->
+create_device(Acc, Id, Attrs, Access) ->
     %% Ugly solution to exodmapi limitations
     %% Device type name same as account name 
     exodm_json_api:create_device(Id, Acc, Attrs ++ [{"account", Acc}], 
-	opts(current_user)).
-delete_device(Acc, Id) ->
-    exodm_json_api:delete_devices(Acc, [Id], opts(current_user)).
+	opts(Access)).
+delete_device(Account, Id, Access) ->
+    exodm_json_api:delete_devices(Account, [Id], opts(Access)).
 
 list_devices_attributes(Acc, Rows, Last, Direction, Access) -> 
     Attrs = [atom_to_list(Name) || { _ColName, Name, _} <- 
@@ -383,11 +365,6 @@ list_devices_attributes(Acc, Rows, Last, Direction, Access) ->
     exodm_json_api:list_devices_attributes(Acc, Rows, Last, Attrs, "*", 
 					   atom_to_list(Direction), 
 					   opts(Access)).
-lookup_device_attributes(Account, Id) ->
-    %% Ugly solution to exodmapi limitations
-    exodm_json_api:lookup_device_attributes(Account, Id,
-	exoweb_device:attributes2fetch(),
-	opts(current_user)).
 lookup_device_attributes(Account, Id, Access) ->
     %% Ugly solution to exodmapi limitations
     exodm_json_api:lookup_device_attributes(Account, Id,

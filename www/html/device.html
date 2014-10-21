@@ -1,83 +1,82 @@
 
-  <div class="wrapper" style="background-color: #eeeeee">
+<div class="wrapper">
 
-    <div class="header" id="header">
-      <div class="header_left">
-	<div class="logo" id="logo">
-	  <image src="img/feuerlabs.png"></image>
-	</div>
-	<div style="margin-left: 20px">
-	  <p>Connecting the 'internet of Things'</p>
-	</div>
+  <div class="header" id="header">
+    <div class="header_left">
+      <div class="logo" id="logo">
+	<image src="img/feuerlabs.png"></image>
       </div>
-      
-      <div class="exosense-logo" id="exosense-logo">ExoSense</div>
-      
-      <div class="header_right">
-	<div ng-controller="MenuCtrl">
-	  <div class="menu" style="margin-left: 10%">
+      <div style="margin-left: 20px">
+	<p>Connecting the 'internet of Things'</p>
+      </div>
+    </div>
+    
+    <div class="exosense-logo" id="exosense-logo">ExoSense</div>
+    
+    <div class="header_right">
+      <div ng-controller="MenuCtrl">
+	<div class="menu" style="margin-left: 10%">
+	  <table>
+	    <tr>
+	      <td style="background-image:url('img/menu_blue.png');">
+		<a href="#/device">Device</a></td>
+	      <td style="background-image:url('img/menu_red.png');">
+		<a href="#/user">User</a></td>
+	      <td style="background-image:url('img/menu_orange.png');">
+		<a href="#/yang">Yang</a></td>
+	      <td style="background-image:url('img/menu_green.png');" >
+		<a href="#/howto">How to</a></td>
+	    </tr>
+	  </table>
+	  <p/>
+	  <div class="user" >
 	    <table>
 	      <tr>
-		<td style="background-image:url('img/menu_blue.png');">
-		  <a href="#/device">Device</a></td>
-		<td style="background-image:url('img/menu_red.png');">
-		 <a href="#/user">User</a></td>
-		<td style="background-image:url('img/menu_orange.png');">
-		  <a href="#/yang">Yang</a></td>
-		<td style="background-image:url('img/menu_green.png');" >
-		  <a href="#/howto">How to</a></td>
+		<td><image src="img/icon_head.png"/></td>
+		<td><p>{{user}}</p></td>
+		<td><input name="logout" type="submit" class="logout-button"
+			   id="logout" value="Log out" 
+			   ng-click="logout(user)" /></td>
 	      </tr>
 	    </table>
-	    <p/>
-	    <div class="user" >
-	      <table>
-		<tr>
-		  <td><image src="img/icon_head.png"/></td>
-		  <td><p>{{user}}</p></td>
-		  <td><input name="logout" type="submit" class="logout-button"
-			     id="logout" value="Log out" 
-			     ng-click="logout(user)" /></td>
-		</tr>
-	      </table>
-	    </div>
 	  </div>
 	</div>
       </div>
     </div>
+  </div>
 
-    <hr/>
+  <hr/>
 
-    <div class="main" ng-controller="DeviceListCtrl">
-      <div class="devices">
-	<input name="devicename" placeholder="devicename" type="text" 
-	       class="text-input" 
-	       data-ng-model="searchtext" data-ng-change="search()"/>
-	<table style="width: 500px">
-	  <tr>
-	    <td><image src="img/icon_devices_blue.png"/></td>
-	    <td><image src="img/icon_status_blue.png"/></td>
-	    <td><image src="img/icon_changes_blue.png"/></td>
-	    <td><image src="img/icon_created_blue.png"/></td>
-	    <td><image src="img/icon_que_blue.png"/></td>
-	  </tr>
-	  <tr>
-	    <td><p>My devices</p></td>
-	    <td><p>Status</p></td>
-	    <td><p>Last changed</p></td>
-	    <td><p>Created</p></td>
-	    <td><p>Queue</p></td>
-	  </tr>
-	</table>
-	<p ><image src="img/iconbar_blue.png" style="width: 500px"/></p>
-	<div class="gridStyle" ng-grid="gridOptions"></div>
-      </div>
-      <div class="info" style="width: 500px">
-          <tabset>
-            <tab title="Read" template-url="html/readdevice.html"></tab>
-            <tab title="Edit" template-url="html/editdevice.html"></tab>
-          </tabset>
-	  <!-- 	  <div device-tabs tabs-base-id="content-tab"> !-->
-      </div>
+  <div class="main" ng-controller="DeviceListCtrl">
+    <div class="devices">
+      <input name="devicename" placeholder="devicename" type="text" 
+	     class="text-input" 
+	     data-ng-model="searchtext" data-ng-change="search()"/>
+      <table style="width: 500px">
+	<tr>
+	  <td><image src="img/icon_devices_blue.png"/></td>
+	  <td><image src="img/icon_status_blue.png"/></td>
+	  <td><image src="img/icon_changes_blue.png"/></td>
+	  <td><image src="img/icon_created_blue.png"/></td>
+	  <td><image src="img/icon_que_blue.png"/></td>
+	</tr>
+	<tr>
+	  <td><p>My devices</p></td>
+	  <td><p>Status</p></td>
+	  <td><p>Last changed</p></td>
+	  <td><p>Created</p></td>
+	  <td><p>Queue</p></td>
+	</tr>
+      </table>
+      <p ><image src="img/iconbar_blue.png" style="width: 500px"/></p>
+      <div class="gridStyle" ng-grid="gridOptions"></div>
+    </div>
+    <div class="info">
+      <tabset>
+        <tab title="Read" template-url="html/readdevice.html"></tab>
+        <tab title="Edit" template-url="html/editdevice.html"></tab>
+      </tabset>
+      <!-- 	  <div device-tabs tabs-base-id="content-tab"> !-->
     </div>
   </div>
 
@@ -95,4 +94,4 @@
     </div>
   </div>
 </div>
-  
+

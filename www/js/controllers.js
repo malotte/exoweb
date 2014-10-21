@@ -78,7 +78,7 @@ exowebControllers.controller('ConfirmCtrl',
   }]);
 
 
-exowebControllers.controller('LoginCtrl', ['$scope', '$routeParams',
+exowebControllers.controller('LoginCtrl', ['$scope',
   function($scope) {
       
       $scope.login = function(user) {
@@ -304,16 +304,6 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 
 	};
 
-	var scroll = function(rowItem, event){
-            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
-		var grid = $scope.gridOptions.ngGrid;
-		grid.$viewport.scrollTop(rowItem.offsetTop - (grid.config.rowHeight * 2));
-		angular.forEach($scope.myData, function(data, index){
-		    $scope.gridOptions.selectRow(index, false);
-		});
-            }
-            return true;
-	}
 
 	
 	var rowSelected = function(rowItem, event) {
@@ -325,7 +315,8 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 		     [Ei.atom('exoweb_device'),  // Module
 		      Ei.atom('event'),          // Function
 		      Ei.tuple(Ei.atom('select'), // Args
-				[Ei.tuple(Ei.atom('id'), rowItem.getProperty('id'))])], 
+				[Ei.tuple(Ei.atom('device-id'), 
+					  rowItem.getProperty('id'))])], 
 			     // reply callback
 			     function(obj,ref,reply) {  
 				 window.console.debug("Value = " +reply);
@@ -434,7 +425,6 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 	    enableSorting: false,
 	    enableCellSelection: true,
 	    selectedItems: $scope.mySelections,
-	    beforeSelectionChange: scroll,
 	    afterSelectionChange: rowSelected,
 	    multiSelect: false
 	};
@@ -443,14 +433,51 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 
 exowebControllers.controller('ReadTabCtrl', ['$scope', 
     function ($scope) {
-	console.log('Loading ReadTabCtrl');
+	window.console.debug('Loading ReadTabCtrl');
 	$scope.title = 'Read';
     }
 ]);
 
 exowebControllers.controller('EditTabCtrl', ['$scope', 
     function ($scope) {
-	console.log('Loading EditTabCtrl');
-	$scope.title = 'Edit';
+	window.console.debug('Loading EditTabCtrl');
+	$scope.connect = false;
+	$scope.deletequeue = false;
+	$scope.deletedevice = false;
+
+	$scope.update = function (device) {
+	    if (device.connect == undefined) device.connect = false;
+	    if (device.deletequeue == undefined) device.deletequeue = false;
+	    if (device.deletedevice == undefined) device.deletedevice = false;
+	    window.console.debug("Device = " +device);
+	    window.console.debug("Device key = " +device.dkey);
+	    window.console.debug("Server key = " +device.skey);
+	    window.console.debug("MsIsdn = " +device.msisdn);
+	    window.console.debug("Delete = " +device.deletedevice);
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_device'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('update'), // Args
+				   [Ei.tuple(Ei.atom('device-id'), 
+					     $scope.deviceid),
+				    Ei.tuple(Ei.atom('device-key'), 
+					     device.dkey),
+				    Ei.tuple(Ei.atom('server-key'), 
+					     device.skey),
+				    Ei.tuple(Ei.atom('msisdn'), 
+					     device.msisdn),
+				    Ei.tuple(Ei.atom('delete'), 
+					     device.deletedevice)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     //parseListReply(reply);
+			 });
+	    }, 100);
+	};
+	
     }
+
+
 ]);
