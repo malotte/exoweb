@@ -307,7 +307,7 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 
 	
 	var rowSelected = function(rowItem, event) {
-	    $scope.deviceid = rowItem.getProperty('id')
+	    $scope.deviceid = rowItem.getProperty('id');
 	    window.console.debug("Row = " +rowItem.rowIndex);
 	    window.console.debug("Event = " +event);
 	    window.console.debug("Id = " +$scope.deviceid);
@@ -322,7 +322,6 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 				 window.console.debug("Value = " +reply);
 				 parseDeviceReply(reply);
 			     });
-	    
 	};
 	    
 	var parseDeviceReply = function(reply) {
@@ -370,6 +369,7 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 		default: window.console.debug("Unknown attribute = " +attArray[i].name);
 		}
 	    }
+	    $scope.$apply();
 	};
 
 	var exowebError = function(error) {

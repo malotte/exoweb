@@ -4,6 +4,19 @@
 
 var exowebDirectives = angular.module('exowebDirectives', []);
 
+exowebDirectives.directive('input', function ($parse) {
+  return {
+    restrict: 'E',
+    require: '?ngModel',
+    link: function (scope, element, attrs) {
+      if (attrs.ngModel && attrs.value) {
+        $parse(attrs.ngModel).assign(scope, attrs.value);
+      }
+    }
+  };
+});
+
+
 exowebDirectives.directive('tabset', function () {
   return {
     restrict: 'E',
@@ -71,23 +84,4 @@ exowebDirectives.directive('tab', function () {
         '<a href="" ng-click="select()">{{ title }}</a>' +
       '</li>'
   };
-});
-
-exowebDirectives.directive('deviceTabs', function () {
-    return {
-        restrict: 'A',
-        templateUrl: 'html/devicetabs.html',
-	link: function(scope, el, attrs){
-            scope.contentBaseId = attrs.tabsBaseId;
-
-	    scope.toggleActive = function(ind){
-		angular.forEach(scope.ngModel, function(value, key){
-		    if (key == ind) 
-			scope.ngModel[key].active = !scope.ngModel[key].active;
-		    else
-			scope.ngModel[key].active = false;
-		});
-	    }
-        }
-    };
 });
