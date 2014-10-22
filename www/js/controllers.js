@@ -90,10 +90,10 @@ exowebControllers.controller('LoginCtrl', ['$scope',
 		   // reply callback
 		   function(obj,ref,reply) {  
 		       window.console.debug("Value = " +reply);
-		       parseReply(reply, user);
+		       parseLoginReply(reply, user);
 		   })};
 
-     var parseReply = function(reply, user) {
+     var parseLoginReply = function(reply, user) {
 	  if (reply.value[0] == "ok") {
 	      // Call performed
 	      var result = reply.value[1];
@@ -304,7 +304,16 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 
 	};
 
-
+	var scroll = function(rowItem, event){
+           if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
+		var grid = $scope.gridOptions.ngGrid;
+		grid.$viewport.scrollTop(rowItem.offsetTop - (grid.config.rowHeight * 2));
+		angular.forEach($scope.myData, function(data, index){
+		    $scope.gridOptions.selectRow(index, false);
+		});
+            }
+            return true;
+	}
 	
 	var rowSelected = function(rowItem, event) {
 	    $scope.deviceid = rowItem.getProperty('id');
@@ -352,7 +361,7 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 	    window.console.debug("Device = " +$scope.deviceid);
 	    var i, attArray;
 	    var device = new Object;
-	    // Loop over atttribute obiects
+	    // Loop over atttribute objects and set display fields
 	    for (i=0; i < attArray.length; i++){
 		window.console.debug("Attribute = " +attArray[i].name);
 		window.console.debug("Value = " +attArray[i].val);
@@ -425,6 +434,7 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 	    enableSorting: false,
 	    enableCellSelection: true,
 	    selectedItems: $scope.mySelections,
+	    beforeSelectionChange: scroll,
 	    afterSelectionChange: rowSelected,
 	    multiSelect: false
 	};
@@ -444,6 +454,7 @@ exowebControllers.controller('EditTabCtrl', ['$scope',
 	$scope.connect = false;
 	$scope.deletequeue = false;
 	$scope.deletedevice = false;
+	
 
 	$scope.update = function (device) {
 	    if (device.connect == undefined) device.connect = false;
@@ -472,12 +483,82 @@ exowebControllers.controller('EditTabCtrl', ['$scope',
 			 // reply callback
 			 function(obj,ref,reply) {  
 			     window.console.debug("Value = " +reply);
-			     //parseListReply(reply);
+			     parseEditReply(reply, $scope.deviceid);
 			 });
 	    }, 100);
 	};
 	
+	var parseEditReply = function(reply, did) {
+	    if (reply.value[0] == "ok") {
+		// Call performed
+		var result = reply.value[1];
+		window.console.debug("Result = " + result);
+		if (result == "ok") {
+		    // call successful => {ok, ok}
+		    window.alert("Device" + did + " updated");
+		}
+		else if (result.value[0] == "error") {
+		    // Call failed => {ok,{error,Reason}}
+		    window.alert("Error: " + result.value[1]);
+		}
+	    }
+	    else if (reply.value[0] == "error") {
+		// Call not performed => {error, Reason}
+		window.alert("Error: " +reply.value[1]);
+	    }};
+
     }
+]);
 
+exowebControllers.controller('CreateTabCtrl', ['$scope', 
+    function ($scope) {
+	window.console.debug('Loading CreateTabCtrl');	
 
+	$scope.create = function (device) {
+	    window.console.debug("Device = " +device);
+	    window.console.debug("Device id = " +device.did);
+	    window.console.debug("Device key = " +device.dkey);
+	    window.console.debug("Server key = " +device.skey);
+	    window.console.debug("MsIsdn = " +device.msisdn);
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_device'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('create'), // Args
+				   [Ei.tuple(Ei.atom('device-id'), 
+					     device.did),
+				    Ei.tuple(Ei.atom('device-key'), 
+					     device.dkey),
+				    Ei.tuple(Ei.atom('server-key'), 
+					     device.skey),
+				    Ei.tuple(Ei.atom('msisdn'), 
+					     device.msisdn)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     parseCreateReply(reply, device);
+			 });
+	    }, 100);
+	};
+	
+	var parseCreateReply = function(reply, device) {
+	    if (reply.value[0] == "ok") {
+		// Call performed
+		var result = reply.value[1];
+		window.console.debug("Result = " + result);
+		if (result == "ok") {
+		    // call successful => {ok, ok}
+		    window.alert("Device " + device.did + " created");
+		}
+		else if (result.value[0] == "error") {
+		    // Call failed => {ok,{error,Reason}}
+		    window.alert("Error: " + result.value[1]);
+		}
+	    }
+	    else if (reply.value[0] == "error") {
+		// Call not performed => {error, Reason}
+		window.alert("Error: " +reply.value[1]);
+	    }};
+
+    }
 ]);

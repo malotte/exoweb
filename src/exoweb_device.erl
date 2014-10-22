@@ -89,6 +89,13 @@ event({update, Args} = Event) ->
 	true -> 
 	    exoweb_data_if:delete(device, Account, Id, {User, Pass})
     end;
+event({create, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    Account = proplists:get_value(account, Args),
+    User = proplists:get_value(user, Args),
+    Pass = proplists:get_value(password, Args),
+    Id = proplists:get_value('device-id', Args),
+    exoweb_data_if:create(device, Account, Id, attrs(Args, []), {User, Pass});
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.
