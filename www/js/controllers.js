@@ -214,7 +214,9 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 	$scope.pagingOptions = {
             pageSizes: [10, 20, 50],
             pageSize: 10,
-            currentPage: 1,
+            currentPage: 1
+	};	
+ 	$scope.selectOptions = {
             lastPage: 0,
             lastId: ""
 	};	
@@ -231,9 +233,9 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 				 Ei.tuple(Ei.atom('page'), 
 					  $scope.pagingOptions.currentPage),
 				 Ei.tuple(Ei.atom('lastpage'), 
-					  $scope.pagingOptions.lastPage),
+					  $scope.selectOptions.lastPage),
 				 Ei.tuple(Ei.atom('lastid'), 
-					  $scope.pagingOptions.lastId),
+					  $scope.selectOptions.lastId),
 				 Ei.tuple(Ei.atom('match'), 
 					  $scope.filterOptions.filterText)])], 
 			     // reply callback
@@ -244,9 +246,10 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 		}, 100);
 	    };
 	
-	$scope.setPageData = function(data){	
+	$scope.setPageData = function(data){
+	    // These variables are watched by ng-grid
             $scope.myData = data;
-            $scope.totalServerItems = data.length;
+            $scope.totalServerItems = 10;
             if (!$scope.$$phase) {
 		$scope.$apply();
             }
@@ -287,20 +290,21 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 		for (j=0; j < attArray.length; j++)
 		    device[attArray[j].name] = attArray[j].val;
 		// Make status attribute understandable
-		window.console.debug("is-connected = " +device["is-connected"]);
+		// Can't use field with "-" in name in ng-grid
 		if (device["is-connected"] == "true") 
-		    device["is-connected"] = "Connected";
-		else
-		     device["is-connected"] = "Not connected";
-		window.console.debug("Status = " +device["is-connected"]);
+		     device["status"] = "Connected";
+		 else
+		      device["status"] = "Not connected";
 		devArray[i] = device;
 	    }
 	    
 	    $scope.setPageData(devArray);
-	    $scope.pagingOptions.lastPage = $scope.pagingOptions.currentPage;
-	    $scope.pagingOptions.lastId = (devArray[devArray.length - 1])["id"];
-	    window.console.debug("Last = " + $scope.pagingOptions.lastId);
-	    window.console.debug("Last page = " + $scope.pagingOptions.lastPage);
+	    $scope.selectOptions.lastPage = $scope.pagingOptions.currentPage;
+	    $scope.selectOptions.lastId = (devArray[devArray.length - 1])["id"];
+	    window.console.debug("Total = " + $scope.totalServerItems);
+	    window.console.debug("Total = " + $scope.gridOptions.totalServerItems);
+	    window.console.debug("Last = " + $scope.selectOptions.lastId);
+	    window.console.debug("Last page = " + $scope.selectOptions.lastPage);
 
 	};
 
@@ -422,10 +426,11 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 	    }, true);
 	
 	$scope.gridOptions = {
-            data: 'myData',
+            data: 'myData',  // Watch this variable
+	    primaryKey: 'id',
  	    columnDefs: [{field:'id', displayName:'My devices', width: 100}, 
-			 {field:'is-connected', displayName:'Status', width: 100}],
-            totalServerItems: 'totalServerItems',
+			 {field:'status', displayName:'Status', width: 100}],
+            totalServerItems: 'totalServerItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
             enablePaging: true,
