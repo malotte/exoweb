@@ -121,193 +121,40 @@ exowebControllers.controller('LoginCtrl', ['$scope',
 
   }]);
 
-exowebControllers.controller('MenuCtrl', ['$scope', '$routeParams',
-  function($scope) {
+exowebControllers.controller('MenuCtrl', 
+			     ['$scope', '$routeParams', 'Redirect',
+     function($scope, $routeParams, Redirect) {
       
-      // If not logged in redirect
-      //$scope.$on('$routeChangeSuccess', function () {
-      var redirect = function() {
-	  var cookie = getCookie("id");
-	  window.console.debug("Cookie = " +cookie);
-	  if (cookie == "") {
-	      window.console.debug("Empty cookie, redirecting!");
-	      window.location.href = "#/login";
-	  }
-	  else {
-	      Wse.call('exoweb_js', 'wrapper', 
-		       [Ei.atom('exoweb_login'),  // Module
-			Ei.atom('event'),          // Function
-			Ei.tuple(Ei.atom('user'),[])], // Args
-			// reply callback
-			function(obj,ref,reply) {  
-			    window.console.debug("User = " +reply);
-			    parseUserReply(reply);
-			})
-	  }};
+	 // If not logged in redirect
+	 //$scope.$on('$routeChangeSuccess', function () {
+	 
+	 // Called when user clicks logout-button
+	 $scope.logout = function() {
+	     var cookie = document.cookie;
+ 	     window.console.debug("Cookie before reset " +cookie);
+	     document.cookie="id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+	     cookie = document.cookie;
+ 	     window.console.debug("Cookie after reset " +cookie);
+	     deleteCookie();
+	     window.location.href = "#/login";
+	 };
 
-      var parseUserReply = function(reply) {
-	  if (reply.value[0] == "ok") {		       
-	      if (reply.value[0] == "ok") {
-		  // Call performed
-		  var result = reply.value[1];
-		  window.console.debug("Result = " +result.value[1]);
-		  if (result.value[0] == "ok") {
-		      // call successful => {ok,{ok,User}}
-		      $scope.user = result.value[1];
-		  }
-		  else if (result.value[0] == "error") {
-		      // Call failed => {ok,{error,Reason}}
-		      window.alert("Error: " +result.value[1]);
-		  }
-	      }
-	      else if (reply.value[0] == "error") {
-		  // Call not performed => {error, Reason}
-		  window.alert("Error: " +reply.value[1]);
-	      }
-	  }};
+	 var deleteCookie = function() {
+	     Wse.call('exoweb_js', 'delete_cookie',  [], 
+		      function(obj,ref,reply) {  
+			  window.console.debug("Value = " +reply);
+		      })};
+	 
+	 // Call this at load
+	 Redirect($scope.user);
 
-      // Called when user clicks logout-button
-      $scope.logout = function() {
-	  var cookie = document.cookie;
- 	  window.console.debug("Cookie before reset " +cookie);
-	  document.cookie="id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-	  cookie = document.cookie;
- 	  window.console.debug("Cookie after reset " +cookie);
-	  deleteCookie();
-	  window.location.href = "#/login";
-      };
-
-      // Remove when made ngCookies work
-      var getCookie = function(cname) {
-	  var name = cname + "=";
-	  var ca = document.cookie.split(';');
-	  window.console.debug("getCookie => " +ca);
-	  for(var i=0; i<ca.length; i++) {
-              var c = ca[i];
-              while (c.charAt(0)==' ') c = c.substring(1);
-              if (c.indexOf(name) != -1) 
-		  return c.substring(name.length, c.length);
-	  }
-	  return "";
-      };
-
-      var deleteCookie = function() {
-	  Wse.call('exoweb_js', 'delete_cookie',  [], 
-		   function(obj,ref,reply) {  
-		       window.console.debug("Value = " +reply);
-		   })};
-
-       // Call this at load
-      redirect();
-
-      }
-  ]);
+     }]);
 
 
-exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
-    function($scope, $http) {
-	$scope.totalServerItems = 0;
-	$scope.filterOptions = {
-            filterText: "",
-            useExternalFilter: false
-	}; 
-	$scope.pagingOptions = {
-            pageSizes: [10, 20, 50],
-            pageSize: 10,
-            currentPage: 1
-	};	
- 	$scope.selectOptions = {
-            lastPage: 0,
-            lastId: ""
-	};	
-
-	$scope.getData = 
-	    function () {
-		setTimeout(function () {
-		    Wse.call('exoweb_js', 'wrapper', 
-			     [Ei.atom('exoweb_device'),  // Module
-			      Ei.atom('event'),          // Function
-			      Ei.tuple(Ei.atom('load'), // Args
-				[Ei.tuple(Ei.atom('rows'), 
-					 $scope.pagingOptions.pageSize),
-				 Ei.tuple(Ei.atom('page'), 
-					  $scope.pagingOptions.currentPage),
-				 Ei.tuple(Ei.atom('lastpage'), 
-					  $scope.selectOptions.lastPage),
-				 Ei.tuple(Ei.atom('lastid'), 
-					  $scope.selectOptions.lastId),
-				 Ei.tuple(Ei.atom('match'), 
-					  $scope.filterOptions.filterText)])], 
-			     // reply callback
-			     function(obj,ref,reply) {  
-				 window.console.debug("Value = " +reply);
-				 parseListReply(reply);
-			     });
-		}, 100);
-	    };
+exowebControllers.controller('DeviceListCtrl', [
+    '$scope', 'DeviceList', 'DeviceDetail',
+    function($scope, DeviceList, DeviceDetail) {
 	
-	$scope.setPageData = function(data){
-	    // These variables are watched by ng-grid
-            $scope.myData = data;
-            $scope.totalServerItems = 10;
-            if (!$scope.$$phase) {
-		$scope.$apply();
-            }
-	};
-
-	var parseListReply = function(reply) {
-	  if (reply.value[0] == "ok") {		       
-	      if (reply.value[0] == "ok") {
-		  // Call performed
-		  var result = reply.value[1];
-		  window.console.debug("Result = " +result.value[1]);
-		  if (result.value[0] == "ok") {
-		      // call successful => {ok,{ok, Data}}
-		      fillTable(result.value[1]);
-		  }
-		  else if (result.value[0] == "error") {
-		      // Call failed => {ok,{error,Reason}}
-		      exowebError(result.value[1]);
-		  }
-	      }
-	      else if (reply.value[0] == "error") {
-		  // Call not performed => {error, Reason}
-		  window.alert("Error: " +reply.value[1]);
-	      }
-	  };
-	};
-
-	var fillTable = function(devArray) {
-	    var i;
-	    // Loop over devices
-	    for (i=0; i < devArray.length; i++){
-		var j, attArray;
-		var device = new Object;
-		devArray[i] = Wse.decode_js(devArray[i]);
-		attArray =  devArray[i].attributes;
-		device["id"] = (devArray[i])["device-id"];
-		// Loop over atttributes
-		for (j=0; j < attArray.length; j++)
-		    device[attArray[j].name] = attArray[j].val;
-		// Make status attribute understandable
-		// Can't use field with "-" in name in ng-grid
-		if (device["is-connected"] == "true") 
-		     device["status"] = "Connected";
-		 else
-		      device["status"] = "Not connected";
-		devArray[i] = device;
-	    }
-	    
-	    $scope.setPageData(devArray);
-	    $scope.selectOptions.lastPage = $scope.pagingOptions.currentPage;
-	    $scope.selectOptions.lastId = (devArray[devArray.length - 1])["id"];
-	    window.console.debug("Total = " + $scope.totalServerItems);
-	    window.console.debug("Total = " + $scope.gridOptions.totalServerItems);
-	    window.console.debug("Last = " + $scope.selectOptions.lastId);
-	    window.console.debug("Last page = " + $scope.selectOptions.lastPage);
-
-	};
-
 	var scroll = function(rowItem, event){
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
 		var grid = $scope.gridOptions.ngGrid;
@@ -319,82 +166,66 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
             return true;
 	}
 	
+	var listCallback = function() {
+	    var devices = DeviceList.devices;
+	    window.console.debug("devices = " + devices);
+	    $scope.setPageData(devices);
+	    $scope.selectOptions.lastPage = $scope.pagingOptions.currentPage;
+	    $scope.selectOptions.lastId = (devices[devices.length - 1])["id"];
+	    window.console.debug("Total = " + $scope.totalServerItems);
+	    window.console.debug("Total = " + $scope.gridOptions.totalServerItems);
+	    window.console.debug("Last = " + $scope.selectOptions.lastId);
+	    window.console.debug("Last page = " + $scope.selectOptions.lastPage);
+	};
+
 	var rowSelected = function(rowItem, event) {
 	    $scope.deviceid = rowItem.getProperty('id');
 	    window.console.debug("Row = " +rowItem.rowIndex);
 	    window.console.debug("Event = " +event);
 	    window.console.debug("Id = " +$scope.deviceid);
-	    Wse.call('exoweb_js', 'wrapper', 
-		     [Ei.atom('exoweb_device'),  // Module
-		      Ei.atom('event'),          // Function
-		      Ei.tuple(Ei.atom('select'), // Args
-				[Ei.tuple(Ei.atom('device-id'), 
-					  rowItem.getProperty('id'))])], 
-			     // reply callback
-			     function(obj,ref,reply) {  
-				 window.console.debug("Value = " +reply);
-				 parseDeviceReply(reply);
-			     });
+	    DeviceDetail.getData($scope.deviceid, detailCallback);
 	};
 	    
-	var parseDeviceReply = function(reply) {
-	  if (reply.value[0] == "ok") {		       
-	      if (reply.value[0] == "ok") {
-		  // Call performed
-		  var result = reply.value[1];
-		  window.console.debug("Result = " +result.value[1]);
-		  if (result.value[0] == "ok") {
-		      // call successful => {ok,{ok, Device}}
-		      window.console.debug("Device = " +result.value[1]);
-		      displayDevice(result.value[1]);
-		      }
-		  else if (result.value[0] == "error") {
-		      // Call failed => {ok,{error,Reason}}
-		      exowebError(result.value[1]);
-		  }
-	      }
-	      else if (reply.value[0] == "error") {
-		  // Call not performed => {error, Reason}
-		  window.alert("Error: " +reply.value[1]);
-	      }
-	  };
-	};
-
-	var displayDevice = function (attArray) {
-	    attArray = Wse.decode_js(attArray);
-	    window.console.debug("Device = " +$scope.deviceid);
-	    var i, attArray;
-	    var device = new Object;
-	    // Loop over atttribute objects and set display fields
-	    for (i=0; i < attArray.length; i++){
-		window.console.debug("Attribute = " +attArray[i].name);
-		window.console.debug("Value = " +attArray[i].val);
-		switch(attArray[i].name) {
-		case "msisdn": $scope.msisdn = attArray[i].val; break;
-		case "device-key": $scope.devicekey = attArray[i].val; break;
-		case "server-key": $scope.serverkey = attArray[i].val; break;
-		case "is-connected": 
-		    if (attArray[i].val == "true")
-			$scope.status = "Connected";
-		    else if (attArray[i].val == "false")
-			$scope.status = "Not connected"; 
-		    break;
-		default: window.console.debug("Unknown attribute = " +attArray[i].name);
-		}
-	    }
+	var detailCallback = function() {
+	    var device = DeviceDetail.device;
+	    window.console.debug("device = " + device);
+	    $scope.status = device.status;
+	    $scope.serverkey = device.serverkey;
+	    $scope.devicekey = device.devicekey;
+	    $scope.msisdn = device.msisdn;	    
 	    $scope.$apply();
-	};
-
-	var exowebError = function(error) {
-	    if (error == "illegal_cookie") {
-		window.console.debug("Go to login");
-		window.location.href = "#/login";
+	}
+	$scope.setPageData = function(data){
+	    // These variables are watched by ng-grid
+	    $scope.myData = data;
+	    $scope.totalServerItems = 10;
+	    if (!$scope.$$phase) {
+		$scope.$apply();
 	    }
-	    else {
-		window.alert("Error: " +result.value[1]);
-	    }};
+	};
+	
 
-	$scope.getData();
+	$scope.totalServerItems = 0;
+	$scope.pagingOptions = {
+            pageSizes: [10, 20, 50],
+            pageSize: 10,
+            currentPage: 1
+	};	
+ 	$scope.selectOptions = {
+            lastPage: 0,
+            lastId: ""
+	};	
+	$scope.filterOptions = {
+            filterText: "",
+            useExternalFilter: false
+	}; 
+						    
+	DeviceList.getData($scope.pagingOptions, 
+			   $scope.selectOptions, 
+			   $scope.filterOptions,
+			   listCallback);
+
+
 	
 	$scope.$watch('pagingOptions', function (newVal, oldVal) {
             if (newVal !== oldVal && 
@@ -404,13 +235,20 @@ exowebControllers.controller('DeviceListCtrl', ['$scope', '$http',
 		}
 		window.console.debug("paging changed ");
 		window.console.debug("Last = " + $scope.pagingOptions.last);
-		window.console.debug("Last page = " + $scope.pagingOptions.lastPage);		$scope.getData();
+		window.console.debug("Last page = " + $scope.pagingOptions.lastPage);
+		DeviceList.getData($scope.pagingOptions, 
+				   $scope.selectOptions, 
+				   $scope.filterOptions,
+				   listCallback);
             }
 	}, true);
 
 	$scope.$watch('filterOptions', function (newVal, oldVal) {
             if (newVal !== oldVal) {
-		$scope.getData();
+		DeviceList.getData($scope.pagingOptions, 
+				   $scope.selectOptions, 
+				   $scope.filterOptions,
+				   listCallback);
             }
 	}, true);
 	
