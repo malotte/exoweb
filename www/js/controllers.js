@@ -6,24 +6,21 @@ var exowebControllers =
     angular.module('exowebControllers', ['ngRoute', 'ngGrid']);
 
 
-exowebControllers.controller('ApplyCtrl', ['$scope',
-  function($scope) {
-      
-      $scope.apply = function(user) {
-	  window.console.debug("User = " +user);
-	  Wse.call('exoweb_apply', 'event', 
-		   [Ei.tuple(Ei.atom('send'),
-		    [Ei.tuple(Ei.atom('email'), user.email),
-		     Ei.tuple(Ei.atom('password'), user.password)])], 
-		   // reply callback
-		   function(obj,ref,reply) {  
-		       window.console.debug("Value = " +reply);
-		       if (reply == "{ok, ok}") {
-			   window.alert("Confirm mail sent to " +user.email);}
-		       else if (reply.value[0] == "error") {
-			   // Call not performed => {error, Reason}
-			   window.alert("Error: " +reply.value[1]);
-		       }})};
+exowebControllers.controller('ApplyCtrl', ['$scope', 'ExowebUser',
+					   function($scope, ExowebUser) {
+  
+      var applyOkCallback = function(user) {
+	  window.alert("Confirm mail sent to " + user.email);
+      }
+    
+       var applyNokCallback = function(error) {
+	   window.alert("Error: " + error);
+      }
+ 
+     $scope.apply = function(user) {
+	 window.console.debug("User = " +user);
+	 ExowebUser.apply(user, applyOkCallback, applyNokCallback);
+     }
 
       $scope.passwordConfirmed = function(user) {
 	  if (user.password != user.confirmpassword) {
@@ -33,120 +30,101 @@ exowebControllers.controller('ApplyCtrl', ['$scope',
   }]);
 
 
-exowebControllers.controller('ConfirmCtrl', 
-			     ['$scope', '$routeParams',
-			      function($scope, $routeParams) {
+exowebControllers.controller('ConfirmCtrl', [
+    '$scope', '$routeParams', 'ExowebUser',
+    function($scope, $routeParams, ExowebUser) {
       $scope.account = $routeParams.account;
       $scope.email = $routeParams.email;
       $scope.session = $routeParams.session;
       
-      $scope.confirm = function() {
-	  Wse.call('exoweb_confirm', 'event', 
-		   [Ei.tuple(Ei.atom('confirm'),
-		    [Ei.tuple(Ei.atom('account'), $scope.account),
-		     Ei.tuple(Ei.atom('email'), $scope.email),
-		     Ei.tuple(Ei.atom('session'), $scope.session)])], 
-		   // reply callback
-		   function(obj,ref,reply) {
-		       window.console.debug("Value = " +reply);
-		       parseReply(reply, user);
-		       window.console.debug("Reply = " +reply);
-		       window.console.debug("Value 0 = " +reply.value[0]);
-		       window.console.debug("Value 1 = " +reply.value[1]);
-		   })};
-				  
-      var parseReply = function(reply, user) {
-	  if (reply.value[0] == "ok") {		       
-	      if (reply.value[0] == "ok") {
-		  // Call performed
-		  var result = reply.value[1];
-		  window.console.debug("Result = " +result.value[1]);
-		  if (result.value[0] == "ok") {
-		      // call successful => {ok,{ok,LoginName}}
-		      window.location = 
-			  "#/login?name="+result.value[1];
-		  }
-		  else if (result.value[0] == "error") {
-		      // Call failed => {ok,{error,Reason}}
-		      window.alert("Error: " +result.value[1]);
-		  }
-	      }
-	      else if (reply.value[0] == "error") {
-		  // Call not performed => {error, Reason}
-		  window.alert("Error: " +reply.value[1]);
-	      }}};
-  }]);
+       var okCallback = function(username) {
+	   window.location =  "#/login?name="+ username;
+      }
+    
+       var nokCallback = function(error) {
+	   window.alert("Error: " + error);
+      }
+ 
+     $scope.confirm = function() {
+	 var user = new Object;
+	 user.email = $scope.email;
+	 user.account = $scope.account;
+	 user.session = $scope.session;
+	 ExowebUser.confirm(user, okCallback, nokCallback);
+     }
+ }]);
 
 
-exowebControllers.controller('LoginCtrl', ['$scope',
-  function($scope) {
+exowebControllers.controller('LoginCtrl', ['$scope', 'ExowebUser',
+  function($scope, ExowebUser) {
       
+      var okCallback = function(user) {
+	  ExowebUser.createCookie(user)
+      }
+    
+      var nokCallback = function(error) {
+	   window.alert("Error: " + error);
+      }
+
       $scope.login = function(user) {
 	  window.console.debug("User = " +user);
-	  Wse.call('exoweb_login', 'event', 
-		   [Ei.tuple(Ei.atom('login'),
-		    [Ei.tuple(Ei.atom('name'), user.name),
-		     Ei.tuple(Ei.atom('password'), user.password)])], 
-		   // reply callback
-		   function(obj,ref,reply) {  
-		       window.console.debug("Value = " +reply);
-		       parseLoginReply(reply, user);
-		   })};
-
-     var parseLoginReply = function(reply, user) {
-	  if (reply.value[0] == "ok") {
-	      // Call performed
-	      var result = reply.value[1];
-	      window.console.debug("Result = " +result);
-	      if (result == "ok") {
-		  // call successful => {ok, ok}
-		  createCookie(user);
-	      }
-	      else if (result.value[0] == "error") {
-		  // Call failed => {ok,{error,Reason}}
-		  window.alert("Error: " +result.value[1]);
-	      }
-	  }
-	  else if (reply.value[0] == "error") {
-	      // Call not performed => {error, Reason}
-	      window.alert("Error: " +reply.value[1]);
-	  }};
-
-      var createCookie = function(user) {
-	  Wse.start('exoweb_js', 'create_cookie', 
-		    [[Ei.tuple(Ei.atom('name'), user.name),
-		      Ei.tuple(Ei.atom('password'), user.password),
-		      Ei.tuple(Ei.atom('path'), "#/device")]])};
+ 	  ExowebUser.login(user, okCallback, nokCallback);
+     }
 
 
   }]);
 
-exowebControllers.controller('MenuCtrl', 
-			     ['$scope', '$routeParams', 'Redirect',
-     function($scope, $routeParams, Redirect) {
+exowebControllers.controller('MenuCtrl', [
+    '$scope', '$routeParams', 'ExowebUser',
+    function($scope, $routeParams, ExowebUser) {
       
-	 // If not logged in redirect
-	 //$scope.$on('$routeChangeSuccess', function () {
+	var okCallback = function(user) {
+	    $scope.user = user;
+	}
 	 
-	 // Called when user clicks logout-button
-	 $scope.logout = function() {
+	 var nokCallback = function(error) {
+	     window.alert("Error: " + error);
+	 }
+
+ 	// Remove when made ngCookies work
+	var getCookie = function(cname) {
+	    var name = cname + "=";
+	    var ca = document.cookie.split(';');
+	    window.console.debug("getCookie => " +ca);
+	    for(var i=0; i<ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1);
+		if (c.indexOf(name) != -1) 
+		    return c.substring(name.length, c.length);
+	    }
+	    return "";
+	};
+	 
+	// If not logged in redirect
+	var redirect = function() {
+	    var cookie = getCookie("id");
+	    window.console.debug("Cookie = " +cookie);
+	    if (cookie == "") {
+		window.console.debug("Empty cookie, redirecting!");
+		window.location.href = "#/login";
+	    }
+	    else {
+		ExowebUser.checkCookie(okCallback, nokCallback);
+	    }
+	};
+	
+	// Called when user clicks logout-button
+	$scope.logout = function() {
 	     var cookie = document.cookie;
- 	     window.console.debug("Cookie before reset " +cookie);
+ 	     window.console.debug("Cookie before reset " + cookie);
 	     document.cookie="id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
 	     cookie = document.cookie;
- 	     window.console.debug("Cookie after reset " +cookie);
-	     deleteCookie();
+ 	     window.console.debug("Cookie after reset " + cookie);
+	     ExowebUser.deleteCookie(); 
 	     window.location.href = "#/login";
 	 };
 
-	 var deleteCookie = function() {
-	     Wse.call('exoweb_js', 'delete_cookie',  [], 
-		      function(obj,ref,reply) {  
-			  window.console.debug("Value = " +reply);
-		      })};
-	 
-	 // Call this at load
-	 Redirect($scope.user);
+	redirect();
 
      }]);
 
@@ -168,22 +146,22 @@ exowebControllers.controller('DeviceListCtrl', [
 	
 	var listCallback = function() {
 	    var devices = DeviceList.devices;
-	    window.console.debug("devices = " + devices);
-	    $scope.setPageData(devices);
-	    $scope.selectOptions.lastPage = $scope.pagingOptions.currentPage;
-	    $scope.selectOptions.lastId = (devices[devices.length - 1])["id"];
-	    window.console.debug("Total = " + $scope.totalServerItems);
-	    window.console.debug("Total = " + $scope.gridOptions.totalServerItems);
-	    window.console.debug("Last = " + $scope.selectOptions.lastId);
-	    window.console.debug("Last page = " + $scope.selectOptions.lastPage);
-	};
-
-	var rowSelected = function(rowItem, event) {
-	    $scope.deviceid = rowItem.getProperty('id');
-	    window.console.debug("Row = " +rowItem.rowIndex);
-	    window.console.debug("Event = " +event);
-	    window.console.debug("Id = " +$scope.deviceid);
-	    DeviceDetail.getData($scope.deviceid, detailCallback);
+	    if (devices.length > 0) {
+		window.console.debug("devices = " + devices);
+		$scope.setPageData(devices);
+		$scope.selectOptions.lastPage = 
+		    $scope.pagingOptions.currentPage;
+		$scope.selectOptions.lastId = 
+		    (devices[devices.length - 1])["id"];
+		window.console.debug("Total = " + 
+				     $scope.totalServerItems);
+		window.console.debug("Total = " + 
+				     $scope.gridOptions.totalServerItems);
+		window.console.debug("Last = " + 
+				     $scope.selectOptions.lastId);
+		window.console.debug("Last page = " + 
+				     $scope.selectOptions.lastPage);
+	    }
 	};
 	    
 	var detailCallback = function() {
@@ -195,10 +173,20 @@ exowebControllers.controller('DeviceListCtrl', [
 	    $scope.msisdn = device.msisdn;	    
 	    $scope.$apply();
 	}
+
+
+	var rowSelected = function(rowItem, event) {
+	    $scope.deviceid = rowItem.getProperty('id');
+	    window.console.debug("Row = " +rowItem.rowIndex);
+	    window.console.debug("Event = " +event);
+	    window.console.debug("Id = " +$scope.deviceid);
+	    DeviceDetail.getData($scope.deviceid, detailCallback);
+	};
+
 	$scope.setPageData = function(data){
 	    // These variables are watched by ng-grid
 	    $scope.myData = data;
-	    $scope.totalServerItems = 10;
+	    $scope.totalServerItems = 100;
 	    if (!$scope.$$phase) {
 		$scope.$apply();
 	    }
@@ -208,7 +196,7 @@ exowebControllers.controller('DeviceListCtrl', [
 	$scope.totalServerItems = 0;
 	$scope.pagingOptions = {
             pageSizes: [10, 20, 50],
-            pageSize: 10,
+            pageSize: "10",
             currentPage: 1
 	};	
  	$scope.selectOptions = {
@@ -234,8 +222,9 @@ exowebControllers.controller('DeviceListCtrl', [
 		    newVal.currentPage = 1;
 		}
 		window.console.debug("paging changed ");
-		window.console.debug("Last = " + $scope.pagingOptions.last);
-		window.console.debug("Last page = " + $scope.pagingOptions.lastPage);
+		window.console.debug("Size = " + $scope.pagingOptions.pageSize);
+		window.console.debug("Last = " + $scope.selectOptions.lastId);
+		window.console.debug("Last page = " + $scope.selectOptions.lastPage);
 		DeviceList.getData($scope.pagingOptions, 
 				   $scope.selectOptions, 
 				   $scope.filterOptions,
@@ -291,15 +280,19 @@ exowebControllers.controller('ReadTabCtrl', ['$scope',
     }
 ]);
 
-exowebControllers.controller('EditTabCtrl', ['$scope', 
-    function ($scope) {
+exowebControllers.controller('EditTabCtrl', ['$scope', 'Device',
+    function ($scope, Device) {
 	window.console.debug('Loading EditTabCtrl');
 	$scope.connect = false;
 	$scope.deletequeue = false;
 	$scope.deletedevice = false;
 	
+	var updateCallback = function(device) {
+	    window.alert("Device " + device.did + " updated");
+	}
 
 	$scope.update = function (device) {
+	    device.did = $scope.deviceid;
 	    if (device.connect == undefined) device.connect = false;
 	    if (device.deletequeue == undefined) device.deletequeue = false;
 	    if (device.deletedevice == undefined) device.deletedevice = false;
@@ -308,54 +301,20 @@ exowebControllers.controller('EditTabCtrl', ['$scope',
 	    window.console.debug("Server key = " +device.skey);
 	    window.console.debug("MsIsdn = " +device.msisdn);
 	    window.console.debug("Delete = " +device.deletedevice);
-	    setTimeout(function () {
-		Wse.call('exoweb_js', 'wrapper', 
-			 [Ei.atom('exoweb_device'),  // Module
-			  Ei.atom('event'),          // Function
-			  Ei.tuple(Ei.atom('update'), // Args
-				   [Ei.tuple(Ei.atom('device-id'), 
-					     $scope.deviceid),
-				    Ei.tuple(Ei.atom('device-key'), 
-					     device.dkey),
-				    Ei.tuple(Ei.atom('server-key'), 
-					     device.skey),
-				    Ei.tuple(Ei.atom('msisdn'), 
-					     device.msisdn),
-				    Ei.tuple(Ei.atom('delete'), 
-					     device.deletedevice)])], 
-			 // reply callback
-			 function(obj,ref,reply) {  
-			     window.console.debug("Value = " +reply);
-			     parseEditReply(reply, $scope.deviceid);
-			 });
-	    }, 100);
+	    Device.update(device, updateCallback);
 	};
-	
-	var parseEditReply = function(reply, did) {
-	    if (reply.value[0] == "ok") {
-		// Call performed
-		var result = reply.value[1];
-		window.console.debug("Result = " + result);
-		if (result == "ok") {
-		    // call successful => {ok, ok}
-		    window.alert("Device" + did + " updated");
-		}
-		else if (result.value[0] == "error") {
-		    // Call failed => {ok,{error,Reason}}
-		    window.alert("Error: " + result.value[1]);
-		}
-	    }
-	    else if (reply.value[0] == "error") {
-		// Call not performed => {error, Reason}
-		window.alert("Error: " +reply.value[1]);
-	    }};
 
+	
     }
 ]);
 
-exowebControllers.controller('CreateTabCtrl', ['$scope', 
-    function ($scope) {
+exowebControllers.controller('CreateTabCtrl', ['$scope', 'Device',
+    function ($scope, Device) {
 	window.console.debug('Loading CreateTabCtrl');	
+
+	var createCallback = function(device) {
+	    window.alert("Device " + device.did + " created");
+	}
 
 	$scope.create = function (device) {
 	    window.console.debug("Device = " +device);
@@ -363,45 +322,9 @@ exowebControllers.controller('CreateTabCtrl', ['$scope',
 	    window.console.debug("Device key = " +device.dkey);
 	    window.console.debug("Server key = " +device.skey);
 	    window.console.debug("MsIsdn = " +device.msisdn);
-	    setTimeout(function () {
-		Wse.call('exoweb_js', 'wrapper', 
-			 [Ei.atom('exoweb_device'),  // Module
-			  Ei.atom('event'),          // Function
-			  Ei.tuple(Ei.atom('create'), // Args
-				   [Ei.tuple(Ei.atom('device-id'), 
-					     device.did),
-				    Ei.tuple(Ei.atom('device-key'), 
-					     device.dkey),
-				    Ei.tuple(Ei.atom('server-key'), 
-					     device.skey),
-				    Ei.tuple(Ei.atom('msisdn'), 
-					     device.msisdn)])], 
-			 // reply callback
-			 function(obj,ref,reply) {  
-			     window.console.debug("Value = " +reply);
-			     parseCreateReply(reply, device);
-			 });
-	    }, 100);
+	    Device.create(device, createCallback);
 	};
 	
-	var parseCreateReply = function(reply, device) {
-	    if (reply.value[0] == "ok") {
-		// Call performed
-		var result = reply.value[1];
-		window.console.debug("Result = " + result);
-		if (result == "ok") {
-		    // call successful => {ok, ok}
-		    window.alert("Device " + device.did + " created");
-		}
-		else if (result.value[0] == "error") {
-		    // Call failed => {ok,{error,Reason}}
-		    window.alert("Error: " + result.value[1]);
-		}
-	    }
-	    else if (reply.value[0] == "error") {
-		// Call not performed => {error, Reason}
-		window.alert("Error: " +reply.value[1]);
-	    }};
 
     }
 ]);

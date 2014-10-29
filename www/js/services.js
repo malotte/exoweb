@@ -4,24 +4,77 @@
 
 var exowebServices = angular.module('exowebServices', []);
 
-exowebServices.factory('Redirect', [
+exowebServices.factory('ExowebUser', [
     function() {
 
-	// Remove when made ngCookies work
-	var getCookie = function(cname) {
-	    var name = cname + "=";
-	    var ca = document.cookie.split(';');
-	    window.console.debug("getCookie => " +ca);
-	    for(var i=0; i<ca.length; i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1);
-		if (c.indexOf(name) != -1) 
-		    return c.substring(name.length, c.length);
-	    }
-	    return "";
-	};
+	var apply = function (user, okCallback, nokCallback) {
+	  Wse.call('exoweb_apply', 'event', 
+		   [Ei.tuple(Ei.atom('send'),
+		    [Ei.tuple(Ei.atom('email'), user.email),
+		     Ei.tuple(Ei.atom('password'), user.password)])], 
+		   // reply callback
+		   function(obj,ref,reply) {  
+		       window.console.debug("Value = " +reply);
+		       if (reply == "{ok, ok}") {
+			   okCallback(user);
+		       }
+		       else if (reply.value[0] == "error") {
+			   // Call not performed => {error, Reason}
+			   nokCallback(reply.value[1]);
+		       }})};
 
-	var parseUserReply = function(user, reply) {
+	var confirm = function(user, okCallback, nokCallback) {
+	  Wse.call('exoweb_confirm', 'event', 
+		   [Ei.tuple(Ei.atom('confirm'),
+		    [Ei.tuple(Ei.atom('account'), user.account),
+		     Ei.tuple(Ei.atom('email'), user.email),
+		     Ei.tuple(Ei.atom('session'), user.session)])], 
+		   // reply callback
+		   function(obj,ref,reply) {
+		       window.console.debug("Reply = " +reply);
+		       parseUserReply(reply, okCallback, nokCallback);
+		   })};
+
+	var login = function(user, okCallback, nokCallback) {
+	  Wse.call('exoweb_login', 'event', 
+		   [Ei.tuple(Ei.atom('login'),
+		    [Ei.tuple(Ei.atom('name'), user.name),
+		     Ei.tuple(Ei.atom('password'), user.password)])], 
+		   // reply callback
+		   function(obj,ref,reply) {  
+		       window.console.debug("Value = " +reply);
+		       parseLoginReply(reply, user, okCallback, nokCallback);
+		   })};
+
+	var parseLoginReply = function(reply, user, okCallback, nokCallback) {
+	    if (reply.value[0] == "ok") {
+		// Call performed
+		var result = reply.value[1];
+		window.console.debug("Result = " +result);
+		if (result == "ok") {
+		    // call successful => {ok, ok}
+		    okCallback(user);
+		}
+		else if (result.value[0] == "error") {
+		    // Call failed => {ok,{error,Reason}}
+		    nokCallback(result.value[1]);
+		}
+	    }
+	    else if (reply.value[0] == "error") {
+		// Call not performed => {error, Reason}
+		nokCallback(reply.value[1]);
+	    }};
+
+      var createCookie = function(user) {
+	  Wse.start('exoweb_js', 'create_cookie', 
+		    [[Ei.tuple(Ei.atom('name'), user.name),
+		      Ei.tuple(Ei.atom('password'), user.password),
+		      Ei.tuple(Ei.atom('path'), "#/device")]])};
+				  
+
+
+
+	var parseUserReply = function(reply, okCallback, nokCallback) {
 	    if (reply.value[0] == "ok") {		       
 		if (reply.value[0] == "ok") {
 		    // Call performed
@@ -29,47 +82,49 @@ exowebServices.factory('Redirect', [
 		    window.console.debug("Result = " +result.value[1]);
 		    if (result.value[0] == "ok") {
 			// call successful => {ok,{ok,User}}
-			user = result.value[1];
+			window.console.debug("User = " + result.value[1]);
+			okCallback(result.value[1]);
 		    }
 		    else if (result.value[0] == "error") {
 			// Call failed => {ok,{error,Reason}}
-			window.alert("Error: " +result.value[1]);
+			nokCallback(result.value[1]);
 		    }
 		}
 		else if (reply.value[0] == "error") {
 		    // Call not performed => {error, Reason}
-		    window.alert("Error: " +reply.value[1]);
+		    nokCallback(reply.value[1]);
 		}
 	    }
 	};
 	
-	return function(user) {
-	    var cookie = getCookie("id");
-	    window.console.debug("Cookie = " +cookie);
-	    if (cookie == "") {
-		window.console.debug("Empty cookie, redirecting!");
-		window.location.href = "#/login";
-	    }
-	    else {
-		Wse.call('exoweb_js', 'wrapper', 
-			 [Ei.atom('exoweb_login'),  // Module
-			  Ei.atom('event'),          // Function
-			  Ei.tuple(Ei.atom('user'),[])], // Args
-			 // reply callback
-			 function(obj,ref,reply) {  
-			     window.console.debug("Reply = " +reply);
-			     parseUserReply(user, reply);
-			 })
-	    }
+	var checkCookie = function(okCallback, nokCallback) {
+	    Wse.call('exoweb_js', 'wrapper', 
+		     [Ei.atom('exoweb_login'),  // Module
+		      Ei.atom('event'),          // Function
+		      Ei.tuple(Ei.atom('user'),[])], // Args
+		     // reply callback
+		     function(obj,ref,reply) {  
+			 window.console.debug("Reply = " +reply);
+			 parseUserReply(reply, okCallback, nokCallback);
+		     })
+	};
+
+	var deleteCookie = function() {
+	    Wse.call('exoweb_js', 'delete_cookie',  [], 
+		     function(obj,ref,reply) {  
+			 window.console.debug("Value = " +reply);
+		     })};
+
+	return {
+	    apply: apply,
+	    confirm: confirm,
+	    login: login,
+	    createCookie: createCookie,
+	    checkCookie: checkCookie,
+	    deleteCookie: deleteCookie
 	};
     }]);
 
-exowebServices.factory('DeviceDummy', ['ExowebError',
-    function(ExowebError) {
-	return function() {
-	    window.alert("Dummy called.");
-	}}]);
- 
 exowebServices.factory('DeviceList', ['ExowebError',
     function(ExowebError) {
 
@@ -125,7 +180,10 @@ exowebServices.factory('DeviceList', ['ExowebError',
 
 	var getData = 
 	    function(pagingOptions, selectOptions, filterOptions, callback) {
-	    setTimeout(function () {
+		devices.splice(0, devices.length);
+		window.console.debug("Last = " + selectOptions.lastId);
+		window.console.debug("Last page = " + selectOptions.lastPage);
+		setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_device'),  // Module
 			  Ei.atom('event'),          // Function
@@ -182,7 +240,7 @@ exowebServices.factory('DeviceDetail', ['ExowebError',
 	    callback();
 	};
 
-	var parseDeviceReply = function(reply, callback) {
+	var parseDetailReply = function(reply, callback) {
 	  if (reply.value[0] == "ok") {		       
 	      if (reply.value[0] == "ok") {
 		  // Call performed
@@ -195,8 +253,7 @@ exowebServices.factory('DeviceDetail', ['ExowebError',
 		      }
 		  else if (result.value[0] == "error") {
 		      // Call failed => {ok,{error,Reason}}
-		      var error = new ExowebError();
-		      error.handle(result.value[1]);
+		      ExowebError(result.value[1]);
 		  }
 	      }
 	      else if (reply.value[0] == "error") {
@@ -217,7 +274,7 @@ exowebServices.factory('DeviceDetail', ['ExowebError',
 		     // reply callback
 		     function(obj,ref,reply) {  
 			 window.console.debug("Value = " +reply);
-			 parseDeviceReply(reply, callback);
+			 parseDetailReply(reply, callback);
 		     });
 	}
 
@@ -227,6 +284,79 @@ exowebServices.factory('DeviceDetail', ['ExowebError',
 	}
     }]);
 		
+exowebServices.factory('Device', ['ExowebError',
+    function(ExowebError) {
+
+	var parseDeviceReply = function(reply, device, callback) {
+	    if (reply.value[0] == "ok") {
+		// Call performed
+		var result = reply.value[1];
+		window.console.debug("Result = " + result);
+		if (result == "ok") {
+		    // call successful => {ok, ok}
+		    callback(device);
+		}
+		else if (result.value[0] == "error") {
+		    // Call failed => {ok,{error,Reason}}
+		    ExowebError(result.value[1]);
+		}
+	    }
+	    else if (reply.value[0] == "error") {
+		// Call not performed => {error, Reason}
+		window.alert("Error: " +reply.value[1]);
+	    }};
+
+	var update = function(device, callback) {
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_device'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('update'), // Args
+				   [Ei.tuple(Ei.atom('device-id'), 
+					     device.did),
+				    Ei.tuple(Ei.atom('device-key'), 
+					     device.dkey),
+				    Ei.tuple(Ei.atom('server-key'), 
+					     device.skey),
+				    Ei.tuple(Ei.atom('msisdn'), 
+					     device.msisdn),
+				    Ei.tuple(Ei.atom('delete'), 
+					     device.deletedevice)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     parseDeviceReply(reply, device, callback);
+			 });
+	    }, 100);
+	}
+
+	var create = function(device, callback) {
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_device'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('create'), // Args
+				   [Ei.tuple(Ei.atom('device-id'), 
+					     device.did),
+				    Ei.tuple(Ei.atom('device-key'), 
+					     device.dkey),
+				    Ei.tuple(Ei.atom('server-key'), 
+					     device.skey),
+				    Ei.tuple(Ei.atom('msisdn'), 
+					     device.msisdn)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     parseDeviceReply(reply, device, callback);
+			 });
+	    }, 100);
+	}
+
+	return {
+	    update: update,
+	    create: create
+	}
+    }]);
 
 exowebServices.factory('ExowebError', [
     function() {
@@ -240,6 +370,7 @@ exowebServices.factory('ExowebError', [
 		}
 	    }
 	}]);
+
 		
 	
 /*exowebServices.factory('Device', ['$resource',

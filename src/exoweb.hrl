@@ -103,6 +103,9 @@
 -ifndef(ei).
 -define(ei(String, List),  error_logger:info_msg(String, List)).
 -endif.
+-ifndef(l2i).
+-define(l2i(List), list_to_integer(List)).
+-endif.
 
 %% Nitrogen accumulator timeout ??
 %% Used in comet loop functions

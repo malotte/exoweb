@@ -132,7 +132,7 @@ url(Account, Email, Session) ->
 	"localhost"= H -> H ++":" ++ integer_to_list(exoweb:port());
 	_H -> ?WEBSITE %% ??
     end,
-    "http://" ++ Host ++ "/confirm?account=" ++ Account ++
+    "http://" ++ Host ++ "/#/confirm?account=" ++ Account ++
     "&email=" ++ Email ++ "&session=" ++ integer_to_list(Session).
 
 %%--------------------------------------------------------------------
