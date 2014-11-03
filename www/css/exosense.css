@@ -194,6 +194,16 @@ form {
     margin: 10px;
 }
 
+.checkbox-input {
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 24px;
+    color: #FFF;
+    margin: 10px;
+}
+
 .logout-button {
     border-radius: 5px;
     moz-border-radius: 5px;
@@ -221,5 +231,12 @@ hr {
 }
 
 .action-form input.ng-valid.ng-dirty {
+    background-color: #78FA89;
+}
+.edit-form input.ng-invalid.ng-dirty {
+    background-color: #FA787E;
+}
+
+.edit-form input.ng-valid.ng-dirty {
     background-color: #78FA89;
 }

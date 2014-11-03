@@ -38,7 +38,9 @@
 	 get_env/2,
 	 sec/0,
 	 error_txt/1,
-	 roles2string/1]).
+	 roles2string/1,
+	 direction/3,
+	 fix_list/4]).
 
 
 %%--------------------------------------------------------------------
@@ -148,6 +150,51 @@ error_txt(Atom) when is_atom(Atom) ->
     atom_to_list(Atom).
 
 
+roles2string([]) ->
+    "";
 roles2string(Roles) ->
     string:strip(lists:flatten([[R," "] || R <- Roles]), right).
    
+direction(LastId, ReqPage, LastPage) 
+    when ReqPage == LastPage + 1 ->
+    %% Next page
+    {LastId, ascending};
+direction(_LastId, ReqPage, LastPage) 
+  when ReqPage > LastPage + 1 ->
+    %% Last page, restart from end
+    {"", descending};
+direction(_LastId, 1, _LastPage) ->
+    %% First page, restart from beginning
+    {"", ascending};
+direction(LastId, ReqPage, LastPage) 
+  when ReqPage == LastPage - 1 ->
+    %% Previous page
+    {LastId, descending};
+direction(LastId, ReqPage, LastPage) ->
+    ?dbg("direction: ~p, ~p, ~p.", [LastId, ReqPage, LastPage]),
+    %% Should not happen !!
+    %% Only  here for trace output.
+    throw(illegal_direction).
+
+fix_list(_Rows, _ReqPage, _Direction, []) ->
+    [];
+fix_list(Rows, _ReqPage, Direction, List) ->
+    ?dbg("fix_list: list ~p.", [List]),
+    NoOfRecs = length(List),
+    if NoOfRecs == Rows + 1  ->
+	    %% More data available
+	    %% Throw away extra record at end
+	    lists:droplast(List);
+       NoOfRecs < Rows + 1 andalso Direction  == ascending ->
+	    %% Last data
+	    List;
+       NoOfRecs < Rows + 1 andalso Direction  == descending ->
+	    %% First data 
+	    List;
+      true ->
+	    ?dbg("fix_list: ~p, ~p.", [NoOfRecs, Rows]),
+	    %% Should not happen !!
+	    %% Only  here for trace output.
+	    throw(illegal_no_of_recs)
+    end.
+

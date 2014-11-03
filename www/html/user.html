@@ -47,35 +47,33 @@
 
   <hr/>
 
-  <div class="main" ng-controller="DeviceListCtrl">
-    <div class="devices">
-      <input name="devicename" placeholder="devicename" type="text" 
+  <div class="main" ng-controller="UserListCtrl">
+    <div class="users">
+      <input name="name" placeholder="name" type="text" 
 	     class="text-input" 
 	     data-ng-model="searchtext" data-ng-change="search()"/>
       <table style="width: 500px">
 	<tr>
-	  <td><image src="img/icon_devices_blue.png"/></td>
-	  <td><image src="img/icon_status_blue.png"/></td>
-	  <td><image src="img/icon_changes_blue.png"/></td>
-	  <td><image src="img/icon_created_blue.png"/></td>
-	  <td><image src="img/icon_que_blue.png"/></td>
+	  <td><image src="img/icon_users_red.png"/></td>
+	  <td><image src="img/icon_role_red.png"/></td>
+	  <td><image src="img/icon_changes_red.png"/></td>
+	  <td><image src="img/icon_created_red.png"/></td>
 	</tr>
 	<tr>
-	  <td><p>My devices</p></td>
-	  <td><p>Status</p></td>
+	  <td><p>Users</p></td>
+	  <td><p>Role</p></td>
 	  <td><p>Last changed</p></td>
 	  <td><p>Created</p></td>
-	  <td><p>Queue</p></td>
 	</tr>
       </table>
-      <p ><image src="img/iconbar_blue.png" style="width: 500px"/></p>
+      <p ><image src="img/iconbar_red.png" style="width: 500px"/></p>
       <div class="gridStyle" ng-grid="gridOptions"></div>
     </div>
     <div class="info">
       <tabset>
-        <tab title="Read" template-url="html/readdevice.html"></tab>
-        <tab title="Edit" template-url="html/editdevice.html"></tab>
-        <tab title="Add" template-url="html/adddevice.html"></tab>
+        <tab title="Read" template-url="html/readuser.html"></tab>
+        <tab title="Edit" template-url="html/edituser.html"></tab>
+        <tab title="Add" template-url="html/adduser.html"></tab>
       </tabset>
     </div>
   </div>

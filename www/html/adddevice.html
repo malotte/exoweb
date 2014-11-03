@@ -1,7 +1,6 @@
-<div class="tab" ng-controller="CreateTabCtrl">
-  Not fully implemented yet!!
-  <form action="" method="post" name="editform" class="edit-form" 
-	id="editform">
+<div class="tab" ng-controller="AddDeviceCtrl">
+  <form action="" method="post" name="addform" class="edit-form" 
+	id="addform">
   <table>
     <tr> 
       <td>Device id: </td> 
@@ -24,8 +23,8 @@
 		 ng-model="device.msisdn" value="{{msisdn}}"/></td>
     </tr>
   </table> 
-  <input name="create" type="submit" class="button-input" 
-	 id="create" value="Create" ng-click="create(device)" />
+  <input name="add" type="submit" class="button-input" 
+	 id="add" value="Add" ng-click="add(device)" />
 </form>
 </div>
 

@@ -85,12 +85,6 @@
 	[{'ID', 'device-id', [{width, 60}, {sortable, false}]},
          {'Connected', 'is-connected', [{width, 60}, {sortable, false}]}]).
 
--record(exoweb_device,
-	{id::string(),
-	 attributes::list({atom(), string()})}).
-
--record(exoweb_yang,
-	{id::string()}).
 	
 %% Debug support
 -define(dbg(Format, Args),

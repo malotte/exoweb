@@ -5,8 +5,12 @@
 var exowebApp = angular.module('exoweb', [
     'ngRoute',
     'exowebControllers',
+    'exowebDeviceControllers',
+    'exowebUserControllers',
     'exowebDirectives',
     'exowebServices',
+    'exowebDeviceServices',
+    'exowebUserServices',
     'exowebFilters'
 ]);
 

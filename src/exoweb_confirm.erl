@@ -87,5 +87,4 @@ session_nok(Account, _Reason) ->
 
 
 create_account(Account, Email, PassWord) ->
-    exoweb_data_if:create(
-	#exoweb_account{name = Account, email = Email, password = PassWord}).
+    exoweb_data_if:create({account, Account, Email, PassWord}).

@@ -30,13 +30,10 @@
 -export([login/1,
 	 contact/0]).
 -export([read/1,
-	 read/4,
 	 create/1,
-	 create/5,
 	 delete/1,
-	 delete/4,
 	 update/1,
-	 fetch/5]).
+	 fetch/1]).
 
 %% While testing
 -export([opts/1]).
@@ -75,14 +72,17 @@ contact() ->
     end.
 
 %%--------------------------------------------------------------------
--spec create(Record::#exoweb_account{} | 
-		     #exoweb_user{} | 
-		     #exoweb_device{} |
-		     #exoweb_yang{} ) ->
+-spec create(tuple()) ->
 		    ok |
 		    {error, Reason::atom()}.
 
-create(#exoweb_account{name = Name, email = Email, password = Pass}) ->
+	
+create({yang, Account, File}) when is_list(File) ->
+    result(create_yang_module(Account, File));
+
+
+
+create({account, Name, Email, Pass}) ->
     case result(create_account(Name, Email, Pass), {item, "account-admin"}) of
 	Admin when is_list(Admin) ->
 	    %% Also device type for future device creation ??
@@ -101,18 +101,19 @@ create(#exoweb_account{name = Name, email = Email, password = Pass}) ->
 	    ?dbg("create: acount ~p, error ~p.", [Name, _Reason]),
 	    E
     end;
-	
-create(#exoweb_user{name = Name, attributes = Attrs}) ->
-    Account = wf:session(login_account),
+create({device_type, Account, Access}) ->
+    %% Find init-admin
+    result(create_device_type(Account, Account, Access));
+create({user, Account, Name, Attrs, Access}) ->
     {value, {"role", Role}, OtherAttrs} = lists:keytake("role", 1, Attrs),
-    case result(create_user(Name, OtherAttrs)) of
+    case result(create_user(Name, OtherAttrs, Access)) of
 	ok ->
-	    case result(add_account_access(Account, Role, Name)) of
+	    case result(add_account_access(Account, Role, Name, Access)) of
 		ok -> 
 		    ok;
 		{error, _Reason} = E ->
 		    %% Try to rollback
-		    case result(delete_user(Name)) of
+		    case result(delete_user(Name, Access)) of
 			ok -> ok;
 			ERback -> ?ee("Rollback failed ~p.",[ERback])
 		    end,
@@ -122,82 +123,70 @@ create(#exoweb_user{name = Name, attributes = Attrs}) ->
 	    ?dbg("create: user ~p, error ~p.", [Name, _Reason]),
 	    E
     end;
-create(#exoweb_yang{id = File}) when is_list(File) ->
-    Account = wf:session(login_account),
-    result(create_yang_module(Account, File));
-create({device_type, Account, Access}) ->
-    %% Find init-admin
-    result(create_device_type(Account, Account, Access)).
-					
-create(device, Account, Id, Attrs, Access) ->
+create({device, Account, Id, Attrs, Access}) ->
     result(create_device(Account, Id, Attrs, Access)).
 
 %%--------------------------------------------------------------------
--spec delete(Record::#exoweb_device{}) ->
+-spec delete(Record::tuple()) ->
 		    ok |
 		    {error, Reason::atom()}.
 
-delete(#exoweb_user{name = Name}) ->
-    result(delete_user(Name));
-delete(#exoweb_yang{id = File}) when is_list(File) ->
-    Account = wf:session(login_account),
-    result(delete_yang_module(Account, File)).
-
-delete(device, Account, Id, Access) ->
-    result(delete_device(Account, Id, Access)).
+delete({yang, Account, File}) when is_list(File) ->
+    result(delete_yang_module(Account, File));
+delete({device, Account, Id, Access}) ->
+    result(delete_device(Account, Id, Access));
+delete({user, Name, Access}) ->
+    result(delete_user(Name, Access)).
 
 %%--------------------------------------------------------------------
--spec update(Record::#exoweb_user{} | 
-		     #exoweb_device{}) ->
+-spec update(tuple()) ->
 		    ok |
 		    {error, Reason::atom()}.
 
-update(#exoweb_user{attributes = []}) ->
+update({user, _Name, [], _Access}) ->
     {error, "no changes"};
-update(#exoweb_user{name = Name, attributes = Updates}) ->
+update({user, Name, Updates, Access}) ->
     %% Role change can fail but user update can only fail if
     %% user is missing so better start with role change
     case lists:keytake("role", 1, Updates) of
 	{value, {'role', Role}, []} ->
 	    %% Only role is changed
-	    update_role(Name, Role);
+	    update_role(Name, Role, Access);
 	{value, {"role", Role}, Rest} ->
-	    case update_role(Name, Role) of
+	    case update_role(Name, Role, Access) of
 		ok ->
-		    result(update_user(Name, Rest));
+		    result(update_user(Name, Rest, Access));
 		Error ->
 		    ?dbg("update: user ~p, error ~p.", [Name, Error]),
 		    Error
 	    end;
 	false ->
-	    result(update_user(Name, Updates))
+	    result(update_user(Name, Updates, Access))
     end.
+
 
 %%--------------------------------------------------------------------
 -spec read(Record::record()) ->
 		  ok |
 		  {error, Reason::atom()}.
 
-read(#exoweb_user{name = Name}) ->
-    Account = wf:session(login_account),
-    case result(lookup_user(Name),
+read({user, Account, Name, Access}) ->
+    case result(lookup_user(Name, Access),
 		      {lookup, "users"}) of
 	[] ->
 	    ?dbg("read: user ~p not found !!.", [Name]),
 	    {error, "Not found"};
 	AttributesList when is_list(AttributesList) ->
 	    ?dbg("attributes: ~p.", [AttributesList]),
-	    Roles = [R || {A, R} <- accounts(Name), A == Account],
-	    wf:session(roles, Roles),
-	    set_attributes([{"role", exoweb_lib:roles2string(Roles)} | 
-			    AttributesList]),
-	    ok;
+	    Roles = [R || {A, R} <- accounts(Name, Access), A == Account],
+	    ?dbg("roles: ~p.", [Roles]),
+	    {ok, [{"role", exoweb_lib:roles2string(Roles)} | AttributesList]};
 	{error, _Reason} = E ->
 	    ?dbg("read: user ~p, error ~p.", [Name, _Reason]),
 	    E
-    end.
+    end;
 
-read(device, Account, Id, Access) ->
+read({device, Account, Id, Access}) ->
     case result(lookup_device_attributes(Account, Id, Access),
 		      {list, "attributes"}) of
 	[] ->
@@ -220,22 +209,17 @@ read(device, Account, Id, Access) ->
 		  Result::term() |
 		  {error, Reason::atom()}.
 
-fetch(user, Rows, Last, Direction, 
-      Session=#exoweb_session {account = Account}) 
-  when Direction == ascending; Direction == descending ->
-    result(list_account_users(Account, Rows, Last, Direction, Session), 
-	   {list, "users"});
 fetch(file, Rows, Last, Direction, 
       Session=#exoweb_session {account = Account}) 
   when Direction == ascending; Direction == descending ->
     result(list_yang_modules(Account, Rows, Last, Direction, Session), 
-	   {list, "yang-modules"});
-fetch(device, Rows, Last, Direction, 
-      Session=#exoweb_session {account = Account}) 
+	   {list, "yang-modules"}).
+
+fetch({user, Rows, Last, Direction, {Account, User, Pass}}) 
   when Direction == ascending; Direction == descending ->
-    result(list_devices_attributes(Account, Rows, Last, Direction, Session), 
-	   {list, "devices"});
-fetch(device, Rows, Last, Direction, {Account, User, Pass}) 
+    result(list_account_users(Account, Rows, Last, Direction, {User, Pass}), 
+	   {list, "users"});
+fetch({device, Rows, Last, Direction, {Account, User, Pass}}) 
   when Direction == ascending; Direction == descending ->
     result(list_devices_attributes(Account, Rows, Last, Direction, {User, Pass}), 
 	   {list, "devices"}).
@@ -245,8 +229,6 @@ fetch(device, Rows, Last, Direction, {Account, User, Pass})
 %% Internal
 %%--------------------------------------------------------------------
 	    
-accounts(Name) ->
-    accounts(Name, current_user).
 accounts(Name, Access) ->
     case result(list_user_accounts(Name, Access), {list, "accounts"}) of
 	AccountStructList when is_list(AccountStructList) ->
@@ -269,37 +251,37 @@ choose_account([], [{_A, _R} | Rest], First) ->
     choose_account([], Rest, First).
 
 
-update_role(_Name, no_change) ->
+update_role(_Name, no_change, _Access) ->
     ok;
-update_role(Name, NewRole) ->
+update_role(Name, NewRole, Access) ->
     Account = wf:session(login_account),
-    OldRoles = [R || {A, R} <- accounts(Name), A == Account],
+    OldRoles = [R || {A, R} <- accounts(Name, Access), A == Account],
     case lists:member(NewRole, OldRoles) of
 	true -> ok;
 	false -> update_if_not_ia(lists:member(?INIT_ADMIN, OldRoles),
-				  Account, Name, OldRoles, NewRole)
+				  Account, Name, OldRoles, NewRole, Access)
     end.
 
-update_if_not_ia(true, _Account, _Name, _OldRoles, _NewRole) ->
+update_if_not_ia(true, _Account, _Name, _OldRoles, _NewRole, _Access) ->
     {error, "Role initial-admin can not be removed."};
-update_if_not_ia(false, Account, Name, OldRoles, NewRole) ->
-    update_roles(Account, Name, OldRoles, NewRole).
+update_if_not_ia(false, Account, Name, OldRoles, NewRole, Access) ->
+    update_roles(Account, Name, OldRoles, NewRole, Access).
 
-update_roles(Account, Name, OldRoles, NewRole) ->
-    case remove_roles(Account, Name, OldRoles) of
+update_roles(Account, Name, OldRoles, NewRole, Access) ->
+    case remove_roles(Account, Name, OldRoles, Access) of
 	ok -> 
-	    result(add_account_access(Account, NewRole, Name));
+	    result(add_account_access(Account, NewRole, Name, Access));
 	E -> 
 	    %% Rollback of remove ??
 	    E
     end.
 
-remove_roles(_Account, _Name, []) ->
+remove_roles(_Account, _Name, [], _Access) ->
     ok;
-remove_roles(Account, Name, [Role | Rest]) ->
+remove_roles(Account, Name, [Role | Rest], Access) ->
     ?dbg("remove_role:account ~p user ~p, role ~p.", [Account, Name, Role]),
-    case result(remove_account_access(Account, Role, Name)) of
-	ok -> remove_roles(Account, Name, Rest);
+    case result(remove_account_access(Account, Role, Name, Access)) of
+	ok -> remove_roles(Account, Name, Rest, Access);
 	E -> E
     end.	
 
@@ -307,10 +289,7 @@ remove_roles(Account, Name, [Role | Rest]) ->
 %% exodm interface    
 %%--------------------------------------------------------------------
 lookup_user(Name, Access) ->
-    %% At login
     exodm_json_api:lookup_user(Name, opts(Access)).
-lookup_user(Name) ->
-    exodm_json_api:lookup_user(Name, opts(current_user)).
 list_user_accounts(Name, Access) ->
     exodm_json_api:list_user_accounts(Name, opts(Access)).
 create_account(Name, Email, Pass) ->
@@ -319,21 +298,19 @@ delete_account(Name) ->
     exodm_json_api:delete_account(Name, opts(root)).
 create_device_type(Acc, Name, Access) ->
     exodm_json_api:create_device_type(Acc, Name, "exodm", opts(Access)).
-create_user(Name, Attrs) ->
-    exodm_json_api:create_user(Name, Attrs, opts(current_user)).
-delete_user(Name) ->
-    exodm_json_api:delete_user(Name, opts(current_user)).
-update_user(Name, Attributes) ->
-    exodm_json_api:update_user(Name, Attributes, opts(current_user)).
+create_user(Name, Attrs, Access) ->
+    exodm_json_api:create_user(Name, Attrs, opts(Access)).
+delete_user(Name, Access) ->
+    exodm_json_api:delete_user(Name, opts(Access)).
+update_user(Name, Attributes, Access) ->
+    exodm_json_api:update_user(Name, Attributes, opts(Access)).
 list_account_users(Acc, Rows, Last, Direction, Access) -> 
     exodm_json_api:list_account_users(Acc, Rows, Last, 
 				      atom_to_list(Direction), opts(Access)).
-add_account_access(Acc, Role, Name) ->
-    exodm_json_api:add_account_access(Acc, Role, [Name], 
-				      opts(current_user)).
-remove_account_access(Acc, Role, Name) ->
-    exodm_json_api:remove_account_access(Acc, Role, [Name], 
-					 opts(current_user)).
+add_account_access(Acc, Role, Name, Access) ->
+    exodm_json_api:add_account_access(Acc, Role, [Name], opts(Access)).
+remove_account_access(Acc, Role, Name, Access) ->
+    exodm_json_api:remove_account_access(Acc, Role, [Name], opts(Access)).
 create_yang_module(Acc, File) ->
     exodm_json_api:create_yang_module(Acc, 
 				      "user", 
@@ -393,36 +370,6 @@ result(ResultStruct, Wanted) ->
 	    end
     end.
 	
-%%--------------------------------------------------------------------
-%% exodm to exoweb conversion
-%%--------------------------------------------------------------------
-set_attributes([]) ->
-    ok;
-set_attributes([{struct, [{"name", Name}, {"val", Value}]} | Rest ]) 
-  when is_integer(Value) ->
-    %% Device keys
-    wf:session(list_to_atom(Name),  integer_to_list(Value)),
-    ?dbg("set_attributes: device keys ~p = ~p",[Name, Value]),
-    set_attributes(Rest);
-set_attributes([{struct, [{"name", Name}, {"val", Value}]} | Rest ]) ->
-    %% Device
-    ?dbg("set_attributes: device ~p = ~p",[Name, Value]),
-    wf:session(list_to_atom(Name),  Value),
-    set_attributes(Rest);
-set_attributes([{Name, {array, Value}} | Rest ]) ->
-    %% User alias
-    ?dbg("set_attributes: user alias ~p = ~p",[Name, Value]),
-    wf:session(list_to_atom(Name),  Value),
-    set_attributes(Rest);
-set_attributes([{Name, Value} | Rest ]) 
-  when is_atom(Name)->
-    %% User
-    ?dbg("set_attributes: user ~p = ~p",[Name, Value]),
-    wf:session(Name,  Value),
-    set_attributes(Rest);
-set_attributes([{Name, Value} | Rest ]) 
-  when is_list(Name)->
-    set_attributes([{list_to_atom(Name), Value} | Rest ]).
 
 decode([], Acc) ->
     merge(Acc);
@@ -441,10 +388,6 @@ merge(List) ->
 %%--------------------------------------------------------------------
 
 opts(root) ->
-    [{url, get_env(exodm_url, "")},
-     {user, get_env(exodm_user, "")},
-     {password, get_env(exodm_password, "")}];
-opts(exoweb) -> %% Should be replaced with a user with only view access
     [{url, get_env(exodm_url, "")},
      {user, get_env(exodm_user, "")},
      {password, get_env(exodm_password, "")}];

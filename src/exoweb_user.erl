@@ -18,19 +18,15 @@
 %%% @author Malotte W Lönne <malotte@malotte.net>
 %%% @copyright (C) 2015, Tony Rogvall
 %%% @doc
-%%%  ExoDM WebService device page.
-%%%
+%%%  ExoDM WebService user page.
 %%%
 %%% @end
--module (exoweb_device).
+-module (exoweb_user).
 
 -include("exoweb.hrl").
 
 %% Callbacks for js
 -export([event/1]).
-
-%% Callback from exoweb_data_if
--export([attributes2fetch/0]).
 
 -import(exoweb_lib, [direction/3, fix_list/4]).
 
@@ -56,9 +52,9 @@ event({load, Args} = Event) ->
     {ReqLastId, Direction} = direction(LastId, ReqPage, LastPage),
     ?dbg("fetch: reqlastid ~p, dir ~p.", [ReqLastId, Direction]),
     %% Fetch one extra to check if we reached end of data
-    case exoweb_data_if:fetch({device, Rows + 1, ReqLastId, Direction, Access}) of
+    case exoweb_data_if:fetch({user, Rows + 1, ReqLastId, Direction, Access}) of
 	List when is_list(List) ->
-	    ?dbg("fetch: ~p, list ~p.", [device, List]),
+	    ?dbg("fetch: ~p, list ~p.", [user, List]),
 	    {ok, fix_list(Rows, ReqPage, Direction, List)};
 	{error, E} ->
 	    ?ee("fetch: error ~p,", [E]),
@@ -69,27 +65,26 @@ event({select, Args} = Event) ->
     Access = {proplists:get_value(user, Args),
 	      proplists:get_value(password, Args)},
     Account = proplists:get_value(account, Args),
-    Id = proplists:get_value('device-id', Args),
-    exoweb_data_if:read({device, Account, Id, Access});
+    Id = proplists:get_value(name, Args),
+    exoweb_data_if:read({user, Account, Id, Access});
 event({update, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     Access = {proplists:get_value(user, Args),
 	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    Id = proplists:get_value('device-id', Args),
+    Id = proplists:get_value(name, Args),
     case proplists:get_value(delete, Args, "false") of
 	false -> 
-	    exoweb_data_if:create({device, Account, Id, attrs(Args, []), Access});
+	    exoweb_data_if:update({user, Id, attrs(Args, []), Access});
 	true -> 
-	    exoweb_data_if:delete({device, Account, Id, Access})
+	    exoweb_data_if:delete(user, Id, Access)
     end;
 event({create, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     Access = {proplists:get_value(user, Args),
 	      proplists:get_value(password, Args)},
     Account = proplists:get_value(account, Args),
-    {value, {name, Id}, Rest} = lists:keytake('device-id', 1, Args),
-    exoweb_data_if:create({device, Account, Id, attrs(Rest, []), Access});
+    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
+    exoweb_data_if:create({user, Account, Id, attrs(Rest, []), Access});
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.
@@ -99,14 +94,11 @@ event(Event) ->
 %% Internal
 %%--------------------------------------------------------------------
 
-attributes2fetch() ->
-    [atom_to_list(A) || A <- ?DEVICE_ATTRS,A =/= 'device-id'].
-
 attrs([], Attrs) ->
     ?dbg("attrs: ~p.", [Attrs]),
     Attrs;
 attrs([{Name, Value} | Args], Attrs) ->
-    case lists:member(Name, ?DEVICE_ATTRS) of
+    case lists:member(Name, ?USER_ATTRS) of
 	true -> attrs(Args,  [{atom_to_list(Name), Value} | Attrs]);
 	false -> attrs(Args, Attrs)
     end.
