@@ -8,16 +8,16 @@
     </tr>
     <tr> 
       <td>Email: </td>
-      <td><input name="email" placeholder="Email" type="text" 
+      <td><input placeholder="Email" type="text" 
 		 class="text-input" 
-		 ng-model="user.email" value="{{email}}"/></td>
+		 ng-model="user.email" value="{{useremail}}"/></td>
     </tr>
     <tr>
      <td>Password: </td>
      <td><input name="password" placeholder="password" type="password"  
 		class="text-input" 
 		id="password" ng-model="user.password" 
-		required ng-minlength="6"/>
+		ng-minlength="6"/>
      </td>
     </tr>
     <tr>
@@ -25,20 +25,20 @@
       <td><input name="confirmpassword" placeholder="confirm password"  
 		 class="text-input" 
 		 type="password" id="confirmpassword" 
-		 ng-model="user.confirmpassword" required ng-minlength="6"/>
+		 ng-model="user.confirmpassword" ng-minlength="6"/>
       </td>
     </tr>
     <tr> 
       <td>Phone:</td>
-      <td><input name="phone" placeholder="Phone" type="text" 
+      <td><input placeholder="Phone" type="text" 
 		 class="text-input" 
-		 ng-model="user.phone" value="{{phone}}" /></td>
+		 ng-model="user.phone" value="{{userphone}}" /></td>
     </tr>
     <tr> 
       <td>Role:</td>
-      <td><select name="role" required ng-model="user.role" 
+      <td><select required ng-model="user.role" class="text-input"
 		  ng-options="role for role in roles"
-		  ng-init="view"/></td>
+		  ng-init="user.role='view'"/></td>
     </tr>
   </table> 
   <p style="color: #ff0000">

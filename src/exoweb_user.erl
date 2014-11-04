@@ -71,12 +71,13 @@ event({update, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     Access = {proplists:get_value(user, Args),
 	      proplists:get_value(password, Args)},
-    Id = proplists:get_value(name, Args),
+    Account = proplists:get_value(account, Args),
+    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
     case proplists:get_value(delete, Args, "false") of
 	false -> 
-	    exoweb_data_if:update({user, Id, attrs(Args, []), Access});
+	    exoweb_data_if:update({user, Account, Id, attrs(Rest, []), Access});
 	true -> 
-	    exoweb_data_if:delete(user, Id, Access)
+	    exoweb_data_if:delete({user, Account, Id, Access})
     end;
 event({create, Args} = Event) ->
     ?dbg("event: ~p",[Event]),

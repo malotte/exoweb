@@ -84,9 +84,9 @@ exowebUserControllers.controller('UserListCtrl', [
 	}; 
 						    
 	UserList.getData($scope.pagingOptions, 
-			   $scope.selectOptions, 
-			   $scope.filterOptions,
-			   listCallback);
+			 $scope.selectOptions, 
+			 $scope.filterOptions,
+			 listCallback);
 
 
 	
@@ -160,12 +160,14 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User',
 	window.console.debug('Loading EditUserCtrl');
 	$scope.roles = ["view", "config", "execute", "admin"];
 	$scope.deleteuser = false;
-	
+	//$scope.user.role = $scope.userrole;
+
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");
 	}
 
 	$scope.update = function (user) {
+	    window.console.debug("Update " + $scope.username + " pressed.");
 	    user.name = $scope.username;
 	    if (user.deleteuser == undefined) user.deleteuser = false;
 	    window.console.debug("User = " +user);
@@ -189,7 +191,6 @@ exowebUserControllers.controller('AddUserCtrl', ['$scope', 'User',
 	window.console.debug('Loading AddUserCtrl');
 
 	$scope.roles = ["view", "config", "execute", "admin"];
-	$scope.role = "view";
 
 	var createCallback = function(user) {
 	    window.alert("User " + user.name + " created");

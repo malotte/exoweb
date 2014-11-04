@@ -94,16 +94,22 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 	var displayUser = function (attArray, callback) {
 	    attArray = Wse.decode_js(attArray);
 	    var i, attArray;
+		window.console.debug("Attributes = " +attArray);
 	    // Loop over atttribute objects and set display fields
 	    for (i=0; i < attArray.length; i++){
-		window.console.debug("Attribute = " +attArray[i].name);
-		window.console.debug("Value = " +attArray[i].val);
-		switch(attArray[i].name) {
-		case "email": user.email = attArray[i].val; break;
-		case "phone": user.phone = attArray[i].val; break;
-		case "role": user.role = attArray[i].val; break;
-		default: window.console.debug("Unknown attribute = " +attArray[i].name);
-		}
+		window.console.debug("Attribute = " +attArray[i]);
+		window.console.debug("Email = " +attArray[i].email);
+		window.console.debug("Phone = " +attArray[i].phone);
+		window.console.debug("Role = " +attArray[i].role);
+		if (attArray[i].email !== undefined) 
+		    user.email = attArray[i].email;
+		if (attArray[i].phone !== undefined) 
+		    user.phone = attArray[i].phone;
+		if (attArray[i].role !== undefined) 
+		    user.role = attArray[i].role;
+		window.console.debug("UEmail = " +user.email);
+		window.console.debug("UPhone = " +user.phone);
+		window.console.debug("URole = " +user.role);
 	    }
 	    callback();
 	};

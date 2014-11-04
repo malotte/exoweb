@@ -135,7 +135,7 @@ delete({yang, Account, File}) when is_list(File) ->
     result(delete_yang_module(Account, File));
 delete({device, Account, Id, Access}) ->
     result(delete_device(Account, Id, Access));
-delete({user, Name, Access}) ->
+delete({user, _Account, Name, Access}) ->
     result(delete_user(Name, Access)).
 
 %%--------------------------------------------------------------------
@@ -143,17 +143,17 @@ delete({user, Name, Access}) ->
 		    ok |
 		    {error, Reason::atom()}.
 
-update({user, _Name, [], _Access}) ->
+update({user, _Account, _Name, [], _Access}) ->
     {error, "no changes"};
-update({user, Name, Updates, Access}) ->
+update({user, Account, Name, Updates, Access}) ->
     %% Role change can fail but user update can only fail if
     %% user is missing so better start with role change
     case lists:keytake("role", 1, Updates) of
 	{value, {'role', Role}, []} ->
 	    %% Only role is changed
-	    update_role(Name, Role, Access);
+	    update_role(Account, Name, Role, Access);
 	{value, {"role", Role}, Rest} ->
-	    case update_role(Name, Role, Access) of
+	    case update_role(Account, Name, Role, Access) of
 		ok ->
 		    result(update_user(Name, Rest, Access));
 		Error ->
@@ -251,10 +251,9 @@ choose_account([], [{_A, _R} | Rest], First) ->
     choose_account([], Rest, First).
 
 
-update_role(_Name, no_change, _Access) ->
+update_role(_Account, _Name, no_change, _Access) ->
     ok;
-update_role(Name, NewRole, Access) ->
-    Account = wf:session(login_account),
+update_role(Account, Name, NewRole, Access) ->
     OldRoles = [R || {A, R} <- accounts(Name, Access), A == Account],
     case lists:member(NewRole, OldRoles) of
 	true -> ok;

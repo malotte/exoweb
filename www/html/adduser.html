@@ -12,7 +12,7 @@
       <td>Email: </td>
       <td><input name="email" placeholder="Email" type="text"
 		 class="text-input" required
-		 ng-model="user.email" value="{{email}}"/></td>
+		 ng-model="user.email" value="{{useremail}}"/></td>
     </tr>
     <tr>
       <td>Password: </td>
@@ -32,14 +32,14 @@
       <td>Phone:</td>
       <td><input name="phone" placeholder="Phone" type="text"
 		 class="text-input" 
-		 ng-model="user.phone" value="{{phone}}" /></td>
+		 ng-model="user.phone" value="{{userphone}}" /></td>
     </tr>
    <tr> 
       <td>Role:</td>
       <td><select name="role" required class="text-input"
 		  ng-model="user.role" 
 		  ng-options="role for role in roles"
-		  ng-init="view" /></td>
+		  ng-init="user.role='view'" /></td>
     </tr>
   </table> 
   <input name="add" type="submit" class="button-input" 
