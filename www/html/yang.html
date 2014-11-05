@@ -1,0 +1,90 @@
+
+<div class="wrapper">
+
+  <div class="header" id="header">
+    <div class="header_left">
+      <div class="logo" id="logo">
+	<image src="img/feuerlabs.png"></image>
+      </div>
+      <div style="margin-left: 20px">
+	<p>Connecting the 'internet of Things'</p>
+      </div>
+    </div>
+    
+    <div class="exosense-logo" id="exosense-logo">ExoSense</div>
+    
+    <div class="header_right">
+      <div ng-controller="MenuCtrl">
+	<div class="menu" style="margin-left: 10%">
+	  <table>
+	    <tr>
+	      <td style="background-image:url('img/menu_blue.png');">
+		<a href="#/device">Device</a></td>
+	      <td style="background-image:url('img/menu_red.png');">
+		<a href="#/user">User</a></td>
+	      <td style="background-image:url('img/menu_orange.png');">
+		<a href="#/yang">Yang</a></td>
+	      <td style="background-image:url('img/menu_green.png');" >
+		<a href="#/howto">How to</a></td>
+	    </tr>
+	  </table>
+	  <p/>
+	  <div class="user" >
+	    <table>
+	      <tr>
+		<td><image src="img/icon_head.png"/></td>
+		<td><p>{{user}}</p></td>
+		<td><input name="logout" type="submit" class="logout-button"
+			   id="logout" value="Log out" 
+			   ng-click="logout(user)" /></td>
+	      </tr>
+	    </table>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+
+  <hr/>
+
+  <div class="main" ng-controller="YangListCtrl">
+    <div class="yangs">
+      <input name="file" placeholder="file" type="text" 
+	     class="text-input" 
+	     data-ng-model="searchtext" data-ng-change="search()"/>
+      <table style="width: 500px">
+	<tr>
+	  <td><image src="img/icon_role_red.png"/></td>
+	  <td><image src="img/icon_created_red.png"/></td>
+	</tr>
+	<tr>
+	  <td><p>My files</p></td>
+	  <td><p>Created</p></td>
+	</tr>
+      </table>
+      <p ><image src="img/iconbar_red.png" style="width: 500px"/></p>
+      <div class="gridStyle" ng-grid="gridOptions"></div>
+    </div>
+    <div class="info">
+      <tabset>
+        <tab title="Edit" template-url="html/edityang.html"></tab>
+        <tab title="Add" template-url="html/addyang.html"></tab>
+      </tabset>
+    </div>
+  </div>
+
+  <div class="footer" id="footer">
+    <hr/>
+    <div style="margin-left: 10%">
+      <table>
+	<tr>
+	  <td><image src="img/icon-fb.png"/></td>
+	  <td><image src="img/icon-tw.png"/></td>
+	  <td><image src="img/icon-in.png"/></td>
+	  <td style="width: 200px;"><p>Feuerlabs inc. 2014</p></td>
+	</tr>
+      </table>
+    </div>
+  </div>
+</div>
+

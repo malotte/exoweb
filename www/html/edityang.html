@@ -1,0 +1,18 @@
+<div class="tab" ng-controller="EditYangCtrl">
+  <form action="" method="post" name="editform" class="edit-form" 
+	id="editform">
+  <table>
+    <tr> 
+      <td>Name </td> 
+      <td class="text-input" >{{filename}} </td> 
+    </tr>
+  </table> 
+  <p style="color: #ff0000">
+    <input name="deleteyang " type="checkbox" class="checkbox-input"
+	   ng-model="yang.deletefile" />
+    Delete this yangfile</p></br>
+  <input name="save" type="submit" class="button-input" 
+	 id="save" value="Save" ng-click="update(yang)" />
+</form>
+</div>
+

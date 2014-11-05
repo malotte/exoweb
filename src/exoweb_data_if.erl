@@ -76,11 +76,6 @@ contact() ->
 		    ok |
 		    {error, Reason::atom()}.
 
-	
-create({yang, Account, File}) when is_list(File) ->
-    result(create_yang_module(Account, File));
-
-
 
 create({account, Name, Email, Pass}) ->
     case result(create_account(Name, Email, Pass), {item, "account-admin"}) of
@@ -124,20 +119,21 @@ create({user, Account, Name, Attrs, Access}) ->
 	    E
     end;
 create({device, Account, Id, Attrs, Access}) ->
-    result(create_device(Account, Id, Attrs, Access)).
+    result(create_device(Account, Id, Attrs, Access));
+create({yang, Account, File}) when is_list(File) ->
+    result(create_yang_module(Account, File)).
 
 %%--------------------------------------------------------------------
 -spec delete(Record::tuple()) ->
 		    ok |
 		    {error, Reason::atom()}.
 
-delete({yang, Account, File}) when is_list(File) ->
-    result(delete_yang_module(Account, File));
 delete({device, Account, Id, Access}) ->
     result(delete_device(Account, Id, Access));
 delete({user, _Account, Name, Access}) ->
-    result(delete_user(Name, Access)).
-
+    result(delete_user(Name, Access));
+delete({yang, Account, File}) when is_list(File) ->
+    result(delete_yang_module(Account, File)).
 %%--------------------------------------------------------------------
 -spec update(tuple()) ->
 		    ok |
@@ -201,19 +197,9 @@ read({device, Account, Id, Access}) ->
     end.
     
 %%--------------------------------------------------------------------
--spec fetch(Table::atom(),
-	    Rows::integer(),
-	    Last::string(),
-	    Direction::ascending | descending,
-	    Session::#exoweb_session{}) ->
+-spec fetch(tuple()) ->
 		  Result::term() |
 		  {error, Reason::atom()}.
-
-fetch(file, Rows, Last, Direction, 
-      Session=#exoweb_session {account = Account}) 
-  when Direction == ascending; Direction == descending ->
-    result(list_yang_modules(Account, Rows, Last, Direction, Session), 
-	   {list, "yang-modules"}).
 
 fetch({user, Rows, Last, Direction, {Account, User, Pass}}) 
   when Direction == ascending; Direction == descending ->
@@ -222,7 +208,12 @@ fetch({user, Rows, Last, Direction, {Account, User, Pass}})
 fetch({device, Rows, Last, Direction, {Account, User, Pass}}) 
   when Direction == ascending; Direction == descending ->
     result(list_devices_attributes(Account, Rows, Last, Direction, {User, Pass}), 
-	   {list, "devices"}).
+	   {list, "devices"});
+fetch({yang, Rows, Last, Direction, {Account, User, Pass}}) 
+  when Direction == ascending; Direction == descending ->
+    result(list_yang_modules(Account, Rows, Last, Direction, {User, Pass}), 
+	   {list, "yang-modules"}).
+
 
 
 %%--------------------------------------------------------------------
@@ -324,7 +315,6 @@ delete_yang_module(Acc, File) ->
 list_yang_modules(Account, Rows, Last, Direction, Access) ->
     exodm_json_api:list_yang_modules(Account, "user", Rows, Last, 
 				     atom_to_list(Direction), opts(Access)).
-%%				     opts(Access)).
 
 create_device(Acc, Id, Attrs, Access) ->
     %% Ugly solution to exodmapi limitations

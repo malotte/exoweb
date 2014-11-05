@@ -7,10 +7,12 @@ var exowebApp = angular.module('exoweb', [
     'exowebControllers',
     'exowebDeviceControllers',
     'exowebUserControllers',
+    'exowebYangControllers',
     'exowebDirectives',
     'exowebServices',
     'exowebDeviceServices',
     'exowebUserServices',
+    'exowebYangServices',
     'exowebFilters'
 ]);
 
@@ -38,6 +40,9 @@ exowebApp.config(['$routeProvider', '$locationProvider',
       }).
       when('/user', {
           templateUrl: 'html/user.html'
+      }).
+     when('/yang', {
+          templateUrl: 'html/yang.html'
       }).
       when('/howto', {
           templateUrl: 'html/howto.html'
