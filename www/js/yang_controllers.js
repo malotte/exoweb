@@ -48,17 +48,17 @@ exowebYangControllers.controller('YangListCtrl', [
 
 
 	var rowSelected = function(rowItem, event) {
-	    $scope.yangname = rowItem.getProperty('name');
+	    $scope.yangname = rowItem.getProperty('filename');
 	    window.console.debug("Row = " +rowItem.rowIndex);
 	    window.console.debug("Event = " +event);
 	    window.console.debug("Name = " +$scope.yangname);
-	    YangDetail.getData($scope.yangname, detailCallback);
+	    // YangDetail.getData($scope.yangname, detailCallback);
 	};
 
 	$scope.setPageData = function(data){
 	    // These variables are watched by ng-grid
 	    $scope.myData = data;
-	    $scope.totalServerItems = 100;
+	    $scope.totalServerItems = 1000;
 	    if (!$scope.$$phase) {
 		$scope.$apply();
 	    }
@@ -148,12 +148,10 @@ exowebYangControllers.controller('YangListCtrl', [
 exowebYangControllers.controller('EditYangCtrl', ['$scope', 'Yang',
     function ($scope, Yang) {
 	window.console.debug('Loading EditYangCtrl');
-	$scope.roles = ["view", "config", "execute", "admin"];
 	$scope.deleteyang = false;
-	//$scope.yang.role = $scope.yangrole;
 
 	var updateCallback = function(yang) {
-	    window.alert("Yang " + yang.name + " updated");
+	    window.alert("Yang " + yang.name + " deleted");
 	}
 
 	$scope.update = function (yang) {

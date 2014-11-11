@@ -120,8 +120,9 @@ create({user, Account, Name, Attrs, Access}) ->
     end;
 create({device, Account, Id, Attrs, Access}) ->
     result(create_device(Account, Id, Attrs, Access));
-create({yang, Account, File}) when is_list(File) ->
-    result(create_yang_module(Account, File)).
+create({yang, Account, File, Access}) when is_list(File) ->
+    ?dbg("create: yang ~p,  ~p.", [Account, File]),
+    result(create_yang_module(Account, File, Access)).
 
 %%--------------------------------------------------------------------
 -spec delete(Record::tuple()) ->
@@ -132,8 +133,8 @@ delete({device, Account, Id, Access}) ->
     result(delete_device(Account, Id, Access));
 delete({user, _Account, Name, Access}) ->
     result(delete_user(Name, Access));
-delete({yang, Account, File}) when is_list(File) ->
-    result(delete_yang_module(Account, File)).
+delete({yang, Account, File, Access}) when is_list(File) ->
+    result(delete_yang_module(Account, File, Access)).
 %%--------------------------------------------------------------------
 -spec update(tuple()) ->
 		    ok |
@@ -301,17 +302,17 @@ add_account_access(Acc, Role, Name, Access) ->
     exodm_json_api:add_account_access(Acc, Role, [Name], opts(Access)).
 remove_account_access(Acc, Role, Name, Access) ->
     exodm_json_api:remove_account_access(Acc, Role, [Name], opts(Access)).
-create_yang_module(Acc, File) ->
+create_yang_module(Acc, File, Access) ->
     exodm_json_api:create_yang_module(Acc, 
 				      "user", 
 				      filename:basename(File), 
 				      File, 
-				      opts(current_user)).
-delete_yang_module(Acc, File) ->
+				      opts(Access)).
+delete_yang_module(Acc, File, Access) ->
     exodm_json_api:delete_yang_module(Acc, 
 				      "user",
 				      filename:basename(File), 
-				      opts(current_user)).
+				      opts(Access)).
 list_yang_modules(Account, Rows, Last, Direction, Access) ->
     exodm_json_api:list_yang_modules(Account, "user", Rows, Last, 
 				     atom_to_list(Direction), opts(Access)).

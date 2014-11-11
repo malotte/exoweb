@@ -178,7 +178,7 @@ exowebYangServices.factory('Yang', [
 	}
 
 	var create = function(yang, callback) {
-	    var url = "/fileUpload";
+	    var url = "/fileupload";
 	    var fd = new FormData();
 	    fd.append('file', yang.filename);
 	    $http.post(url, fd, {
@@ -186,7 +186,6 @@ exowebYangServices.factory('Yang', [
 		headers: {'Content-Type': undefined},
 	    })		  
 		.success(callback(yang))
-		.error(callback(yang))
 	}
 
 	return {

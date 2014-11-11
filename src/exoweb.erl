@@ -180,7 +180,7 @@ start_dbg() ->
 	 start),
     ale:debug_gl([exoweb, 
 		  exoweb_sup, 
-		  exoweb_inets, 
+		  exoweb_yaws, 
 		  exoweb_index,
 		  exoweb_apply, 
 		  exoweb_login, 
