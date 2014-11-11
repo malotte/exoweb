@@ -88,7 +88,7 @@ event({create, Args} = Event) ->
     Access = {proplists:get_value(user, Args),
 	      proplists:get_value(password, Args)},
     Account = proplists:get_value(account, Args),
-    {value, {name, Id}, Rest} = lists:keytake('device-id', 1, Args),
+    {value, {'device-id', Id}, Rest} = lists:keytake('device-id', 1, Args),
     exoweb_data_if:create({device, Account, Id, attrs(Rest, []), Access});
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),

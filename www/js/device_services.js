@@ -174,6 +174,7 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 		window.console.debug("Result = " + result);
 		if (result == "ok") {
 		    // call successful => {ok, ok}
+		    window.console.debug("Call successful.");
 		    callback(device);
 		}
 		else if (result.value[0] == "error") {
@@ -238,16 +239,4 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 	}
     }]);
 
-		
 	
-/*exowebDeviceServices.factory('Device', ['$resource',
-  function($resource){
-    return $resource('https://localhost:8000/exodm/rpc', {}, {
-	query: {method:'POST', 
-		data:
-		'{"json-rpc": "2.0", "method": "exodm:list-devices", "id": "1","params": {"n": 10,"previous": ""}}', 
-		headers:{"Authorization": "Basic " +btoa("m17/admin:111111") },
-		isArray:true}
-    });
-  }]);
-*/

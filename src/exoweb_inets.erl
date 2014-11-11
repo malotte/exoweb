@@ -33,30 +33,6 @@
 %% API
 -export([start_link/0, stop/0, do/1]).
   
-%%--------------------------------------------------------------------
-%% @doc 
-%% This is the routing table for exodm web.
-%% @end
-%%--------------------------------------------------------------------
-routes() ->
-    [{"/",          exoweb_index},
-     {"/favicon.ico", static_file},
-     {"/apply",     exoweb_apply},
-     {"/login",     exoweb_login},
-     {"/user",      exoweb_user},
-     {"/yang",      exoweb_yang},
-     {"/device",    exoweb_device},
-     {"/data",      static_file},
-     {"/table",     exoweb_table},
-     {"/about",     exoweb_about},
-     {"/confirm",   exoweb_confirm},
-     {"/images",    static_file},
-     {"/nitrogen",  static_file},
-     {"/core",      static_file},
-     {"/elements",  static_file},
-     {"/js",        static_file},
-     {"/css",       static_file}
-    ].
 
 %%--------------------------------------------------------------------
 %% @doc 
@@ -64,30 +40,6 @@ routes() ->
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    ?dbg("start_link: set up links to nitrogen_core & nitrogen_elements", []),
-    Nitrogen = filename:join([code:lib_dir(exoweb), "www", "nitrogen"]),
-    Core = filename:join([code:lib_dir(exoweb), "www", "core"]),
-    Elements = filename:join([code:lib_dir(exoweb), "www", "elements"]),
-    Res1 = 
-    case filelib:is_file(Core) of
-	true -> ok;
-	false -> os:cmd("ln -s " ++ code:lib_dir(nitrogen_core) ++ 
-			    " " ++ Core)
-    end,
-    Res2 =
-    case filelib:is_file(Elements) of
-	true -> ok;
-	false -> os:cmd("ln -s " ++ code:lib_dir(nitrogen_elements) ++ 
-			    " " ++ Elements)
-    end,
-    Res3 = 
-    case filelib:is_file(Nitrogen) of
-	true -> ok;
-	false -> os:cmd("ln -s " ++ code:lib_dir(nitrogen_core) ++ 
-			    "/www " ++ Nitrogen)
-    end,
-    ?dbg("start_link: result:~n~p~n~p~n~p", [Res1, Res2, Res3]),
-
     ?dbg("start_link: starting inets",  []),
     inets:start(),
     {ok, Pid} = 
@@ -121,7 +73,17 @@ start_inets_httpd() ->
 		     {log_format, common},
 		     {error_log,    "log/inets_error.log"},
 		     {transfer_log, "log/inets_transfer.log"},
-                     {modules,       [mod_log, mod_disk_log, ?MODULE]},
+                     {modules,       [?MODULE,
+				      mod_alias, 
+				      mod_auth, 
+				      mod_esi, 
+				      mod_actions, 
+				      mod_cgi, 
+				      mod_dir, 
+				      mod_get, 
+				      mod_head,
+				      mod_log, 
+				      mod_disk_log]},
                      {mime_types,    [{"css",  "text/css"},
 				      {"js",   "text/javascript"},
 				      {"html", "text/html"},
@@ -145,64 +107,18 @@ stop() ->
 %% httpd callback, see OTP documentation.
 %% @end
 %%--------------------------------------------------------------------
-do(Info=#mod{method = "GET", 
-	     request_uri = "/data/" ++ _File}) ->
-    %% Get data
-    data_do(Info);
-do(Info) ->
-    exoweb_do(Info).
+do(ModData=#mod{method = "POST", 
+		request_uri = "/fileUpload"}) ->
+    ?dbg("do: fileUpload", []),
+    do_fileupload(ModData);
+do(ModData=#mod{method = M, 
+		request_uri = Uri}) ->
+    ?dbg("do: ~p, ~p", [M, Uri]),
+    {proceed, ModData#mod.data}.
 
-%% Not needed any more ??
-%% @private
-nitrogen_do(_Info=#mod{http_version = HttpVersion,
-		      parsed_header = Header,
-		      request_uri = "/" ++ File}) ->
-		
-    %% Get nitrogen generic files from nitrogen_core/elements
-    NitrogenFile = filename:join([code:lib_dir(exoweb), "www", File]),
-    ?dbg("do: new file path ~p",  [NitrogenFile]),
-
-    {Etag, Size, LastModified} = file_data(NitrogenFile),
-    case lists:keyfind("if-none-match", 1, Header) of
-	{"if-none-match", Etag} ->
-	    ?dbg("do: file ~p already sent",  [NitrogenFile]),
-	    {proceed, [{response, {response,
-				   lists:keystore(code, 1, Header, {code, 304}),
-				   nobody}}]};
-	_NoMatch ->
-	    send_file(NitrogenFile, Etag, Size, LastModified, HttpVersion)
-    end.
-
-data_do(Info=#mod{request_uri = "/data/" ++ File}) ->
-    ?dbg("do: data file ~p",  [File]),
-    Table = parse_uri(Info),
-    %% ?dbg("do: data info ~p",  [Info]),
-    case exoweb_js:fetch(Table, 
-			 exoweb_lib:parse_options(http_uri:decode(File))) of
-	{struct, Data} = JsonStruct when is_list(Data)->
-	    Bin = iolist_to_binary(exo_json:encode(JsonStruct)),
-	    ?dbg("do: Bin ~p",  [Bin]),
-	    {proceed, [{response, {response,
-				   [{code, 200},
-				    {content_length, integer_to_list(byte_size(Bin))},
-				    {content_type, "application/json"}],
-				   [Bin]}}]};
-	_Other ->
-	    ?dbg("do: data error ~p",  [_Other]),
-	    {proceed, [{response, {response,
-				   [{code, 404}], 
-				   nobody}}]}
-    end.
-    
-exoweb_do(Info=#mod{request_uri = File}) ->
-    %%?dbg("do: file ~p",  [File]),
-    put(gettext_language, "sv"),
-    RequestBridge = simple_bridge:make_request(inets_request_bridge, Info),
-    ResponseBridge = simple_bridge:make_response(inets_response_bridge, Info),
-    nitrogen:init_request(RequestBridge, ResponseBridge),
-    replace_route_handler(),
-    nitrogen:handler(exoweb_security_handler, exoweb_security_handler_callback),
-    nitrogen:run().
+do_fileupload(ModData)->
+    ?dbg("do_fileupload: ~p", [ModData]),
+    {proceed, ModData#mod.data}.
 
 %%--------------------------------------------------------------------
 %% Internal
@@ -321,15 +237,3 @@ file_data(File)->
     Size = integer_to_list(FileInfo#file_info.size),
     {Etag, Size, LastModified}.
 
-%%--------------------------------------------------------------------
-%% @doc 
-%% Change nitrogen route handler to table above.
-%% @end
-%%--------------------------------------------------------------------
-replace_route_handler() ->
-    wf_handler:set_handler(named_route_handler, routes()).
-
-%% in your supervisor's loop function where you call 
-%% nitrogen:run/0, you will need to add the following
-%% code above your nitrogen:run/0 call
-%%,

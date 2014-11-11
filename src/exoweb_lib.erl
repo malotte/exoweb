@@ -170,6 +170,10 @@ direction(LastId, ReqPage, LastPage)
   when ReqPage == LastPage - 1 ->
     %% Previous page
     {LastId, descending};
+direction(LastId, ReqPage, ReqPage) ->
+    ?dbg("direction: ~p, ~p, ~p.", [LastId, ReqPage, ReqPage]),
+    %% Probably last page and turning back...
+    {"", descending};
 direction(LastId, ReqPage, LastPage) ->
     ?dbg("direction: ~p, ~p, ~p.", [LastId, ReqPage, LastPage]),
     %% Should not happen !!

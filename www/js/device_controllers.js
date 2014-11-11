@@ -42,7 +42,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    
 	var detailCallback = function() {
 	    var device = DeviceDetail.device;
-	    window.console.debug("device = " + device);
+	    window.console.debug("device = " + JSON.stringify(device));
 	    $scope.status = device.status;
 	    $scope.serverkey = device.serverkey;
 	    $scope.devicekey = device.devicekey;
@@ -62,7 +62,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	$scope.setPageData = function(data){
 	    // These variables are watched by ng-grid
 	    $scope.myData = data;
-	    $scope.totalServerItems = 100;
+	    $scope.totalServerItems = 1000; // Large number ???
 	    if (!$scope.$$phase) {
 		$scope.$apply();
 	    }
@@ -92,8 +92,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 
 	
 	$scope.$watch('pagingOptions', function (newVal, oldVal) {
-            if (newVal !== oldVal && 
-		newVal.currentPage !== oldVal.currentPage) {
+            if (newVal !== oldVal) {
 		if (newVal.pageSize !== oldVal.pageSize) {
 		    newVal.currentPage = 1;
 		}
@@ -189,7 +188,8 @@ exowebDeviceControllers.controller('AddDeviceCtrl', ['$scope', 'Device',
 	window.console.debug('Loading AddDeviceCtrl');	
 
 	var createCallback = function(device) {
-	    window.alert("Device " + device.did + " created");
+	    window.console.debug("Device = " + JSON.stringify(device) + " created.");
+	    window.alert("Device " + device.did + " created.");
 	}
 
 	$scope.add = function (device) {

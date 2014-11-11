@@ -173,14 +173,12 @@ exowebYangControllers.controller('AddYangCtrl', ['$scope', 'Yang',
 	window.console.debug('Loading AddYangCtrl');
 
 	var createCallback = function(yang) {
-	    window.alert("Yang " + yang.filename + " created");
+	    window.alert("Yang " + yang.filename + " added");
 	}
 
 	$scope.add = function () {
-	    var yang = new Object;
-	    yang.filename = $scope.yang.filename;
-	    window.console.debug('Yang file = ' + JSON.stringify(yang.filename));
-	    Yang.create(yang, createCallback);
+	    window.console.debug('Yang file = ' + JSON.stringify($scope.yang.filename));
+	    Yang.create($scope.yang, createCallback);
 	};
 
  

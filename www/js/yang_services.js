@@ -136,9 +136,10 @@ exowebYangServices.factory('YangDetail', ['ExowebError',
 	}
     }]);
 		
-exowebYangServices.factory('Yang', ['ExowebError',
-    function(ExowebError) {
-
+exowebYangServices.factory('Yang', [
+    '$http', 'ExowebError',
+    function($http, ExowebError) {
+	
 	var parseYangReply = function(reply, yang, callback) {
 	    if (reply.value[0] == "ok") {
 		// Call performed
@@ -177,19 +178,15 @@ exowebYangServices.factory('Yang', ['ExowebError',
 	}
 
 	var create = function(yang, callback) {
-   	    setTimeout(function () {
-		Wse.call('exoweb_js', 'wrapper', 
-			 [Ei.atom('exoweb_yang'),  // Module
-			  Ei.atom('event'),          // Function
-			  Ei.tuple(Ei.atom('create'), // Args
-				   [Ei.tuple(Ei.atom('filename'), 
-					     yang.filename)])], 
-			 // reply callback
-			 function(obj,ref,reply) {  
-			     window.console.debug("Value = " +reply);
-			     parseYangReply(reply, yang, callback);
-			 });
-	    }, 100);
+	    var url = "/fileUpload";
+	    var fd = new FormData();
+	    fd.append('file', yang.filename);
+	    $http.post(url, fd, {
+		transformRequest: angular.identity,
+		headers: {'Content-Type': undefined},
+	    })		  
+		.success(callback(yang))
+		.error(callback(yang))
 	}
 
 	return {

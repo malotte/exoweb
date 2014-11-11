@@ -85,12 +85,12 @@ init(_Args) ->
 			  [?MODULE, _Args, self()]),
     ExoS = exoweb_session_server,
     ExoC = exoweb_cookie_handler,
-    %%ExoW = exoweb_inets,
+    ExoW = exoweb_inets,
     ExoSrv = {ExoS, {ExoS, start_link, [[]]}, permanent, 5000, worker, [ExoS]},
     ExoCook = {ExoC, {ExoC, start_link, [[]]}, permanent, 5000, worker, [ExoC]},
-    %%ExoWeb = {ExoW, {ExoW, start_link, []}, permanent, 5000, worker, [ExoW]},
-    Processes = [ExoSrv, ExoCook],
-    %%Processes = [ExoSrv, ExoCook, ExoWeb],
+    ExoWeb = {ExoW, {ExoW, start_link, []}, permanent, 5000, worker, [ExoW]},
+    %%Processes = [ExoSrv, ExoCook],
+    Processes = [ExoSrv, ExoCook, ExoWeb],
     error_logger:info_msg("~p: About to start ~p\n", [?MODULE,Processes]),
     {ok, { {one_for_one, 0, 300}, Processes} }.
 

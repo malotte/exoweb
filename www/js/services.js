@@ -4,8 +4,8 @@
 
 var exowebServices = angular.module('exowebServices', []);
 
-exowebServices.factory('ExowebUser', [
-    function() {
+exowebServices.factory('ExowebUser', [ 'ExowebError',
+    function(ExowebError) {
 
 	var apply = function (user, okCallback, nokCallback) {
 	  Wse.call('exoweb_apply', 'event', 
@@ -87,7 +87,7 @@ exowebServices.factory('ExowebUser', [
 		    }
 		    else if (result.value[0] == "error") {
 			// Call failed => {ok,{error,Reason}}
-			nokCallback(result.value[1]);
+			ExowebError(result.value[1]);
 		    }
 		}
 		else if (reply.value[0] == "error") {
@@ -129,11 +129,12 @@ exowebServices.factory('ExowebError', [
     function() {
 	return function(error) {
 		if (error == "illegal_cookie") {
+		    window.alert("Session expired.");
 		    window.console.debug("Go to login");
 		    window.location.href = "#/login";
 		}
 		else {
-		    window.alert("Error: " +result.value[1]);
+		    window.alert("Error: " +error);
 		}
 	    }
 	}]);
