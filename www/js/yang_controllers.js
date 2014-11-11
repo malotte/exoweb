@@ -88,8 +88,7 @@ exowebYangControllers.controller('YangListCtrl', [
 
 	
 	$scope.$watch('pagingOptions', function (newVal, oldVal) {
-            if (newVal !== oldVal && 
-		newVal.currentPage !== oldVal.currentPage) {
+            if (newVal !== oldVal) {
 		if (newVal.pageSize !== oldVal.pageSize) {
 		    newVal.currentPage = 1;
 		}
@@ -171,7 +170,8 @@ exowebYangControllers.controller('AddYangCtrl', ['$scope', 'Yang',
 	window.console.debug('Loading AddYangCtrl');
 
 	var createCallback = function(yang) {
-	    window.alert("Yang " + yang.filename + " added");
+	    window.console.debug("Yang " + yang.filename.name + " added");
+	    window.alert("Yang " + yang.filename.name + " added");
 	}
 
 	$scope.add = function () {

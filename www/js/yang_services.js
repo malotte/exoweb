@@ -184,8 +184,8 @@ exowebYangServices.factory('Yang', [
 	    $http.post(url, fd, {
 		transformRequest: angular.identity,
 		headers: {'Content-Type': undefined},
-	    })		  
-		.success(callback(yang))
+	    });
+	    callback(yang);
 	}
 
 	return {

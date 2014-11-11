@@ -91,8 +91,7 @@ exowebUserControllers.controller('UserListCtrl', [
 
 	
 	$scope.$watch('pagingOptions', function (newVal, oldVal) {
-            if (newVal !== oldVal && 
-		newVal.currentPage !== oldVal.currentPage) {
+            if (newVal !== oldVal) {
 		if (newVal.pageSize !== oldVal.pageSize) {
 		    newVal.currentPage = 1;
 		}
