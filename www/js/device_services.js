@@ -29,7 +29,8 @@ exowebDeviceServices.factory('DeviceList', ['ExowebError',
 		 else
 		      device["status"] = "Not connected";
 		devices[i] = device;
-		window.console.debug("Device " + i + " = " + devices[i]);
+		window.console.debug("Device " + i + " = " + 
+				     JSON.stringify(devices[i]));
 	    }
 	    callback();
 	};
@@ -106,8 +107,8 @@ exowebDeviceServices.factory('DeviceDetail', ['ExowebError',
 		window.console.debug("Value = " +attArray[i].val);
 		switch(attArray[i].name) {
 		case "msisdn": device.msisdn = attArray[i].val; break;
-		case "device-key": device.devicekey = attArray[i].val; break;
-		case "server-key": device.serverkey = attArray[i].val; break;
+		case "device-key": device.dkey = attArray[i].val; break;
+		case "server-key": device.skey = attArray[i].val; break;
 		case "is-connected": 
 		    if (attArray[i].val == "true")
 			device.status = "Connected";
@@ -145,7 +146,7 @@ exowebDeviceServices.factory('DeviceDetail', ['ExowebError',
 
 	
 	var getData = function(deviceid, callback) {
-	    device.deviceid = deviceid;
+	    device.did = deviceid;
 	    Wse.call('exoweb_js', 'wrapper', 
 		     [Ei.atom('exoweb_device'),  // Module
 		      Ei.atom('event'),          // Function

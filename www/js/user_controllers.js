@@ -9,11 +9,12 @@ exowebUserControllers.controller('UserListCtrl', [
     '$scope', 'UserList', 'UserDetail',
     function($scope, UserList, UserDetail) {
 	
+	
 	var scroll = function(rowItem, event){
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
 		var grid = $scope.gridOptions.ngGrid;
 		grid.$viewport.scrollTop(rowItem.offsetTop - (grid.config.rowHeight * 2));
-		angular.forEach($scope.myData, function(data, index){
+		angular.forEach($scope.myUsers, function(data, index){
 		    $scope.gridOptions.selectRow(index, false);
 		});
             }
@@ -41,26 +42,24 @@ exowebUserControllers.controller('UserListCtrl', [
 	};
 	    
 	var detailCallback = function() {
-	    var user = UserDetail.user;
-	    window.console.debug("user = " + user);
-	    $scope.userphone = user.phone;
-	    $scope.useremail = user.email;
-	    $scope.userrole = user.role;
+	    $scope.user = UserDetail.user;
+	    window.console.debug("User details = " + 
+				 JSON.stringify($scope.user));
 	    $scope.$apply();
 	}
 
 
 	var rowSelected = function(rowItem, event) {
-	    $scope.username = rowItem.getProperty('name');
+	    var username = rowItem.getProperty('name');
 	    window.console.debug("Row = " +rowItem.rowIndex);
 	    window.console.debug("Event = " +event);
-	    window.console.debug("Name = " +$scope.username);
-	    UserDetail.getData($scope.username, detailCallback);
+	    window.console.debug("Name = " +username);
+	    UserDetail.getData(username, detailCallback);
 	};
 
 	$scope.setPageData = function(data){
 	    // These variables are watched by ng-grid
-	    $scope.myData = data;
+	    $scope.myUsers = data;
 	    $scope.totalServerItems = 100;
 	    if (!$scope.$$phase) {
 		$scope.$apply();
@@ -95,26 +94,23 @@ exowebUserControllers.controller('UserListCtrl', [
 		if (newVal.pageSize !== oldVal.pageSize) {
 		    newVal.currentPage = 1;
 		}
-		window.console.debug("paging changed ");
-		window.console.debug("Size = " + $scope.pagingOptions.pageSize);
-		window.console.debug("Last = " + $scope.selectOptions.lastId);
-		window.console.debug("Last page = " + $scope.selectOptions.lastPage);
 		UserList.getData($scope.pagingOptions, 
-				   $scope.selectOptions, 
-				   $scope.filterOptions,
-				   listCallback);
+				 $scope.selectOptions, 
+				 $scope.filterOptions,
+				 listCallback);
             }
 	}, true);
 
 	$scope.$watch('filterOptions', function (newVal, oldVal) {
             if (newVal !== oldVal) {
 		UserList.getData($scope.pagingOptions, 
-				   $scope.selectOptions, 
-				   $scope.filterOptions,
-				   listCallback);
+				 $scope.selectOptions, 
+				 $scope.filterOptions,
+				 listCallback);
             }
 	}, true);
 	
+
 	// This $watch scrolls the ngGrid to show a newly-selected row as 
 	// close to the middle row as possible
 	$scope.$watch('gridOptions.ngGrid.config.selectedItems', 
@@ -127,7 +123,7 @@ exowebUserControllers.controller('UserListCtrl', [
 	    }, true);
 	
 	$scope.gridOptions = {
-            data: 'myData',  // Watch this variable
+            data: 'myUsers',  // Watch this variable
 	    primaryKey: 'id',
  	    columnDefs: [{field:'name', displayName:'Users', width: 200}, 
 			 {field:'role', displayName:'Role', width: 100}],
@@ -159,28 +155,26 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User',
 	window.console.debug('Loading EditUserCtrl');
 	$scope.roles = ["view", "config", "execute", "admin"];
 	$scope.deleteuser = false;
-	//$scope.user.role = $scope.userrole;
 
 	var updateCallback = function(user) {
-	    window.alert("User " + user.name + " updated");
+	    if ($scope.deleteuser == true)
+		window.alert("User " + user.name + " deleted");
+	    else
+		window.alert("User " + user.name + " updated");
+	    $scope.$digest();
 	}
 
 	$scope.update = function (user) {
-	    window.console.debug("Update " + $scope.username + " pressed.");
-	    user.name = $scope.username;
-	    if (user.deleteuser == undefined) user.deleteuser = false;
-	    window.console.debug("User = " +user);
-	    window.console.debug("Phone = " +user.phone);
-	    window.console.debug("Email = " +user.email);
-	    window.console.debug("Role = " +user.role);
-	    window.console.debug("Delete = " +user.deleteuser);
+	    $scope.deleteuser = user.deleteuser;
+	    if (user.phone == undefined) user.phone = "";
+	    window.console.debug("User = " +JSON.stringify(user));
 	    User.update(user, updateCallback);
 	};
 
-	$scope.passwordConfirmed = function(user) {
-	    if (user.password != user.confirmpassword) {
-		window.alert("Passwords do not match! ");}
-	    return angular.equals(user.password, user.confirmpassword)};
+      $scope.passwordConfirmed = function(user) {
+	  if (user.password != user.confirmpassword) {
+	      window.alert("Passwords do not match! ");}
+	  return angular.equals(user.password, user.confirmpassword)};
 	
     }
 ]);
@@ -196,10 +190,8 @@ exowebUserControllers.controller('AddUserCtrl', ['$scope', 'User',
 	}
 
 	$scope.add = function (user) {
-	    window.console.debug("User = " +user);
-	    window.console.debug("Phone = " +user.phone);
-	    window.console.debug("Email = " +user.email);
-	    window.console.debug("Role = " +user.role);
+	    if (user.phone == undefined) user.phone = "";
+	    window.console.debug("User to add = " +JSON.stringify(user));
 	    User.create(user, createCallback);
 	};
 

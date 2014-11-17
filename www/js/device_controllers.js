@@ -13,7 +13,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
 		var grid = $scope.gridOptions.ngGrid;
 		grid.$viewport.scrollTop(rowItem.offsetTop - (grid.config.rowHeight * 2));
-		angular.forEach($scope.myData, function(data, index){
+		angular.forEach($scope.myDevices, function(data, index){
 		    $scope.gridOptions.selectRow(index, false);
 		});
             }
@@ -23,14 +23,14 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	var listCallback = function() {
 	    var devices = DeviceList.devices;
 	    if (devices.length > 0) {
-		window.console.debug("devices = " + devices);
+		window.console.debug("devices = " + JSON.stringify(devices));
 		$scope.setPageData(devices);
 		$scope.selectOptions.lastPage = 
 		    $scope.pagingOptions.currentPage;
 		$scope.selectOptions.lastId = 
 		    (devices[devices.length - 1])["id"];
 		window.console.debug("Total = " + 
-				     $scope.totalServerItems);
+				     $scope.totalItems);
 		window.console.debug("Total = " + 
 				     $scope.gridOptions.totalServerItems);
 		window.console.debug("Last = " + 
@@ -41,35 +41,32 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	};
 	    
 	var detailCallback = function() {
-	    var device = DeviceDetail.device;
-	    window.console.debug("device = " + JSON.stringify(device));
-	    $scope.status = device.status;
-	    $scope.serverkey = device.serverkey;
-	    $scope.devicekey = device.devicekey;
-	    $scope.msisdn = device.msisdn;	    
+	    $scope.device = DeviceDetail.device;
+	    window.console.debug("Device details = " + 
+				 JSON.stringify($scope.device));
 	    $scope.$apply();
 	}
 
 
 	var rowSelected = function(rowItem, event) {
-	    $scope.deviceid = rowItem.getProperty('id');
+	    var deviceid = rowItem.getProperty('id');
 	    window.console.debug("Row = " +rowItem.rowIndex);
 	    window.console.debug("Event = " +event);
 	    window.console.debug("Id = " +$scope.deviceid);
-	    DeviceDetail.getData($scope.deviceid, detailCallback);
+	    DeviceDetail.getData(deviceid, detailCallback);
 	};
 
 	$scope.setPageData = function(data){
 	    // These variables are watched by ng-grid
-	    $scope.myData = data;
-	    $scope.totalServerItems = 1000; // Large number ???
+	    $scope.myDevices = data;
+	    $scope.totalItems = data.length; // Large number ???
 	    if (!$scope.$$phase) {
 		$scope.$apply();
 	    }
 	};
 	
 
-	$scope.totalServerItems = 0;
+	$scope.totalItems = 0;
 	$scope.pagingOptions = {
             pageSizes: [10, 20, 50],
             pageSize: "10",
@@ -96,10 +93,6 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 		if (newVal.pageSize !== oldVal.pageSize) {
 		    newVal.currentPage = 1;
 		}
-		window.console.debug("paging changed ");
-		window.console.debug("Size = " + $scope.pagingOptions.pageSize);
-		window.console.debug("Last = " + $scope.selectOptions.lastId);
-		window.console.debug("Last page = " + $scope.selectOptions.lastPage);
 		DeviceList.getData($scope.pagingOptions, 
 				   $scope.selectOptions, 
 				   $scope.filterOptions,
@@ -128,11 +121,11 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    }, true);
 	
 	$scope.gridOptions = {
-            data: 'myData',  // Watch this variable
+            data: 'myDevices',  // Watch this variable
 	    primaryKey: 'id',
  	    columnDefs: [{field:'id', displayName:'My devices', width: 100}, 
 			 {field:'status', displayName:'Status', width: 100}],
-            totalServerItems: 'totalServerItems', // Watch this variable
+            totalServerItems: 'totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
             enablePaging: true,
@@ -158,24 +151,19 @@ exowebDeviceControllers.controller('ReadDeviceCtrl', ['$scope',
 exowebDeviceControllers.controller('EditDeviceCtrl', ['$scope', 'Device',
     function ($scope, Device) {
 	window.console.debug('Loading EditDeviceCtrl');
-	$scope.connect = false;
-	$scope.deletequeue = false;
-	$scope.deletedevice = false;
 	
 	var updateCallback = function(device) {
-	    window.alert("Device " + device.did + " updated");
+	    if (device.deletedevice == true)
+		window.alert("Device " + device.did + " deleted");
+	    else
+		window.alert("Device " + device.did + " updated");
 	}
 
 	$scope.update = function (device) {
-	    device.did = $scope.deviceid;
 	    if (device.connect == undefined) device.connect = false;
 	    if (device.deletequeue == undefined) device.deletequeue = false;
 	    if (device.deletedevice == undefined) device.deletedevice = false;
-	    window.console.debug("Device = " +device);
-	    window.console.debug("Device key = " +device.dkey);
-	    window.console.debug("Server key = " +device.skey);
-	    window.console.debug("MsIsdn = " +device.msisdn);
-	    window.console.debug("Delete = " +device.deletedevice);
+	    window.console.debug("Device to change = " + JSON.stringify(device));
 	    Device.update(device, updateCallback);
 	};
 
@@ -193,11 +181,7 @@ exowebDeviceControllers.controller('AddDeviceCtrl', ['$scope', 'Device',
 	}
 
 	$scope.add = function (device) {
-	    window.console.debug("Device = " +device);
-	    window.console.debug("Device id = " +device.did);
-	    window.console.debug("Device key = " +device.dkey);
-	    window.console.debug("Server key = " +device.skey);
-	    window.console.debug("MsIsdn = " +device.msisdn);
+	    window.console.debug("Device to add = " + JSON.stringify(device));
 	    Device.create(device, createCallback);
 	};
 	

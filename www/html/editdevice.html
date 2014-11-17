@@ -4,37 +4,40 @@
   <table>
     <tr> 
       <td>Device id: </td> 
-      <td>{{deviceid}} </td> 
+      <td>{{device.did}} </td> 
     </tr>
     <tr> 
       <td>Server Key: </td>
-      <td><input name="skey" placeholder="Server Key" type="text"
-		 ng-model="device.skey" value="{{serverkey}}"/></td>
+      <td><input name="device.skey" placeholder="Server Key" type="text"
+		 class="text-input" required
+		 ng-model="device.skey" /></td>
     </tr>
     <tr> 
       <td>Device Key:</td>
-      <td><input name="dkey" placeholder="Device Key" type="text"
-		 ng-model="device.dkey" value="{{devicekey}}" /></td>
+      <td><input name="device.dkey" placeholder="Device Key" type="text"
+		 class="text-input" required
+		 ng-model="device.dkey"  /></td>
     </tr>
     <tr> 
-      <td>Ms Isdn:</td>
-      <td><input name="msisdn" placeholder="Ms Isdn" type="text" 
-		 ng-model="device.msisdn" value="{{msisdn}}"/></td>
+      <td>MSISDN:</td>
+      <td><input name="device.msisdn" placeholder="MSISDN" type="text" 
+		 class="text-input" 
+		 ng-model="device.msisdn" ></td>
     </tr>
     <tr> 
       <td>Status:</td> 
-      <td>{{status}}</td>
+      <td>{{device.status}}</td>
     </tr>
   </table> 
-  <input name="connect" type="checkbox" 
+  <input name="device.connect" type="checkbox" class="checkbox-input"
 	 ng-model="device.connect" />
   Connect</br>
   Events in queue: {{inqueue}}</br>
-  <input name="deletequeue" type="checkbox" 
+  <input name="device.deletequeue" type="checkbox" class="checkbox-input"
 	 ng-model="device.deletequeue" />
   Delete all events in queue
   <p style="color: #ff0000">
-    <input name="deletedevice " type="checkbox" 
+    <input name="device.deletedevice " type="checkbox" class="checkbox-input"
 	   ng-model="device.deletedevice" />
     Delete this device</p></br>
   <input name="save" type="submit" class="button-input" 

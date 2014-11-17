@@ -107,9 +107,6 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 		    user.phone = attArray[i].phone;
 		if (attArray[i].role !== undefined) 
 		    user.role = attArray[i].role;
-		window.console.debug("UEmail = " +user.email);
-		window.console.debug("UPhone = " +user.phone);
-		window.console.debug("URole = " +user.role);
 	    }
 	    callback();
 	};
@@ -139,7 +136,7 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 
 	
 	var getData = function(username, callback) {
-	    user.username = username;
+	    user.name = username;
 	    Wse.call('exoweb_js', 'wrapper', 
 		     [Ei.atom('exoweb_user'),  // Module
 		      Ei.atom('event'),          // Function
@@ -181,6 +178,7 @@ exowebUserServices.factory('User', ['ExowebError',
 	    }};
 
 	var update = function(user, callback) {
+	    window.console.debug("User to update = " +JSON.stringify(user));
 	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module

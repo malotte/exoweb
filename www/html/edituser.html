@@ -8,41 +8,41 @@
     </tr>
     <tr> 
       <td>Email: </td>
-      <td><input placeholder="Email" type="text" 
+      <td><input name="user.email" placeholder="Email" type="text" 
 		 class="text-input" 
-		 ng-model="user.email" value="{{useremail}}"/></td>
+		 ng-model="user.email"/></td>
     </tr>
     <tr>
      <td>Password: </td>
-     <td><input name="password" placeholder="password" type="password"  
-		class="text-input" 
+     <td><input name="user.password" placeholder="password" type="password"  
+		class="text-input" required
 		id="password" ng-model="user.password" 
 		ng-minlength="6"/>
      </td>
     </tr>
     <tr>
       <td>Confirm Password: </td>
-      <td><input name="confirmpassword" placeholder="confirm password"  
-		 class="text-input" 
+      <td><input name="user.confirmpassword" placeholder="confirm password"  
+		 class="text-input" required
 		 type="password" id="confirmpassword" 
 		 ng-model="user.confirmpassword" ng-minlength="6"/>
       </td>
     </tr>
     <tr> 
       <td>Phone:</td>
-      <td><input placeholder="Phone" type="text" 
+      <td><input name="user.phone" placeholder="Phone" type="text" 
 		 class="text-input" 
-		 ng-model="user.phone" value="{{userphone}}" /></td>
+		 ng-model="user.phone"/></td>
     </tr>
     <tr> 
       <td>Role:</td>
       <td><select required ng-model="user.role" class="text-input"
 		  ng-options="role for role in roles"
-		  ng-init="user.role='view'"/></td>
+		  ng-init="user.role"/></td>
     </tr>
   </table> 
   <p style="color: #ff0000">
-    <input name="deleteuser " type="checkbox" class="checkbox-input"
+    <input name="user.deleteuser " type="checkbox" class="checkbox-input"
 	   ng-model="user.deleteuser" />
     Delete this user</p></br>
   <input name="save" type="submit" class="button-input" 

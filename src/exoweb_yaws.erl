@@ -58,7 +58,13 @@ start_link() ->
                  {listen, exoweb:ip()},
                  {docroot, exoweb:docroot()},
 		 {appmods, [{"/fileupload", exoweb_yaws}]}],
-    ok = yaws:start_embedded(Docroot, SconfList, GconfList, Id),
+    case yaws:start_embedded(Docroot, SconfList, GconfList, Id) of
+	ok -> 
+	    ok;
+	{error, {already_started, yaws}} -> 
+	    yaws:stop(), 
+	    yaws:start_embedded(Docroot, SconfList, GconfList, Id)
+    end,
     {ok, self()}.
 
 %%--------------------------------------------------------------------
