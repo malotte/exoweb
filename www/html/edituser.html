@@ -4,29 +4,13 @@
   <table>
     <tr> 
       <td>Name </td> 
-      <td class="text-input" >{{username}} </td> 
+      <td class="text-input" >{{user.name}} </td> 
     </tr>
     <tr> 
       <td>Email: </td>
       <td><input name="user.email" placeholder="Email" type="text" 
 		 class="text-input" 
 		 ng-model="user.email"/></td>
-    </tr>
-    <tr>
-     <td>Password: </td>
-     <td><input name="user.password" placeholder="password" type="password"  
-		class="text-input" required
-		id="password" ng-model="user.password" 
-		ng-minlength="6"/>
-     </td>
-    </tr>
-    <tr>
-      <td>Confirm Password: </td>
-      <td><input name="user.confirmpassword" placeholder="confirm password"  
-		 class="text-input" required
-		 type="password" id="confirmpassword" 
-		 ng-model="user.confirmpassword" ng-minlength="6"/>
-      </td>
     </tr>
     <tr> 
       <td>Phone:</td>
@@ -41,13 +25,16 @@
 		  ng-init="user.role"/></td>
     </tr>
   </table> 
-  <p style="color: #ff0000">
-    <input name="user.deleteuser " type="checkbox" class="checkbox-input"
-	   ng-model="user.deleteuser" />
-    Delete this user</p></br>
-  <input name="save" type="submit" class="button-input" 
-	 id="save" value="Save" ng-click="update(user)"
-	 ng-disabled="editform.$invalid || !passwordConfirmed(user)" />
+  <div class="info-footer">
+    <div class="buttons">
+    <input name="save" type="submit" class="button-input" 
+	   id="save" value="Save" ng-click="update(user)" />
+    <input name="delete" type="submit" class="danger-button-input" 
+	   id="save" value="Delete" ng-click="remove(user)" />
+    <input name="passwordchange" type="submit" class="button-input" 
+	   id="passwordchange" value="Change Password" ng-click="open()" />
+    </div>
+  </div>
 </form>
 </div>
 

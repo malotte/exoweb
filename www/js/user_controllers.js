@@ -3,7 +3,7 @@
 /* Controllers */
 
 var exowebUserControllers = 
-    angular.module('exowebUserControllers', ['ngGrid']);
+    angular.module('exowebUserControllers', ['ngGrid', 'ngDialog']);
 
 exowebUserControllers.controller('UserListCtrl', [
     '$scope', 'UserList', 'UserDetail',
@@ -150,29 +150,58 @@ exowebUserControllers.controller('ReadUserCtrl', ['$scope',
     }
 ]);
 
-exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User',
-    function ($scope, User) {
+exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
+    function ($scope, User, ngDialog) {
 	window.console.debug('Loading EditUserCtrl');
 	$scope.roles = ["view", "config", "execute", "admin"];
 
 	var updateCallback = function(user) {
-	    if (user.deleteuser == true)
-		window.alert("User " + user.name + " deleted");
-	    else
-		window.alert("User " + user.name + " updated");
-	    user.password = undefined;
-	    user.confirmpassword = undefined;
-	    $scope.$digest();
+	    window.alert("User " + user.name + " updated");
+	}
+
+	var deleteCallback = function(user) {
+	    window.alert("User " + user.name + " deleted");
 	}
 
 	$scope.update = function (user) {
-	    if (user.deleteuser == undefined) user.deleteuser = false;
 	    if (user.phone == undefined) user.phone = "";
 	    window.console.debug("User = " +JSON.stringify(user));
 	    User.update(user, updateCallback);
 	};
 
-      $scope.passwordConfirmed = function(user) {
+	$scope.remove = function (user) {
+	    window.console.debug("User = " +JSON.stringify(user));
+	    User.remove(user, deleteCallback);
+	};
+
+	$scope.open = function () {
+	    ngDialog.open({
+		templateUrl: 'html/password.html',
+		scope: $scope
+	    });
+	};
+	
+    }
+]);
+
+exowebUserControllers.controller('UserPassCtrl', ['$scope', 'User', 'ngDialog',
+    function ($scope, User, ngDialog) {
+	window.console.debug('Loading UserPassCtrl');
+	$scope.roles = ["view", "config", "execute", "admin"];
+
+	var updateCallback = function(user) {
+	    window.alert("User " + user.name + " updated");
+	    user.password = undefined;
+	    user.confirmpassword = undefined;
+	    ngDialog.close();
+	}
+
+	$scope.changepassword = function (user) {
+	    window.console.debug("User = " +JSON.stringify(user));
+	    User.changepassword(user, updateCallback);
+	};
+
+	$scope.passwordConfirmed = function(user) {
 	  if (user.password != user.confirmpassword) {
 	      window.alert("Passwords do not match! ");}
 	  return angular.equals(user.password, user.confirmpassword)};

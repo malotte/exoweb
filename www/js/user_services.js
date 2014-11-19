@@ -179,7 +179,7 @@ exowebUserServices.factory('User', ['ExowebError',
 	    }};
 
 	var update = function(user, callback) {
-	    window.console.debug("User to update = " +JSON.stringify(user));
+	    window.console.debug("User to update = " + JSON.stringify(user));
 	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
@@ -189,14 +189,47 @@ exowebUserServices.factory('User', ['ExowebError',
 					     user.name),
 				    Ei.tuple(Ei.atom('email'), 
 					     user.email),
-				    Ei.tuple(Ei.atom('password'), 
-					     user.password),
 				    Ei.tuple(Ei.atom('role'), 
 					     user.role), 
 				    Ei.tuple(Ei.atom('phone'), 
-					     user.phone), 
-				    Ei.tuple(Ei.atom('delete'), 
-					     user.deleteuser)])], 
+					     user.phone)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     parseUserReply(reply, user, callback);
+			 });
+	    }, 100);
+	}
+
+	var changepassword = function(user, callback) {
+	    window.console.debug("User to change password for = " +
+				 JSON.stringify(user));
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_user'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('update'), // Args
+				   [Ei.tuple(Ei.atom('name'), 
+					     user.name),
+				    Ei.tuple(Ei.atom('password'), 
+					     user.password)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     parseUserReply(reply, user, callback);
+			 });
+	    }, 100);
+	}
+
+	var remove = function(user, callback) {
+	    window.console.debug("User to delete = " + JSON.stringify(user));
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_user'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('delete'), // Args
+				   [Ei.tuple(Ei.atom('name'), 
+					     user.name)])], 
 			 // reply callback
 			 function(obj,ref,reply) {  
 			     window.console.debug("Value = " +reply);
@@ -231,6 +264,8 @@ exowebUserServices.factory('User', ['ExowebError',
 
 	return {
 	    update: update,
+	    changepassword: changepassword,
+	    remove: remove,
 	    create: create
 	}
     }]);
