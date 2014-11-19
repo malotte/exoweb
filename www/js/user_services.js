@@ -97,7 +97,8 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 		window.console.debug("Attributes = " +attArray);
 	    // Loop over atttribute objects and set display fields
 	    for (i=0; i < attArray.length; i++){
-		window.console.debug("Attribute = " +attArray[i]);
+		window.console.debug("Attribute = " +
+				     JSON.stringify(attArray[i]));
 		window.console.debug("Email = " +attArray[i].email);
 		window.console.debug("Phone = " +attArray[i].phone);
 		window.console.debug("Role = " +attArray[i].role);

@@ -38,8 +38,7 @@
       <td>Role:</td>
       <td><select name="user.role" required class="text-input"
 		  ng-model="user.role" 
-		  ng-options="role for role in roles"
-		  ng-init="user.role='view'" /></td>
+		  ng-options="role for role in roles track by user.role"/></td>
     </tr>
   </table> 
   <input name="add" type="submit" class="button-input" 

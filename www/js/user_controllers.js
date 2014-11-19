@@ -154,18 +154,19 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User',
     function ($scope, User) {
 	window.console.debug('Loading EditUserCtrl');
 	$scope.roles = ["view", "config", "execute", "admin"];
-	$scope.deleteuser = false;
 
 	var updateCallback = function(user) {
-	    if ($scope.deleteuser == true)
+	    if (user.deleteuser == true)
 		window.alert("User " + user.name + " deleted");
 	    else
 		window.alert("User " + user.name + " updated");
+	    user.password = undefined;
+	    user.confirmpassword = undefined;
 	    $scope.$digest();
 	}
 
 	$scope.update = function (user) {
-	    $scope.deleteuser = user.deleteuser;
+	    if (user.deleteuser == undefined) user.deleteuser = false;
 	    if (user.phone == undefined) user.phone = "";
 	    window.console.debug("User = " +JSON.stringify(user));
 	    User.update(user, updateCallback);
