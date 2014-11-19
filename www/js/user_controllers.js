@@ -153,7 +153,12 @@ exowebUserControllers.controller('ReadUserCtrl', ['$scope',
 exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
     function ($scope, User, ngDialog) {
 	window.console.debug('Loading EditUserCtrl');
-	$scope.roles = ["view", "config", "execute", "admin"];
+	$scope.filter = {
+	    roles: [{name: "view", selectable: true}, 
+		    {name: "config", selectable: true}, 
+		    {name: "execute", selectable: true}, 
+		    {name: "admin", selectable: true},
+		    {name: "initial-admin", selectable: false}]};
 
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");
@@ -187,7 +192,6 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 exowebUserControllers.controller('UserPassCtrl', ['$scope', 'User', 'ngDialog',
     function ($scope, User, ngDialog) {
 	window.console.debug('Loading UserPassCtrl');
-	$scope.roles = ["view", "config", "execute", "admin"];
 
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");
@@ -212,7 +216,6 @@ exowebUserControllers.controller('UserPassCtrl', ['$scope', 'User', 'ngDialog',
 exowebUserControllers.controller('AddUserCtrl', ['$scope', 'User',
     function ($scope, User) {
 	window.console.debug('Loading AddUserCtrl');
-
 	$scope.roles = ["view", "config", "execute", "admin"];
 
 	var createCallback = function(user) {
@@ -222,7 +225,11 @@ exowebUserControllers.controller('AddUserCtrl', ['$scope', 'User',
 	$scope.add = function (user) {
 	    if (user.phone == undefined) user.phone = "";
 	    window.console.debug("User to add = " +JSON.stringify(user));
-	    User.create(user, createCallback);
+	    if (user.role == "initial-admin")
+		// This is checked in exodm as well
+		window.alert("Not possible to create an initial-admin! ");
+	    else
+		User.create(user, createCallback);
 	};
 
       $scope.passwordConfirmed = function(user) {
