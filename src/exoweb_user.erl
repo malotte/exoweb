@@ -28,8 +28,6 @@
 %% Callbacks for js
 -export([event/1]).
 
--import(exoweb_lib, [direction/3, fix_list/4]).
-
 %%--------------------------------------------------------------------
 %% @doc 
 %% Callback from js when an event has occured
@@ -40,54 +38,19 @@
 
 event({load, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(account, Args),
-	      proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Rows = to_int(proplists:get_value(rows, Args, 10)), %% Mix of int and list
-    ReqPage = proplists:get_value(page, Args, 1),
-    LastPage = proplists:get_value(lastpage, Args, 0),
-    LastId = proplists:get_value(lastid, Args, ""),
-    ?dbg("fetch: lastid ~p, reqpage ~p, lastpage ~p, rows ~p.", 
-	 [LastId, ReqPage, LastPage, Rows]),
-    {ReqLastId, Direction} = direction(LastId, ReqPage, LastPage),
-    ?dbg("fetch: reqlastid ~p, dir ~p.", [ReqLastId, Direction]),
-    %% Fetch one extra to check if we reached end of data
-    case exoweb_data_if:fetch({user, Rows + 1, ReqLastId, Direction, Access}) of
-	List when is_list(List) ->
-	    ?dbg("fetch: ~p, list ~p.", [user, List]),
-	    {ok, fix_list(Rows, ReqPage, Direction, List)};
-	{error, E} ->
-	    ?ee("fetch: error ~p,", [E]),
-	    []
-    end;
+    exoweb_lib:load(user, Args);
 event({create, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
-    exoweb_data_if:create({user, Account, Id, attrs(Rest, []), Access});
+    call(create, Args); 
 event({delete, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    {value, {name, Id}, _Rest} = lists:keytake(name, 1, Args),
-    exoweb_data_if:delete({user, Account, Id, Access});
+    call(delete, Args); 
 event({select, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    Id = proplists:get_value(name, Args),
-    exoweb_data_if:read({user, Account, Id, Access});
+    call(read, Args); 
 event({update, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
-    exoweb_data_if:update({user, Account, Id, attrs(Rest, []), Access});
+    call(update, Args); 
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.
@@ -97,6 +60,19 @@ event(Event) ->
 %% Internal
 %%--------------------------------------------------------------------
 
+call(Action, Args) ->
+    Access = {proplists:get_value(user, Args),
+	      proplists:get_value(password, Args)},
+    Account = proplists:get_value(account, Args),
+    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
+    case Action of
+	ActionWithAttrs when ActionWithAttrs == create;
+			     ActionWithAttrs == update ->
+	    exoweb_data_if:Action({user, Account, Id, attrs(Rest, []), Access});
+	_OtherActions ->
+	    exoweb_data_if:Action({user, Account, Id, Access})
+    end.
+
 attrs([], Attrs) ->
     ?dbg("attrs: ~p.", [Attrs]),
     Attrs;
@@ -105,7 +81,4 @@ attrs([{Name, Value} | Args], Attrs) ->
 	true -> attrs(Args,  [{atom_to_list(Name), Value} | Attrs]);
 	false -> attrs(Args, Attrs)
     end.
-
-to_int(I) when is_integer(I) -> I;
-to_int(List) when is_list(List) -> ?l2i(List). 
     

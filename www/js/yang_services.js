@@ -159,16 +159,14 @@ exowebYangServices.factory('Yang', [
 		window.alert("Error: " +reply.value[1]);
 	    }};
 
-	var update = function(yang, callback) {
+	var remove = function(yang, callback) {
 	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_yang'),  // Module
 			  Ei.atom('event'),          // Function
-			  Ei.tuple(Ei.atom('update'), // Args
+			  Ei.tuple(Ei.atom('delete'), // Args
 				   [Ei.tuple(Ei.atom('filename'), 
-					     yang.name),
-				    Ei.tuple(Ei.atom('delete'), 
-					     yang.deletefile)])], 
+					     yang)])], 
 			 // reply callback
 			 function(obj,ref,reply) {  
 			     window.console.debug("Value = " +reply);
@@ -189,7 +187,7 @@ exowebYangServices.factory('Yang', [
 	}
 
 	return {
-	    update: update,
+	    remove: remove,
 	    create: create
 	}
     }]);

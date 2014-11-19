@@ -40,13 +40,6 @@ exowebYangControllers.controller('YangListCtrl', [
 	    }
 	};
 	    
-	var detailCallback = function() {
-	    var yang = YangDetail.yang;
-	    window.console.debug("yang = " + yang);
-	    $scope.$apply();
-	}
-
-
 	var rowSelected = function(rowItem, event) {
 	    $scope.yangname = rowItem.getProperty('filename');
 	    window.console.debug("Row = " +rowItem.rowIndex);
@@ -147,18 +140,13 @@ exowebYangControllers.controller('YangListCtrl', [
 exowebYangControllers.controller('EditYangCtrl', ['$scope', 'Yang',
     function ($scope, Yang) {
 	window.console.debug('Loading EditYangCtrl');
-	$scope.deleteyang = false;
 
-	var updateCallback = function(yang) {
-	    window.alert("Yang " + yang.name + " deleted");
+	var deleteCallback = function(yangname) {
+	    window.alert("Yang " + yangname + " deleted");
 	}
 
-	$scope.update = function (yang) {
-	    window.console.debug("Update " + $scope.yangname + " pressed.");
-	    yang.name = $scope.yangname;
-	    if (yang.deleteyang == undefined) yang.deleteyang = false;
-	    window.console.debug("Delete = " +yang.deleteyang);
-	    Yang.update(yang, updateCallback);
+	$scope.remove = function (yang) {
+	    Yang.remove(yang, deleteCallback);
 	};
 
 	
@@ -175,7 +163,8 @@ exowebYangControllers.controller('AddYangCtrl', ['$scope', 'Yang',
 	}
 
 	$scope.add = function () {
-	    window.console.debug('Yang file = ' + JSON.stringify($scope.yang.filename));
+	    window.console.debug('Yang file = ' + 
+				 JSON.stringify($scope.yang.filename));
 	    Yang.create($scope.yang, createCallback);
 	};
 

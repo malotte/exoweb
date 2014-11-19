@@ -173,6 +173,12 @@ form {
     color: #696969;
 }
 
+.text-info {
+    font-size: 18px;
+    font-weight: bold;
+    color: #696969;
+}
+
 .text-input {
     border-radius: 5px;
     moz-border-radius: 5px;

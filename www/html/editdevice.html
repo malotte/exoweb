@@ -4,7 +4,7 @@
   <table>
     <tr> 
       <td>Device id: </td> 
-      <td>{{device.did}} </td> 
+      <td class="text-info">{{device.did}} </td> 
     </tr>
     <tr> 
       <td>Server Key: </td>
@@ -26,10 +26,10 @@
     </tr>
     <tr> 
       <td>Status:</td> 
-      <td>{{device.status}}</td>
+      <td class="text-info">{{device.status}}</td>
     </tr>
   </table> 
-  Events in queue: {{inqueue}}</br>
+  <p>Events in queue: <span class="text-input">{{inqueue}} </span></p>
   <input name="save" type="submit" class="button-input" 
 	 id="save" value="Save" ng-click="update(device)" />
   <input name="connect" type="submit" class="button-input" 

@@ -3,16 +3,12 @@
 	id="editform">
   <table>
     <tr> 
-      <td>Name </td> 
-      <td>{{yangname}} </td> 
+      <td>Name: </td> 
+      <td class="text-info"> {{yangname}} </td> 
     </tr>
   </table> 
-  <p style="color: #ff0000">
-    <input name="deleteyang " type="checkbox" class="checkbox-input"
-	   ng-model="yang.deletefile" />
-    Delete this yangfile</p></br>
-  <input name="save" type="submit" class="button-input" 
-	 id="save" value="Save" ng-click="update(yang)" />
+  <input name="remove" type="submit" class="danger-button-input" 
+	 id="remove" value="Delete" ng-click="remove(yangname)" />
 </form>
 </div>
 

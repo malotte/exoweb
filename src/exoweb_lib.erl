@@ -39,8 +39,7 @@
 	 sec/0,
 	 error_txt/1,
 	 roles2string/1,
-	 direction/3,
-	 fix_list/4]).
+	 load/2]).
 
 
 %%--------------------------------------------------------------------
@@ -155,6 +154,29 @@ roles2string([]) ->
 roles2string(Roles) ->
     string:strip(lists:flatten([[R," "] || R <- Roles]), right).
    
+
+load(Table, Args) ->
+    Access = {proplists:get_value(account, Args),
+	      proplists:get_value(user, Args),
+	      proplists:get_value(password, Args)},
+    Rows = to_int(proplists:get_value(rows, Args, 10)), %% Mix of int and list
+    ReqPage = proplists:get_value(page, Args, 1),
+    LastPage = proplists:get_value(lastpage, Args, 0),
+    LastId = proplists:get_value(lastid, Args, ""),
+    ?dbg("fetch: lastid ~p, reqpage ~p, lastpage ~p, rows ~p.", 
+	 [LastId, ReqPage, LastPage, Rows]),
+    {ReqLastId, Direction} = direction(LastId, ReqPage, LastPage),
+    ?dbg("fetch: reqlastid ~p, dir ~p.", [ReqLastId, Direction]),
+    %% Fetch one extra to check if we reached end of data
+    case exoweb_data_if:fetch({Table, Rows + 1, ReqLastId, Direction, Access}) of
+	List when is_list(List) ->
+	    ?dbg("fetch: ~p, list ~p.", [Table, List]),
+	    {ok, fix_list(Rows, ReqPage, Direction, List)};
+	{error, E} ->
+	    ?ee("fetch: error ~p,", [E]),
+	    []
+    end.
+
 direction(LastId, ReqPage, LastPage) 
     when ReqPage == LastPage + 1 ->
     %% Next page
@@ -202,3 +224,5 @@ fix_list(Rows, _ReqPage, Direction, List) ->
 	    throw(illegal_no_of_recs)
     end.
 
+to_int(I) when is_integer(I) -> I;
+to_int(List) when is_list(List) -> ?l2i(List). 
