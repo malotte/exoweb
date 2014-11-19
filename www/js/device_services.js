@@ -201,9 +201,23 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 				    Ei.tuple(Ei.atom('server-key'), 
 					     device.skey),
 				    Ei.tuple(Ei.atom('msisdn'), 
-					     device.msisdn),
-				    Ei.tuple(Ei.atom('delete'), 
-					     device.deletedevice)])], 
+					     device.msisdn)])], 
+			 // reply callback
+			 function(obj,ref,reply) {  
+			     window.console.debug("Value = " +reply);
+			     parseDeviceReply(reply, device, callback);
+			 });
+	    }, 100);
+	}
+
+	var remove = function(device, callback) {
+	    setTimeout(function () {
+		Wse.call('exoweb_js', 'wrapper', 
+			 [Ei.atom('exoweb_device'),  // Module
+			  Ei.atom('event'),          // Function
+			  Ei.tuple(Ei.atom('delete'), // Args
+				   [Ei.tuple(Ei.atom('device-id'), 
+					     device.did)])], 
 			 // reply callback
 			 function(obj,ref,reply) {  
 			     window.console.debug("Value = " +reply);
@@ -236,6 +250,7 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 
 	return {
 	    update: update,
+	    remove: remove,
 	    create: create
 	}
     }]);

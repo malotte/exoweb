@@ -153,18 +153,32 @@ exowebDeviceControllers.controller('EditDeviceCtrl', ['$scope', 'Device',
 	window.console.debug('Loading EditDeviceCtrl');
 	
 	var updateCallback = function(device) {
-	    if (device.deletedevice == true)
-		window.alert("Device " + device.did + " deleted");
-	    else
-		window.alert("Device " + device.did + " updated");
+	    window.alert("Device " + device.did + " updated");
 	}
 
+	var deleteCallback = function(device) {
+	    window.alert("Device " + device.did + " deleted");
+	}
+
+	$scope.connect = function (device) {
+	    window.console.debug("Device to connect = " + JSON.stringify(device));
+	    window.alert("Not implemented yet!");
+	};
+
+	$scope.deletequeue = function (device) {
+	    window.console.debug("Device to delete queue for = " + 
+				 JSON.stringify(device));
+	    window.alert("Not implemented yet!");
+	};
+
 	$scope.update = function (device) {
-	    if (device.connect == undefined) device.connect = false;
-	    if (device.deletequeue == undefined) device.deletequeue = false;
-	    if (device.deletedevice == undefined) device.deletedevice = false;
 	    window.console.debug("Device to change = " + JSON.stringify(device));
 	    Device.update(device, updateCallback);
+	};
+
+	$scope.remove = function (device) {
+	    window.console.debug("Device to delete = " + JSON.stringify(device));
+	    Device.remove(device, deleteCallback);
 	};
 
 	

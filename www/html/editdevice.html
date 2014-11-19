@@ -29,19 +29,15 @@
       <td>{{device.status}}</td>
     </tr>
   </table> 
-  <input name="device.connect" type="checkbox" class="checkbox-input"
-	 ng-model="device.connect" />
-  Connect</br>
   Events in queue: {{inqueue}}</br>
-  <input name="device.deletequeue" type="checkbox" class="checkbox-input"
-	 ng-model="device.deletequeue" />
-  Delete all events in queue
-  <p style="color: #ff0000">
-    <input name="device.deletedevice " type="checkbox" class="checkbox-input"
-	   ng-model="device.deletedevice" />
-    Delete this device</p></br>
   <input name="save" type="submit" class="button-input" 
 	 id="save" value="Save" ng-click="update(device)" />
+  <input name="connect" type="submit" class="button-input" 
+	 id="connect" value="Connect" ng-click="connect(device)" />
+  <input name="deletequeue" type="submit" class="button-input" 
+	 id="deletequeue" value="Delete Queue" ng-click="deletequeue(device)" />
+  <input name="delete" type="submit" class="danger-button-input" 
+	 id="delete" value="Delete" ng-click="remove(device)" />
 </form>
 </div>
 

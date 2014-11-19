@@ -64,6 +64,20 @@ event({load, Args} = Event) ->
 	    ?ee("fetch: error ~p,", [E]),
 	    []
     end;
+event({create, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    Access = {proplists:get_value(user, Args),
+	      proplists:get_value(password, Args)},
+    Account = proplists:get_value(account, Args),
+    {value, {'device-id', Id}, Rest} = lists:keytake('device-id', 1, Args),
+    exoweb_data_if:create({device, Account, Id, attrs(Rest, []), Access});
+event({delete, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    Access = {proplists:get_value(user, Args),
+	      proplists:get_value(password, Args)},
+    Account = proplists:get_value(account, Args),
+    Id = proplists:get_value('device-id', Args),
+    exoweb_data_if:delete({device, Account, Id, Access});
 event({select, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     Access = {proplists:get_value(user, Args),
@@ -77,19 +91,8 @@ event({update, Args} = Event) ->
 	      proplists:get_value(password, Args)},
     Account = proplists:get_value(account, Args),
     Id = proplists:get_value('device-id', Args),
-    case proplists:get_value(delete, Args, "false") of
-	false -> 
-	    exoweb_data_if:create({device, Account, Id, attrs(Args, []), Access});
-	true -> 
-	    exoweb_data_if:delete({device, Account, Id, Access})
-    end;
-event({create, Args} = Event) ->
-    ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    {value, {'device-id', Id}, Rest} = lists:keytake('device-id', 1, Args),
-    exoweb_data_if:create({device, Account, Id, attrs(Rest, []), Access});
+    %% Update not implemented in exodm yet
+    exoweb_data_if:create({device, Account, Id, attrs(Args, []), Access});
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.

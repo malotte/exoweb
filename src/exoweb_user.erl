@@ -60,20 +60,6 @@ event({load, Args} = Event) ->
 	    ?ee("fetch: error ~p,", [E]),
 	    []
     end;
-event({select, Args} = Event) ->
-    ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    Id = proplists:get_value(name, Args),
-    exoweb_data_if:read({user, Account, Id, Access});
-event({update, Args} = Event) ->
-    ?dbg("event: ~p",[Event]),
-    Access = {proplists:get_value(user, Args),
-	      proplists:get_value(password, Args)},
-    Account = proplists:get_value(account, Args),
-    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
-    exoweb_data_if:update({user, Account, Id, attrs(Rest, []), Access});
 event({create, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     Access = {proplists:get_value(user, Args),
@@ -88,6 +74,20 @@ event({delete, Args} = Event) ->
     Account = proplists:get_value(account, Args),
     {value, {name, Id}, _Rest} = lists:keytake(name, 1, Args),
     exoweb_data_if:delete({user, Account, Id, Access});
+event({select, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    Access = {proplists:get_value(user, Args),
+	      proplists:get_value(password, Args)},
+    Account = proplists:get_value(account, Args),
+    Id = proplists:get_value(name, Args),
+    exoweb_data_if:read({user, Account, Id, Access});
+event({update, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    Access = {proplists:get_value(user, Args),
+	      proplists:get_value(password, Args)},
+    Account = proplists:get_value(account, Args),
+    {value, {name, Id}, Rest} = lists:keytake(name, 1, Args),
+    exoweb_data_if:update({user, Account, Id, attrs(Rest, []), Access});
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.
