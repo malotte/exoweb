@@ -24,14 +24,14 @@ exowebUserControllers.controller('UserListCtrl', [
 	var listCallback = function() {
 	    var users = UserList.users;
 	    if (users.length > 0) {
-		window.console.debug("users = " + users);
+		window.console.debug("users = " + JSON.stringify(users));
 		$scope.setPageData(users);
 		$scope.selectOptions.lastPage = 
 		    $scope.pagingOptions.currentPage;
 		$scope.selectOptions.lastId = 
-		    (users[users.length - 1])["id"];
+		    (users[users.length - 1])["name"];
 		window.console.debug("Total = " + 
-				     $scope.totalServerItems);
+				     $scope.totalItems);
 		window.console.debug("Total = " + 
 				     $scope.gridOptions.totalServerItems);
 		window.console.debug("Last = " + 
@@ -60,15 +60,17 @@ exowebUserControllers.controller('UserListCtrl', [
 	$scope.setPageData = function(data){
 	    // These variables are watched by ng-grid
 	    $scope.myUsers = data;
-	    $scope.totalServerItems = 100;
+	    $scope.totalItems = data.length; 
+	    $scope.gridOptions.totalServerItems = data.length;
 	    if (!$scope.$$phase) {
 		$scope.$apply();
 	    }
 	};
 	
 
-	$scope.totalServerItems = 0;
+	$scope.totalItems = 0;
 	$scope.pagingOptions = {
+	    totalServerItems: 0,
             pageSizes: [10, 20, 50],
             pageSize: "10",
             currentPage: 1
@@ -125,9 +127,10 @@ exowebUserControllers.controller('UserListCtrl', [
 	$scope.gridOptions = {
             data: 'myUsers',  // Watch this variable
 	    primaryKey: 'id',
- 	    columnDefs: [{field:'name', displayName:'Users', width: 200}, 
-			 {field:'role', displayName:'Role', width: 100}],
-            totalServerItems: 'totalServerItems', // Watch this variable
+ 	    columnDefs: [{field:'name', displayName:'Users', width: 150}, 
+			 {field:'role', displayName:'Role', width: 150}],
+	    headerRowHeight:0,
+            totalServerItems: 'totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
             enablePaging: true,
@@ -171,12 +174,18 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 	$scope.update = function (user) {
 	    if (user.phone == undefined) user.phone = "";
 	    window.console.debug("User = " +JSON.stringify(user));
-	    User.update(user, updateCallback);
+	    if (user.name == undefined) 
+		window.alert("No user selected!");
+	    else 
+		User.update(user, updateCallback);
 	};
 
 	$scope.remove = function (user) {
 	    window.console.debug("User = " +JSON.stringify(user));
-	    User.remove(user, deleteCallback);
+	    if (user.name == undefined) 
+		window.alert("No user selected!");
+	    else 
+		User.remove(user, deleteCallback);
 	};
 
 	$scope.open = function () {
@@ -228,6 +237,10 @@ exowebUserControllers.controller('AddUserCtrl', ['$scope', 'User',
 	    if (user.role == "initial-admin")
 		// This is checked in exodm as well
 		window.alert("Not possible to create an initial-admin! ");
+	    else if (user == undefined)
+		window.alert("No user specified!");
+	    else if (user.name == undefined)
+		window.alert("No user name specified!");
 	    else
 		User.create(user, createCallback);
 	};

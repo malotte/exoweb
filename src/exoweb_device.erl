@@ -37,7 +37,7 @@
 %% Callback from js when an event has occured
 %% @end
 %%--------------------------------------------------------------------
--spec event({Tag::atom(), list(tuple())}) -> 
+-spec event({Action::atom(), Args::list(tuple())}) -> 
    ok | {error, Error::term()}.
 
 event({load, Args} = Event) ->
@@ -62,8 +62,22 @@ event(Event) ->
 
 
 %%--------------------------------------------------------------------
+%% @doc 
+%% Specification of attributes to fetch from exodm, needed by
+%% exoweb_data_if module.
+%% @end
+%%--------------------------------------------------------------------
+-spec attributes2fetch() -> list().
+
+attributes2fetch() ->
+    [atom_to_list(A) || A <- ?DEVICE_ATTRS,A =/= 'device-id'].
+
+
+%%--------------------------------------------------------------------
 %% Internal
 %%--------------------------------------------------------------------
+-spec call(Action::atom(), Args::list(tuple())) -> 
+   ok | {error, Error::term()}.
 
 call(Action, Args) ->
     Access = {proplists:get_value(user, Args),
@@ -73,14 +87,18 @@ call(Action, Args) ->
     case Action of
 	ActionWithAttrs when ActionWithAttrs == create;
 			     ActionWithAttrs == update ->
-	    exoweb_data_if:Action({device, Account, Id, attrs(Rest, []), Access});
+	    %% Check msisdn format
+	    case exoweb_lib:is_phone_no(proplists:get_value(msisdn, Args, "")) of
+		true ->
+		    exoweb_data_if:Action({device, Account, Id, 
+					   attrs(Rest, []), Access});
+		false ->
+		    {error, illegal_msisdn}
+	    end;
 	_OtherActions ->
 	    exoweb_data_if:Action({device, Account, Id, Access})
     end.
-
-attributes2fetch() ->
-    [atom_to_list(A) || A <- ?DEVICE_ATTRS,A =/= 'device-id'].
-
+	
 attrs([], Attrs) ->
     ?dbg("attrs: ~p.", [Attrs]),
     Attrs;

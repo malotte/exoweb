@@ -68,7 +68,13 @@ call(Action, Args) ->
     case Action of
 	ActionWithAttrs when ActionWithAttrs == create;
 			     ActionWithAttrs == update ->
-	    exoweb_data_if:Action({user, Account, Id, attrs(Rest, []), Access});
+	    %% Check phone format
+	    case exoweb_lib:is_phone_no(proplists:get_value(phone, Args, "")) of
+		true ->
+		    exoweb_data_if:Action({user, Account, Id, attrs(Rest, []), Access});
+		false ->
+		    {error, illegal_phone}
+	    end;
 	_OtherActions ->
 	    exoweb_data_if:Action({user, Account, Id, Access})
     end.

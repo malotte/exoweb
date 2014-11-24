@@ -17,13 +17,12 @@ exowebUserServices.factory('UserList', ['ExowebError',
 		var j, roleArray;
 		var user = new Object;
 		dataArray[i] = Wse.decode_js(dataArray[i]);
-		window.console.debug("User " + i + " = " + dataArray[i]);
 		roleArray =  dataArray[i].roles;
 		user["name"] = (dataArray[i])["name"];
 		// Get first role
 		user["role"] = roleArray[0];
 		users[i] = user;
-		window.console.debug("User " + i + " = " + users[i]);
+		window.console.debug("User " + i + " = " + JSON.stringify(users[i]));
 	    }
 	    callback();
 	};
@@ -55,8 +54,6 @@ exowebUserServices.factory('UserList', ['ExowebError',
 	var getData = 
 	    function(pagingOptions, selectOptions, filterOptions, callback) {
 		users.splice(0, users.length);
-		window.console.debug("Last = " + selectOptions.lastId);
-		window.console.debug("Last page = " + selectOptions.lastPage);
 		setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
@@ -94,7 +91,7 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 	var displayUser = function (attArray, callback) {
 	    attArray = Wse.decode_js(attArray);
 	    var i, attArray;
-		window.console.debug("Attributes = " +attArray);
+	    window.console.debug("Attributes = " + JSON.stringify(attArray));
 	    // Loop over atttribute objects and set display fields
 	    for (i=0; i < attArray.length; i++){
 		window.console.debug("Attribute = " +

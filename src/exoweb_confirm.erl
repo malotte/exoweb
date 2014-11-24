@@ -28,9 +28,6 @@
 %% Callbacks for js
 -export([event/1]).
 
--import(exoweb_lib, [get_env/2, parse_options/1]).
-
-
 %--------------------------------------------------------------------
 %% @doc 
 %% Callback from js when an event has occured.

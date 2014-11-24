@@ -148,6 +148,7 @@ form {
 
 .info {
     width: 500px;
+    position: relative;
     font-family: Callibri, Arial, Verdana;
     background-image:url('../img/info_bg.png');
     color: black;
@@ -193,6 +194,7 @@ form {
 
 
 .tab {
+    position: relative;
     float: left;
     text-align: left;
     margin: 3px 3px 0px 3px;
@@ -216,7 +218,7 @@ form {
 }
 
 .buttons {
-    position: relative;
+    position: absolute;
     bottom: 10 px;
     left: 10 px;
 }
@@ -226,7 +228,7 @@ form {
     moz-border-radius: 5px;
     webkit-border-radius: 5px;
     font-family: Callibri, Arial, Verdana;
-    font-size: 24px;
+    font-size: 20px;
     color: #FFF;
     background-color: #F90;
     margin: 10px;

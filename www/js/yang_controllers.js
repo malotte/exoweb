@@ -28,7 +28,7 @@ exowebYangControllers.controller('YangListCtrl', [
 		$scope.selectOptions.lastPage = 
 		    $scope.pagingOptions.currentPage;
 		$scope.selectOptions.lastId = 
-		    (yangs[yangs.length - 1])["id"];
+		    (yangs[yangs.length - 1])["filename"];
 		window.console.debug("Total = " + 
 				     $scope.totalServerItems);
 		window.console.debug("Total = " + 
@@ -60,6 +60,7 @@ exowebYangControllers.controller('YangListCtrl', [
 
 	$scope.totalServerItems = 0;
 	$scope.pagingOptions = {
+	    totalServerItems: 0,
             pageSizes: [10, 20, 50],
             pageSize: "10",
             currentPage: 1
@@ -85,14 +86,10 @@ exowebYangControllers.controller('YangListCtrl', [
 		if (newVal.pageSize !== oldVal.pageSize) {
 		    newVal.currentPage = 1;
 		}
-		window.console.debug("paging changed ");
-		window.console.debug("Size = " + $scope.pagingOptions.pageSize);
-		window.console.debug("Last = " + $scope.selectOptions.lastId);
-		window.console.debug("Last page = " + $scope.selectOptions.lastPage);
 		YangList.getData($scope.pagingOptions, 
-				   $scope.selectOptions, 
-				   $scope.filterOptions,
-				   listCallback);
+				 $scope.selectOptions, 
+				 $scope.filterOptions,
+				 listCallback);
             }
 	}, true);
 
@@ -119,7 +116,8 @@ exowebYangControllers.controller('YangListCtrl', [
 	$scope.gridOptions = {
             data: 'myData',  // Watch this variable
 	    primaryKey: 'id',
- 	    columnDefs: [{field:'filename', displayName:'My Files', width: 200}],
+ 	    columnDefs: [{field:'filename', displayName:'My Files', width: 250}],
+ 	    headerRowHeight:0,
             totalServerItems: 'totalServerItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,

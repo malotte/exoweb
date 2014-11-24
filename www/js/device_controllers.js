@@ -68,6 +68,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 
 	$scope.totalItems = 0;
 	$scope.pagingOptions = {
+	    totalServerItems: 1000,
             pageSizes: [10, 20, 50],
             pageSize: "10",
             currentPage: 1
@@ -125,6 +126,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    primaryKey: 'id',
  	    columnDefs: [{field:'id', displayName:'My devices', width: 100}, 
 			 {field:'status', displayName:'Status', width: 100}],
+	    headerRowHeight:0,
             totalServerItems: 'totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
@@ -172,13 +174,19 @@ exowebDeviceControllers.controller('EditDeviceCtrl', ['$scope', 'Device',
 	};
 
 	$scope.update = function (device) {
-	    window.console.debug("Device to change = " + JSON.stringify(device));
-	    Device.update(device, updateCallback);
+	    window.console.debug("Device to update = " + JSON.stringify(device));
+	    if (device.did == undefined)
+		window.alert("No device selected!")
+	    else 
+		Device.update(device, updateCallback);
 	};
 
 	$scope.remove = function (device) {
 	    window.console.debug("Device to delete = " + JSON.stringify(device));
-	    Device.remove(device, deleteCallback);
+	     if (device.did == undefined)
+		window.alert("No device selected!")
+	    else 
+		Device.remove(device, deleteCallback);
 	};
 
 	
@@ -195,8 +203,13 @@ exowebDeviceControllers.controller('AddDeviceCtrl', ['$scope', 'Device',
 	}
 
 	$scope.add = function (device) {
-	    window.console.debug("Device to add = " + JSON.stringify(device));
-	    Device.create(device, createCallback);
+		 window.console.debug("Device to add = " + JSON.stringify(device));
+	    if (device == undefined)
+		window.alert("No device specified!")
+	    else if (device.did == undefined)
+		window.alert("No device id specified!")
+	    else
+		Device.create(device, createCallback);
 	};
 	
 

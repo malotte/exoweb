@@ -20,7 +20,7 @@
     </tr>
     <tr> 
       <td>MSISDN:</td>
-      <td><input name="device.msisdn" placeholder="MSISDN" type="text" 
+      <td><input name="device.msisdn" placeholder="MSISDN" type="tel" 
 		 class="text-input" 
 		 ng-model="device.msisdn" ></td>
     </tr>
@@ -35,7 +35,8 @@
   <input name="connect" type="submit" class="button-input" 
 	 id="connect" value="Connect" ng-click="connect(device)" />
   <input name="deletequeue" type="submit" class="button-input" 
-	 id="deletequeue" value="Delete Queue" ng-click="deletequeue(device)" />
+	 id="deletequeue" value="Empty Queue" ng-click="deletequeue(device)" />
+  <br/>
   <input name="delete" type="submit" class="danger-button-input" 
 	 id="delete" value="Delete" ng-click="remove(device)" />
 </form>

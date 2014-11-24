@@ -14,7 +14,7 @@
     </tr>
     <tr> 
       <td>Phone:</td>
-      <td><input name="user.phone" placeholder="Phone" type="text" 
+      <td><input name="user.phone" placeholder="Phone number" type="tel" 
 		 class="text-input" 
 		 ng-model="user.phone"/></td>
     </tr>
@@ -32,10 +32,11 @@
     <div class="buttons">
     <input name="save" type="submit" class="button-input" 
 	   id="save" value="Save" ng-click="update(user)" />
-    <input name="delete" type="submit" class="danger-button-input" 
-	   id="save" value="Delete" ng-click="remove(user)" />
     <input name="passwordchange" type="submit" class="button-input" 
 	   id="passwordchange" value="Change Password" ng-click="open()" />
+    <br/>
+    <input name="delete" type="submit" class="danger-button-input" 
+	   id="save" value="Delete" ng-click="remove(user)" />
     </div>
   </div>
 </form>
