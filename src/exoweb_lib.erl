@@ -136,6 +136,17 @@ load(Table, Args) ->
 %%--------------------------------------------------------------------
 %% Internal 
 %%--------------------------------------------------------------------
+direction(_LastId, 1, _LastPage) ->
+    %% First page, restart from beginning
+    {"", ascending};
+direction("", ReqPage, LastPage) 
+  when ReqPage > LastPage ->
+    %% Last item, restart from end
+    {"", descending};
+direction("", ReqPage, LastPage) 
+  when ReqPage < LastPage ->
+    %% First item, restart from beginning
+    {"", ascending };
 direction(LastId, ReqPage, LastPage) 
     when ReqPage == LastPage + 1 ->
     %% Next page
@@ -144,12 +155,9 @@ direction(_LastId, ReqPage, LastPage)
   when ReqPage > LastPage + 1 ->
     %% Last page, restart from end
     {"", descending};
-direction(_LastId, 1, _LastPage) ->
-    %% First page, restart from beginning
-    {"", ascending};
 direction(LastId, ReqPage, LastPage) 
-  when ReqPage == LastPage - 1 ->
-    %% Previous page
+  when ReqPage < LastPage ->
+    %% Go backwards
     {LastId, descending};
 direction(LastId, ReqPage, ReqPage) ->
     ?dbg("direction: ~p, ~p, ~p.", [LastId, ReqPage, ReqPage]),

@@ -37,6 +37,10 @@ form {
 }
 
 .header {
+    display: -webkit-flex; /* Safari */
+    -webkit-justify-content: left; /* Safari 6.1+ */
+    display: -moz-flex; /* Mozilla */
+    -moz-justify-content: left; /* Mozilla */
     display: flex;
     justify-content: left;
     width: 100%;
@@ -50,7 +54,7 @@ form {
 
 .content {
     height: 100%;
-    padding:10px;
+    padding:20px;
     padding-bottom:55px;   /* Height of the footer element */
     background-color: #eeeeee;
 }
@@ -121,14 +125,6 @@ form {
     width: 360px;
     height: 40px;
     font-family: Callibri, Arial, Verdana;
-    color: #eeeeee;
-    font-size: 12px;
-    font-style: normal;
-    font-weight: bold;
-}
-
-.main {
-    display: flex;
     justify-content: center;
     width: 100%;
     height: 100%;
@@ -138,7 +134,18 @@ form {
     margin-left: 0px;
 }
 
-.devices {
+.main {
+    height: 100%;
+    display: -webkit-flex; /* Safari */
+    -webkit-justify-content: center; /* Safari 6.1+ */
+    display: -moz-flex; /* Mozilla */
+    -moz-justify-content: center; /* Mozilla */
+    display: flex;
+    justify-content: center;
+}
+
+.item-table {
+    padding:10px;
     font-family: Callibri, Arial, Verdana;
     color: black;
     font-size: 12px;
@@ -148,13 +155,14 @@ form {
 
 .info {
     width: 500px;
+    height: 500px;
     position: relative;
     font-family: Callibri, Arial, Verdana;
-    background-image:url('../img/info_bg.png');
     color: black;
-    font-size: 12px;
+    font-size: 18px;
     font-style: normal;
     font-weight: bold;
+    background-color: #ffffa6; 
 }
 
 .gridStyle {
@@ -194,12 +202,13 @@ form {
 
 
 .tab {
+    width: 500px;
     position: relative;
-    float: left;
     text-align: left;
     margin: 3px 3px 0px 3px;
     padding: 5px 5px 0px 5px;
     color: #696969;
+    background-color: #ffffa6; 
 }
 
 .text-info {

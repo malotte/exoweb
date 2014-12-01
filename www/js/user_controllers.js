@@ -1,15 +1,39 @@
-'use strict';
+//
+// Copyright (C) 2007 - 2014, Rogvall Invest AB, <tony@rogvall.se>
+//
+// This software is licensed as described in the file COPYRIGHT, which
+// you should have received as part of this distribution. The terms
+// are also available at http://www.rogvall.se/docs/copyright.txt.
+//
+// You may opt to use, copy, modify, merge, publish, distribute and/or sell
+// copies of the Software, and permit persons to whom the Software is
+// furnished to do so, under the terms of the COPYRIGHT file.
+//
+// This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+// KIND, either express or implied.
+//
+//---- END COPYRIGHT ---------------------------------------------------------
+//
+// Exoweb user controllers
+//
+// Author: Marina Westman Lönne
+// Created: October 2014
+//
+//----------------------------------------------------------------------------
 
-/* Controllers */
+'use strict';
 
 var exowebUserControllers = 
     angular.module('exowebUserControllers', ['ngGrid', 'ngDialog']);
 
+var wseUserWatch = new WseWatchClass();
+
 exowebUserControllers.controller('UserListCtrl', [
     '$scope', 'UserList', 'UserDetail',
     function($scope, UserList, UserDetail) {
-	
-	
+	$scope.myModel = {myUsers:[],
+			  totalItems:0};
+
 	var scroll = function(rowItem, event){
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
 		var grid = $scope.gridOptions.ngGrid;
@@ -58,17 +82,19 @@ exowebUserControllers.controller('UserListCtrl', [
 	};
 
 	$scope.setPageData = function(data){
+	    window.console.debug("set data " + JSON.stringify(data));
 	    // These variables are watched by ng-grid
-	    $scope.myUsers = data;
-	    $scope.totalItems = data.length; 
+	    $scope.myModel.myUsers = data;
+	    $scope.myModel.totalItems = data.length; 
 	    $scope.gridOptions.totalServerItems = data.length;
 	    if (!$scope.$$phase) {
+		window.console.debug("set data apply" + 
+				     JSON.stringify($scope.myUsers));
 		$scope.$apply();
 	    }
 	};
 	
 
-	$scope.totalItems = 0;
 	$scope.pagingOptions = {
 	    totalServerItems: 0,
             pageSizes: [10, 20, 50],
@@ -110,8 +136,7 @@ exowebUserControllers.controller('UserListCtrl', [
 				 $scope.filterOptions,
 				 listCallback);
             }
-	}, true);
-	
+	}, true);	
 
 	// This $watch scrolls the ngGrid to show a newly-selected row as 
 	// close to the middle row as possible
@@ -124,13 +149,18 @@ exowebUserControllers.controller('UserListCtrl', [
 		}
 	    }, true);
 	
+	// Needed when change notification comes from exodm
+	wseUserWatch.get_data = UserList.getData;
+	wseUserWatch.scope =  $scope;
+	wseUserWatch.callback = listCallback;
+
 	$scope.gridOptions = {
-            data: 'myUsers',  // Watch this variable
+            data: 'myModel.myUsers',  // Watch this variable
 	    primaryKey: 'id',
  	    columnDefs: [{field:'name', displayName:'Users', width: 150}, 
 			 {field:'role', displayName:'Role', width: 150}],
 	    headerRowHeight:0,
-            totalServerItems: 'totalItems', // Watch this variable
+            totalServerItems: 'myModel.totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
             enablePaging: true,

@@ -1,4 +1,30 @@
+//
+// Copyright (C) 2007 - 2014, Rogvall Invest AB, <tony@rogvall.se>
+//
+// This software is licensed as described in the file COPYRIGHT, which
+// you should have received as part of this distribution. The terms
+// are also available at http://www.rogvall.se/docs/copyright.txt.
+//
+// You may opt to use, copy, modify, merge, publish, distribute and/or sell
+// copies of the Software, and permit persons to whom the Software is
+// furnished to do so, under the terms of the COPYRIGHT file.
+//
+// This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+// KIND, either express or implied.
+//
+//---- END COPYRIGHT ---------------------------------------------------------
+//
+// Exoweb device controllers
+//
+// Author: Marina Westman Lönne
+// Created: October 2014
+//
+//----------------------------------------------------------------------------
+
 'use strict';
+
+var wseDeviceWatch = new WseWatchClass();
+
 
 /* Controllers */
 
@@ -22,22 +48,72 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	
 	var listCallback = function() {
 	    var devices = DeviceList.devices;
-	    if (devices.length > 0) {
+	    // A lot of code to handle that we actually don't know
+	    // total number of devices
+	    if (devices.length < $scope.pagingOptions.pageSize) {
+		// Last page, don't go further
+		window.console.debug("devices = " + JSON.stringify(devices));
+		if ($scope.pagingOptions.currentPage >= 
+		    $scope.selectOptions.lastPage) {
+		    // Going forwards
+		    $scope.setPageData(devices);
+		    $scope.selectOptions.lastPage = 
+			$scope.pagingOptions.currentPage - 1;
+		    $scope.selectOptions.lastId = "";
+		}
+		else {
+		    // Going backwards, 
+		    
+		    $scope.setPageData(devices);
+		    $scope.selectOptions.lastPage = 
+			$scope.pagingOptions.currentPage + 1;
+		    $scope.selectOptions.lastId = "";
+		}
+	    }
+	    else if (devices.length > 0) {
+		// Normal case
 		window.console.debug("devices = " + JSON.stringify(devices));
 		$scope.setPageData(devices);
 		$scope.selectOptions.lastPage = 
 		    $scope.pagingOptions.currentPage;
 		$scope.selectOptions.lastId = 
 		    (devices[devices.length - 1])["id"];
-		window.console.debug("Total = " + 
-				     $scope.totalItems);
-		window.console.debug("Total = " + 
-				     $scope.gridOptions.totalServerItems);
-		window.console.debug("Last = " + 
-				     $scope.selectOptions.lastId);
-		window.console.debug("Last page = " + 
-				     $scope.selectOptions.lastPage);
 	    }
+	    else if ($scope.pagingOptions.currentPage !== 1){
+		// Border case 
+		if ($scope.pagingOptions.currentPage >= 
+		    $scope.selectOptions.lastPage) {
+		    // Going forwards, fetch last  page
+		    $scope.selectOptions.lastId = "";
+		    DeviceList.getData($scope.pagingOptions, 
+				       $scope.selectOptions, 
+				       $scope.filterOptions,
+				       listCallback);
+		}
+		else {
+		    // Going backward, get last page
+		    $scope.selectOptions.lastPage = 
+			$scope.pagingOptions.currentPage - 1; 
+		    $scope.selectOptions.lastId = "";
+		    DeviceList.getData($scope.pagingOptions, 
+				       $scope.selectOptions, 
+				       $scope.filterOptions,
+				       listCallback);
+		}
+	    }
+	    else {
+		// No devices at all, do nothing
+	    }
+	    window.console.debug("Total = " + 
+				     $scope.totalItems);
+	    window.console.debug("Total = " + 
+				     $scope.gridOptions.totalServerItems);
+	    window.console.debug("Last = " + 
+				     $scope.selectOptions.lastId);
+	    window.console.debug("Last page = " + 
+				     $scope.selectOptions.lastPage);
+	    window.console.debug("Current page = " + 
+				     $scope.pagingOptions.currentPage);
 	};
 	    
 	var detailCallback = function() {
@@ -68,9 +144,9 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 
 	$scope.totalItems = 0;
 	$scope.pagingOptions = {
-	    totalServerItems: 1000,
+	    totalServerItems: 100000, // A large number since we don't know
             pageSizes: [10, 20, 50],
-            pageSize: "10",
+            pageSize: 10,
             currentPage: 1
 	};	
  	$scope.selectOptions = {
@@ -121,6 +197,11 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 		}
 	    }, true);
 	
+	// Needed when change notification comes from exodm
+	wseDeviceWatch.get_data = DeviceList.getData;
+	wseDeviceWatch.scope =  $scope;
+	wseDeviceWatch.callback = listCallback;
+
 	$scope.gridOptions = {
             data: 'myDevices',  // Watch this variable
 	    primaryKey: 'id',
