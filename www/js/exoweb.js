@@ -33,8 +33,7 @@ var exowebApp = angular.module('exoweb', [
     'exowebServices',
     'exowebDeviceServices',
     'exowebUserServices',
-    'exowebYangServices',
-    'exowebFilters'
+    'exowebYangServices'
 ]);
 
 exowebApp.config(['$routeProvider', '$locationProvider',
