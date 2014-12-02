@@ -30,7 +30,10 @@
 -export([create_cookie/2,
 	 delete_cookie/0,
 	 wrapper/3]).
-	 
+
+%% Change notificaton api towards js	
+-export([notify/1]).
+ 
 %%%===================================================================
 %%% Javascript cookie handling
 %%%===================================================================
@@ -101,6 +104,17 @@ wrapper(M, F, A) ->
     ?dbg("wrapper: faulty args ~p, ~p, ~p.",[M, F, A]),
     {error, faulty_arguments}.
 	
+
+%% Called to update web page when a change has occured
+notify(Table) ->
+    {ok, Watcher} = wse:get(exoweb, wse:window(), watch(Table)),
+    {ok, undefined} = wse:call(exoweb, Watcher, changed, []).
+
+watch(device) -> wseDeviceWatch;
+watch(user) -> wseUserWatch;
+watch(yang) -> wseYangWatch.
+
+    
 %%--------------------------------------------------------------------
 %% Internal
 %%--------------------------------------------------------------------
