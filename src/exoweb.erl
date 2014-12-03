@@ -62,11 +62,7 @@
 	      smtp_relay, 
 	      smtp_user,
 	      smtp_password,
-	      smtp_port,
-	      
-	      %% recaptcha
-	      public_key, 
-	      private_key
+	      smtp_port
 	     ]).
 
 %% Shortcut API
@@ -75,6 +71,9 @@
 	 stop/0]).
 
 -import(exoweb_lib, [get_env/2]).
+
+%% Hardcoded in web pages !!!
+-define(WSE_PORT, 19999).
 
 %%%===================================================================
 %%% API
@@ -111,7 +110,7 @@ start(_StartType, _StartArgs) ->
 %%%===================================================================
 %%--------------------------------------------------------------------
 %% @doc
-%% Used by nitrogen when setting up web server
+%% Used when setting up web server
 %%
 %% @end
 %%--------------------------------------------------------------------
@@ -172,7 +171,7 @@ start() ->
     call([crypto, asn1, public_key, ssl,
 	  sasl, gettext, lager, ale, gen_smtp, exoweb], 
 	 start),
-    wse_server:start().
+    wse_server:start(?WSE_PORT, [{name, exoweb_wse_server}]).
 
 start_dbg() ->
     call([crypto, asn1, public_key, ssl,
@@ -196,10 +195,11 @@ start_dbg() ->
 		  exoweb_js]),
 
     call([exoweb], start),
-    wse_server:start().
+    wse_server:start(?WSE_PORT, [{name, exoweb_wse_server}]).
 
 stop() ->
-    %% inets:stop(),
+    wse_server:stop(exoweb_wse_server),
+    yaws:stop(), 
     call([exoweb, gen_smtp, ale, lager, nprocreg, gettext],
 	 stop).
 

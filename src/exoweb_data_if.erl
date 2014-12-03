@@ -326,8 +326,7 @@ delete_device(Account, Id, Access) ->
     exodm_json_api:delete_devices(Account, [Id], opts(Access)).
 
 list_devices_attributes(Acc, Rows, Last, Direction, Access) -> 
-    Attrs = [atom_to_list(Name) || { _ColName, Name, _} <- 
-				       ?DEVICE_MODEL, Name =/= 'device-id'],
+    Attrs = [atom_to_list(Name) || Name <-?DEVICE_LIST_ATTRS],
     ?dbg("list_devices_attributes: ~p", [Attrs]),
     exodm_json_api:list_devices_attributes(Acc, Rows, Last, Attrs, "*", 
 					   atom_to_list(Direction), 

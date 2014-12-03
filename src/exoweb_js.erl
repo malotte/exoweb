@@ -107,12 +107,12 @@ wrapper(M, F, A) ->
 
 %% Called to update web page when a change has occured
 notify(Table) ->
-    {ok, Watcher} = wse:get(exoweb, wse:window(), watch(Table)),
-    {ok, undefined} = wse:call(exoweb, Watcher, changed, []).
+    {ok, Notifier} = wse:get(exoweb, wse:window(), notifier(Table)),
+    {ok, undefined} = wse:call(exoweb, Notifier, changed, []).
 
-watch(device) -> wseDeviceWatch;
-watch(user) -> wseUserWatch;
-watch(yang) -> wseYangWatch.
+notifier(device) -> wseDeviceNotify;
+notifier(user) -> wseUserNotify;
+notifier(yang) -> wseYangNotify.
 
     
 %%--------------------------------------------------------------------

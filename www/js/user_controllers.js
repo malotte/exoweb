@@ -26,7 +26,7 @@
 var exowebUserControllers = 
     angular.module('exowebUserControllers', ['ngGrid', 'ngDialog']);
 
-var wseUserWatch = new WseWatchClass();
+var wseUserNotify = new WseNotifyClass();
 
 exowebUserControllers.controller('UserListCtrl', [
     '$scope', 'UserList', 'UserDetail',
@@ -150,15 +150,17 @@ exowebUserControllers.controller('UserListCtrl', [
 	    }, true);
 	
 	// Needed when change notification comes from exodm
-	wseUserWatch.get_data = UserList.getData;
-	wseUserWatch.scope =  $scope;
-	wseUserWatch.callback = listCallback;
+	wseUserNotify.get_data = UserList.getData;
+	wseUserNotify.scope =  $scope;
+	wseUserNotify.callback = listCallback;
 
 	$scope.gridOptions = {
             data: 'myModel.myUsers',  // Watch this variable
 	    primaryKey: 'id',
- 	    columnDefs: [{field:'name', displayName:'Users', width: 150}, 
-			 {field:'role', displayName:'Role', width: 150}],
+ 	    columnDefs: [{field:'name', width: 150}, 
+			 {field:'role', width: 150}, 
+			 {field:'changed', width: 100}, 
+			 {field:'created', width: 100}],
 	    headerRowHeight:0,
             totalServerItems: 'myModel.totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,

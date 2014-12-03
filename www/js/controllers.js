@@ -89,7 +89,7 @@ exowebControllers.controller('LoginCtrl', ['$scope', 'ExowebUser',
       }
 
       $scope.login = function(user) {
-	  window.console.debug("User = " +user);
+	  window.console.debug("User = " +JSON.stringify(user));
  	  ExowebUser.login(user, okCallback, nokCallback);
      }
 

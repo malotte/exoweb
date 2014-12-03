@@ -75,16 +75,12 @@
 	 attributes::list({atom(), string()})}).
 
 %% same as in exodm rpc:s
-%% Note: is-connected must be last !!!
 -define(DEVICE_ATTRS, 
 	['device-id', 'server-key', 'device-key', msisdn, 'is-connected']).
 
-%% Config of device table
-%% Format list({ColName, Name, Attrs})
--define(DEVICE_MODEL,
-	[{'ID', 'device-id', [{width, 60}, {sortable, false}]},
-         {'Connected', 'is-connected', [{width, 60}, {sortable, false}]}]).
-
+%% 
+-define(DEVICE_LIST_ATTRS, 
+	['is-connected']). %% Changed, created, in-queue
 	
 %% Debug support
 -define(dbg(Format, Args),
@@ -101,8 +97,5 @@
 -define(l2i(List), list_to_integer(List)).
 -endif.
 
-%% Nitrogen accumulator timeout ??
-%% Used in comet loop functions
--define(LOOP_TIMEOUT, 9 * 1000).
 
 -endif.

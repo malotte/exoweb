@@ -23,7 +23,7 @@
 
 'use strict';
 
-function WseWatchClass() {
+function WseNotifyClass() {
     this.get_data = null; 
     this.scope = null;
     this.callback = null;
@@ -31,7 +31,7 @@ function WseWatchClass() {
 
 // Called from exoweb erlang code when exodm has signalled
 // a data update, including changes initiated by this client.
-WseWatchClass.prototype.changed = function () {
+WseNotifyClass.prototype.changed = function () {
     window.console.debug("changed, reload updated ");
     this.get_data(this.scope.pagingOptions, 
 		  this.scope.selectOptions, 

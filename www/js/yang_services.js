@@ -40,6 +40,8 @@ exowebYangServices.factory('YangList', ['ExowebError',
 		dataArray[i] = Wse.decode_js(dataArray[i]);
 		window.console.debug("Yang " + i + " = " + dataArray[i]);
 		yang["filename"] = dataArray[i];
+		// Add fields not yet available
+		yang["created"] = "00-00-00";
 		yangs[i] = yang;
 		window.console.debug("Yang " + i + " = " + yangs[i]);
 	    }

@@ -43,6 +43,9 @@ exowebUserServices.factory('UserList', ['ExowebError',
 		user["name"] = (dataArray[i])["name"];
 		// Get first role
 		user["role"] = roleArray[0];
+		// Add fields not yet available
+		user["changed"] = "00-00-00";
+		user["created"] = "00-00-00";
 		users[i] = user;
 		window.console.debug("User " + i + " = " + JSON.stringify(users[i]));
 	    }

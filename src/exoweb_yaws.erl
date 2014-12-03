@@ -49,6 +49,26 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
+    %%
+    %% !!!! Change exoweb_js to exoweb when moved !!!!!!!
+    %%
+
+    ?dbg("start_link: set up links to wse.js and ej.js", []),
+    WseWse = filename:join([code:lib_dir(wse), "priv", "wse.js"]),
+    ExowebWse = filename:join([code:lib_dir(exoweb_js), "www", "js", "wse.js"]),
+    WseEj = filename:join([code:lib_dir(wse), "priv", "ej.js"]),
+    ExowebEj = filename:join([code:lib_dir(exoweb_js), "www", "js", "ej.js"]),
+    Res1 = 
+    case filelib:is_file(ExowebWse) of
+	true -> ok;
+	false -> os:cmd("ln -s " ++ WseWse ++ " " ++ ExowebWse)
+    end,
+    Res2 =
+    case filelib:is_file(ExowebEj) of
+	true -> ok;
+	false -> os:cmd("ln -s " ++ WseEj ++ " " ++ ExowebEj)
+    end,
+    ?dbg("start_link: link result ~p, ~p",  [Res1, Res2]),
     ?dbg("start_link: starting yaws",  []),
     Id = "exoweb",
     GconfList = [{id, Id}],
@@ -58,10 +78,11 @@ start_link() ->
                  {listen, exoweb:ip()},
                  {docroot, exoweb:docroot()},
 		 {appmods, [{"/fileupload", exoweb_yaws}]}],
-    case yaws:start_embedded(Docroot, SconfList, GconfList, Id) of
-	ok -> 
-	    ok;
-	{error, {already_started, yaws}} -> 
+    try yaws:start_embedded(Docroot, SconfList, GconfList, Id) of
+	ok ->  ok
+    catch
+	error: E ->
+	    ?dbg("start_link: starting yaws failed, error ~p",  [E]),
 	    yaws:stop(), 
 	    yaws:start_embedded(Docroot, SconfList, GconfList, Id)
     end,
@@ -169,7 +190,7 @@ addFileChunk(_A, [], State) when State#upload.last==true,
     file:delete(TmpFile),
     {done, Res};
 
-addFileChunk(A, [], State) when State#upload.last==true ->
+addFileChunk(_A, [], State) when State#upload.last==true ->
     {done, err()};
 
 addFileChunk(_A, [], State) ->
@@ -189,7 +210,7 @@ addFileChunk(A, [{head, {_Name, Opts}}|Res], State ) ->
 		    S2 = State#upload{filename = Fname,
 				      fd = Fd},
 		    addFileChunk(A, Res, S2);
-		Err ->
+		_Err ->
 		    {done, err()}
 	    end;
 	false ->
@@ -201,7 +222,7 @@ addFileChunk(A, [{body, Data}|Res], State)
     case file:write(State#upload.fd, Data) of
         ok ->
             addFileChunk(A, Res, State);
-        Err ->
+        _Err ->
             {done, err()}
     end.
 

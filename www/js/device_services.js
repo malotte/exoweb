@@ -49,6 +49,10 @@ exowebDeviceServices.factory('DeviceList', ['ExowebError',
 		     device["status"] = "Connected";
 		 else
 		      device["status"] = "Not connected";
+		// Add fields not yet available
+		device["changed"] = "00-00-00";
+		device["created"] = "00-00-00";
+		device["inqueue"] = "Not known";
 		devices[i] = device;
 		window.console.debug("Device " + i + " = " + 
 				     JSON.stringify(devices[i]));

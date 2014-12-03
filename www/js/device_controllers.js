@@ -23,7 +23,7 @@
 
 'use strict';
 
-var wseDeviceWatch = new WseWatchClass();
+var wseDeviceNotify = new WseNotifyClass();
 
 
 /* Controllers */
@@ -198,15 +198,18 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    }, true);
 	
 	// Needed when change notification comes from exodm
-	wseDeviceWatch.get_data = DeviceList.getData;
-	wseDeviceWatch.scope =  $scope;
-	wseDeviceWatch.callback = listCallback;
+	wseDeviceNotify.get_data = DeviceList.getData;
+	wseDeviceNotify.scope =  $scope;
+	wseDeviceNotify.callback = listCallback;
 
 	$scope.gridOptions = {
             data: 'myDevices',  // Watch this variable
 	    primaryKey: 'id',
- 	    columnDefs: [{field:'id', displayName:'My devices', width: 100}, 
-			 {field:'status', displayName:'Status', width: 100}],
+ 	    columnDefs: [{field:'id', width: 100}, 
+			 {field:'status', width: 100},
+			 {field:'created', width: 100},
+			 {field:'changed', width: 100},
+			 {field:'inqueue', width: 100}],
 	    headerRowHeight:0,
             totalServerItems: 'totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,

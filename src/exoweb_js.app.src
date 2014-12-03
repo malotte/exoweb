@@ -8,8 +8,14 @@
                   stdlib,
 		  sasl,
 		  gettext,
-		  gen_smtp
+		  gen_smtp,
+		  yaws,
+		  wse,
+		  exo,
+		  exodmapi,
+		  sync,
+		  lager
                  ]},
-  {modules,[exoweb, exoweb_sup, exoweb_index]},
+  {modules,[exoweb, exoweb_sup]},
   {mod, {exoweb, []}}
 ]}.

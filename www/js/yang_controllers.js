@@ -26,7 +26,7 @@
 var exowebYangControllers = 
     angular.module('exowebYangControllers', ['ngGrid']);
 
-var wseYangWatch = new WseWatchClass();
+var wseYangNotify = new WseNotifyClass();
 
 exowebYangControllers.controller('YangListCtrl', [
     '$scope', 'YangList', 'YangDetail',
@@ -137,14 +137,15 @@ exowebYangControllers.controller('YangListCtrl', [
 	    }, true);
 	
 	// Needed when change notification comes from exodm
-	wseYangWatch.get_data = YangList.getData;
-	wseYangWatch.scope = $scope;
-	wseYangWatch.callback = listCallback;
+	wseYangNotify.get_data = YangList.getData;
+	wseYangNotify.scope = $scope;
+	wseYangNotify.callback = listCallback;
 
 	$scope.gridOptions = {
             data: 'myData',  // Watch this variable
 	    primaryKey: 'id',
- 	    columnDefs: [{field:'filename', displayName:'My Files', width: 250}],
+ 	    columnDefs: [{field:'filename', width: 350}, 
+			 {field:'created', width: 150}],
  	    headerRowHeight:0,
             totalServerItems: 'totalServerItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
