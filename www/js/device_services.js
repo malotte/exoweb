@@ -52,7 +52,17 @@ exowebDeviceServices.factory('DeviceList', ['ExowebError',
 		// Add fields not yet available
 		device["changed"] = "00-00-00";
 		device["created"] = "00-00-00";
-		device["inqueue"] = "Not known";
+		device["inqueue"] = "Unknown";
+
+		/// For test
+		if (device["id"] == 200) device["reserved"] = 2189378;
+
+		if (device["reserved"] == exodmSession)
+		    device["locked"] = false;
+		else if (device["reserved"] !== undefined) // Which value ??
+		    device["locked"] = true;
+		else
+		    device["locked"] = false;
 		devices[i] = device;
 		window.console.debug("Device " + i + " = " + 
 				     JSON.stringify(devices[i]));

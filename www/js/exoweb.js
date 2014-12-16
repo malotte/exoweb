@@ -25,6 +25,7 @@
 
 var exowebApp = angular.module('exoweb', [
     'ngRoute',
+    'toggle-switch',
     'exowebControllers',
     'exowebDeviceControllers',
     'exowebUserControllers',

@@ -24,7 +24,7 @@
 'use strict';
 
 var wseDeviceNotify = new WseNotifyClass();
-
+var exodmSession;
 
 /* Controllers */
 
@@ -104,6 +104,8 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    else {
 		// No devices at all, do nothing
 	    }
+	    if ($scope.selectedItem !== undefined)
+		$scope.gridOptions.selectItem($scope.selectedItem, true);
 	    window.console.debug("Total = " + 
 				     $scope.totalItems);
 	    window.console.debug("Total = " + 
@@ -120,12 +122,21 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    $scope.device = DeviceDetail.device;
 	    window.console.debug("Device details = " + 
 				 JSON.stringify($scope.device));
+	    
+	    if ($scope.editMode == true && 
+		$scope.selectedLocked == false)
+		$scope.buttonsEnabled = true;
+	    else
+		$scope.buttonsEnabled = false;
 	    $scope.$apply();
 	}
 
 
 	var rowSelected = function(rowItem, event) {
 	    var deviceid = rowItem.getProperty('id');
+	    $scope.selectedLocked = rowItem.getProperty('locked')
+	    $scope.selectedRowIndex = rowItem.rowIndex;
+	    $scope.selectedItem = deviceid;
 	    window.console.debug("Row = " +rowItem.rowIndex);
 	    window.console.debug("Event = " +event);
 	    window.console.debug("Id = " +$scope.deviceid);
@@ -136,11 +147,25 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    // These variables are watched by ng-grid
 	    $scope.myDevices = data;
 	    $scope.totalItems = data.length; // Large number ???
-	    if (!$scope.$$phase) {
-		$scope.$apply();
-	    }
-	};
-	
+	    if (!$scope.$$phase) $scope.$apply();
+	}
+
+	// Edit mode switch
+	$scope.editModeChange = function(edit) {
+	    $scope.editMode = edit.mode;
+	    window.console.debug("Edit mode = " + edit.mode);
+	    window.console.debug("Edit mode = " + $scope.editMode);
+	    window.console.debug("Selected locked = " + $scope.selectedLocked);
+	    window.console.debug("Buttons enabled = " + $scope.buttonsEnabled);
+	    if ($scope.editMode == true && 
+		$scope.selectedLocked == false)
+		$scope.buttonsEnabled = true;
+	    else
+		$scope.buttonsEnabled = false;
+	}
+	$scope.editMode = false;
+	$scope.selectedLocked = true;
+	$scope.buttonsEnabled = false;
 
 	$scope.totalItems = 0;
 	$scope.pagingOptions = {
@@ -157,14 +182,16 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
             filterText: "",
             useExternalFilter: false
 	}; 
-						    
+
+	// Session id to use when reserving in exodm
+	exodmSession = Math.floor((Math.random() * 100000) + 1);	
+	
 	DeviceList.getData($scope.pagingOptions, 
 			   $scope.selectOptions, 
 			   $scope.filterOptions,
 			   listCallback);
 
 
-	
 	$scope.$watch('pagingOptions', function (newVal, oldVal) {
             if (newVal !== oldVal) {
 		if (newVal.pageSize !== oldVal.pageSize) {
@@ -207,9 +234,11 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    primaryKey: 'id',
  	    columnDefs: [{field:'id', width: 100}, 
 			 {field:'status', width: 100},
-			 {field:'created', width: 100},
-			 {field:'changed', width: 100},
-			 {field:'inqueue', width: 100}],
+			 {field:'created', width: 90},
+			 {field:'changed', width: 90},
+			 {field:'inqueue', width: 80},
+			 {field:'locked', width: 40, 
+			  cellTemplate : 'html/lockIcon.html'}],
 	    headerRowHeight:0,
             totalServerItems: 'totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
@@ -244,6 +273,7 @@ exowebDeviceControllers.controller('EditDeviceCtrl', ['$scope', 'Device',
 
 	var deleteCallback = function(device) {
 	    window.alert("Device " + device.did + " deleted");
+	    $scope.gridOptions.selectRow($scope.selectedRowIndex + 1, true);
 	}
 
 	$scope.connect = function (device) {

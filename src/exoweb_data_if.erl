@@ -29,7 +29,7 @@
 %% Exodm access
 -export([login/1,
 	 contact/0]).
--export([read/1,
+-export([select/1,
 	 create/1,
 	 delete/1,
 	 update/1,
@@ -163,11 +163,11 @@ update({user, Account, Name, Updates, Access}) ->
 
 
 %%--------------------------------------------------------------------
--spec read(Record::record()) ->
+-spec select(Record::record()) ->
 		  ok |
 		  {error, Reason::atom()}.
 
-read({user, Account, Name, Access}) ->
+select({user, Account, Name, Access}) ->
     case result(lookup_user(Name, Access),
 		      {lookup, "users"}) of
 	[] ->
@@ -183,7 +183,7 @@ read({user, Account, Name, Access}) ->
 	    E
     end;
 
-read({device, Account, Id, Access}) ->
+select({device, Account, Id, Access}) ->
     case result(lookup_device_attributes(Account, Id, Access),
 		      {list, "attributes"}) of
 	[] ->

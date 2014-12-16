@@ -47,7 +47,7 @@ event({delete, Args} = Event) ->
     call(delete, Args); 
 event({select, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
-    call(read, Args); 
+    call(select, Args); 
 event({update, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     call(update, Args); 

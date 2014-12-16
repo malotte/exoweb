@@ -167,8 +167,8 @@ form {
 
 .gridStyle {
     border: 1px solid rgb(212,212,212);
-    width: 500px; 
-    height: 300px;
+    width: 505px; 
+    height: 370px;
 }
 
 .action-text {
@@ -242,6 +242,16 @@ form {
     background-color: #F90;
     margin: 10px;
 }
+.button-input[disabled] {
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 20px;
+    color: #FFF;
+    background-color: #ccc;
+    margin: 10px;
+}
 
 .danger-button-input {
     border-radius: 5px;
@@ -253,6 +263,17 @@ form {
     background-color: #FF0000;
     margin: 10px;
 }
+.danger-button-input[disabled] {
+    border-radius: 5px;
+    moz-border-radius: 5px;
+    webkit-border-radius: 5px;
+    font-family: Callibri, Arial, Verdana;
+    font-size: 24px;
+    color: #FFF;
+    background-color: #ccc;
+    margin: 10px;
+}
+
 .checkbox-input {
     border-radius: 5px;
     moz-border-radius: 5px;

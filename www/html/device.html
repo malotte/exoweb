@@ -48,13 +48,14 @@
       <input name="devicename" placeholder="devicename" type="text" 
 	     class="text-input" 
 	     data-ng-model="searchtext" data-ng-change="search()"/>
-      <table style="width: 500px">
+      <table style="width: 505px">
 	<tr>
 	  <td style="width: 100px"><image src="img/icon_devices_blue.png"/></td>
 	  <td style="width: 100px"><image src="img/icon_status_blue.png"/></td>
-	  <td style="width: 100px"><image src="img/icon_changes_blue.png"/></td>
-	  <td style="width: 100px"><image src="img/icon_created_blue.png"/></td>
-	  <td style="width: 100px"><image src="img/icon_que_blue.png"/></td>
+	  <td style="width: 90px"><image src="img/icon_changes_blue.png"/></td>
+	  <td style="width: 90px"><image src="img/icon_created_blue.png"/></td>
+	  <td style="width: 80px"><image src="img/icon_que_blue.png"/></td>
+	  <td style="width: 40px"><image src="img/icon-lock.png"/></td>
 	</tr>
 	<tr>
 	  <td><p>My devices</p></td>
@@ -62,16 +63,19 @@
 	  <td><p>Last changed</p></td>
 	  <td><p>Created</p></td>
 	  <td><p>In Queue</p></td>
+	  <td><p>Locked</p></td>
 	</tr>
       </table>
-      <p ><image src="img/iconbar_blue.png" style="width: 500px"/></p>
+      <p ><image src="img/iconbar_blue.png" style="width: 505px"/></p>
       <div class="gridStyle" ng-grid="gridOptions"></div>
     </div>
-    <div class="info">
-      <tabset>
-        <tab title="Edit" template-url="html/editdevice.html"></tab>
-        <tab title="Add" template-url="html/adddevice.html"></tab>
-      </tabset>
+    <div class="left">
+      <div class="info">
+	<tabset>
+          <tab title="Edit" template-url="html/editdevice.html"></tab>
+          <tab title="Add" template-url="html/adddevice.html"></tab>
+	</tabset>
+      </div>
     </div>
   </div>
 </div>

@@ -1,6 +1,11 @@
 <div class="tab" ng-controller="EditDeviceCtrl">
   <form action="" method="post" name="editform" class="edit-form" 
 	id="editform">
+    <toggle-switch ng-model="edit.mode" 
+		   knob-label="Edit mode"
+		   ng-change="editModeChange(edit)">
+    </toggle-switch>
+
   <table>
     <tr> 
       <td>Device id: </td> 
@@ -31,14 +36,18 @@
   </table> 
   <p>Events in queue: <span class="text-input">{{inqueue}} </span></p>
   <input name="save" type="submit" class="button-input" 
-	 id="save" value="Save" ng-click="update(device)" />
+	 id="save" value="Save" ng-click="update(device)"
+	 ng-disabled="buttonsEnabled==false" />
   <input name="connect" type="submit" class="button-input" 
-	 id="connect" value="Connect" ng-click="connect(device)" />
+	 id="connect" value="Connect" ng-click="connect(device)"
+	 ng-disabled="buttonsEnabled==false" />
   <input name="deletequeue" type="submit" class="button-input" 
-	 id="deletequeue" value="Empty Queue" ng-click="deletequeue(device)" />
+	 id="deletequeue" value="Empty Queue" ng-click="deletequeue(device)"
+	 ng-disabled="buttonsEnabled==false" />
   <br/>
   <input name="delete" type="submit" class="danger-button-input" 
-	 id="delete" value="Delete" ng-click="remove(device)" />
+	 id="delete" value="Delete" ng-click="remove(device)" 
+	 ng-disabled="buttonsEnabled==false"/>
 </form>
 </div>
 

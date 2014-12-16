@@ -31,7 +31,7 @@
 	 delete_cookie/0,
 	 wrapper/3]).
 
-%% Change notificaton api towards js	
+%% Notificaton api towards js	
 -export([notify/1]).
  
 %%%===================================================================
@@ -105,7 +105,7 @@ wrapper(M, F, A) ->
     {error, faulty_arguments}.
 	
 
-%% Called to update web page when a change has occured
+%% Called to update web page when a change of data has occured
 notify(Table) ->
     {ok, Notifier} = wse:get(exoweb, wse:window(), notifier(Table)),
     {ok, undefined} = wse:call(exoweb, Notifier, changed, []).
@@ -114,7 +114,6 @@ notifier(device) -> wseDeviceNotify;
 notifier(user) -> wseUserNotify;
 notifier(yang) -> wseYangNotify.
 
-    
 %%--------------------------------------------------------------------
 %% Internal
 %%--------------------------------------------------------------------
