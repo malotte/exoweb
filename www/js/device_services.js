@@ -99,7 +99,6 @@ exowebDeviceServices.factory('DeviceList', ['ExowebError',
 		devices.splice(0, devices.length);
 		window.console.debug("getData");
 		window.console.debug("Current page = " + pagingOptions.currentPage);
-		setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_device'),  // Module
 			  Ei.atom('event'),          // Function
@@ -119,7 +118,6 @@ exowebDeviceServices.factory('DeviceList', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseListReply(reply, callback);
 			 });
-	    }, 100);
 	};
 	
 	return {
@@ -275,7 +273,6 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 	    }};
 
 	var update = function(device, callback) {
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_device'),  // Module
 			  Ei.atom('event'),          // Function
@@ -293,11 +290,9 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseDeviceReply(reply, device, callback);
 			 });
-	    }, 100);
 	}
 
 	var remove = function(device, callback) {
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_device'),  // Module
 			  Ei.atom('event'),          // Function
@@ -309,11 +304,9 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseDeviceReply(reply, device, callback);
 			 });
-	    }, 100);
 	}
 
 	var create = function(device, callback) {
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_device'),  // Module
 			  Ei.atom('event'),          // Function
@@ -331,7 +324,6 @@ exowebDeviceServices.factory('Device', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseDeviceReply(reply, device, callback);
 			 });
-	    }, 100);
 	}
 
 	return {

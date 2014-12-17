@@ -77,7 +77,6 @@ exowebYangServices.factory('YangList', ['ExowebError',
 		yangs.splice(0, yangs.length);
 		window.console.debug("Last = " + selectOptions.lastId);
 		window.console.debug("Last page = " + selectOptions.lastPage);
-		setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_yang'),  // Module
 			  Ei.atom('event'),          // Function
@@ -97,7 +96,6 @@ exowebYangServices.factory('YangList', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseListReply(reply, callback);
 			 });
-	    }, 100);
 	};
 	
 	return {
@@ -183,7 +181,6 @@ exowebYangServices.factory('Yang', [
 	    }};
 
 	var remove = function(yang, callback) {
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_yang'),  // Module
 			  Ei.atom('event'),          // Function
@@ -195,7 +192,6 @@ exowebYangServices.factory('Yang', [
 			     window.console.debug("Value = " +reply);
 			     parseYangReply(reply, yang, callback);
 			 });
-	    }, 100);
 	}
 
 	var create = function(yang, callback) {

@@ -36,18 +36,18 @@ exowebUserControllers.controller('UserListCtrl', [
 	$scope.myModel = {myUsers:[],
 			  totalItems:0};
 
-	var filter1 = {
-	    roles: [{name: "view", selectable: false}, 
-		    {name: "config", selectable: false}, 
-		    {name: "execute", selectable: false}, 
-		    {name: "admin", selectable: false},
-		    {name: "initial-admin", selectable: true}]};
-	var filter2 = {
-	    roles: [{name: "view", selectable: true}, 
-		    {name: "config", selectable: true}, 
-		    {name: "execute", selectable: true}, 
-		    {name: "admin", selectable: true},
-		    {name: "initial-admin", selectable: false}]};
+	var roles1 = {
+	    list: [{name: "view", selectable: true}, 
+		   {name: "config", selectable: true}, 
+		   {name: "execute", selectable: true}, 
+		   {name: "admin", selectable: true},
+		   {name: "initial-admin", selectable: false}]};
+	var roles2 = {
+	    list: [{name: "view", selectable: false}, 
+		   {name: "config", selectable: false}, 
+		   {name: "execute", selectable: false}, 
+		   {name: "admin", selectable: false},
+		   {name: "initial-admin", selectable: true}]};
 
 	var scroll = function(rowItem, event){
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
@@ -85,14 +85,14 @@ exowebUserControllers.controller('UserListCtrl', [
 	var detailCallback = function() {
 	    $scope.user = UserDetail.user;
 
-	    window.console.debug("Filter before = " +
-				 JSON.stringify($scope.filter)); 
+	    window.console.debug("Roles before = " +
+				 JSON.stringify($scope.roles)); 
 	    if ($scope.user.role == "initial-admin") 
-		$scope.filter = filter1;
+		$scope.roles = roles2;
 	    else
-		$scope.filter = filter2;
-	    window.console.debug("Filter after = " +
-				 JSON.stringify($scope.filter)); 
+		$scope.roles = roles1;
+	    window.console.debug("Roles after = " +
+				 JSON.stringify($scope.roles)); 
 
 	    window.console.debug("User details = " + 
 				 JSON.stringify($scope.user));
@@ -170,7 +170,10 @@ exowebUserControllers.controller('UserListCtrl', [
 	// Session id to use when reserving in exodm
 	exodmSession = Math.floor((Math.random() * 100000) + 1);	
 
-	$scope.totalItems = 0;
+	$scope.roles = roles1;
+	    window.console.debug("First roles = " +
+				 JSON.stringify($scope.roles)); 
+
 	$scope.pagingOptions = {
 	    totalServerItems: 0,
             pageSizes: [10, 20, 50],
@@ -266,14 +269,9 @@ exowebUserControllers.controller('ReadUserCtrl', ['$scope',
 exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
     function ($scope, User, ngDialog) {
 	window.console.debug('Loading EditUserCtrl');
-	
-	// Two parent levels needed because of ng-repeat
-	$scope.$parent.$parent.filter = {
-	    roles: [{name: "view", selectable: true}, 
-		    {name: "config", selectable: true}, 
-		    {name: "execute", selectable: true}, 
-		    {name: "admin", selectable: true},
-		    {name: "initial-admin", selectable: false}]};
+
+	// Two parent levels needed because of ng-repeat in select
+	$scope.roles = $scope.$parent.$parent.roles;
 
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");

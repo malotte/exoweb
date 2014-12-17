@@ -90,7 +90,6 @@ exowebUserServices.factory('UserList', ['ExowebError',
 	var getData = 
 	    function(pagingOptions, selectOptions, filterOptions, callback) {
 		users.splice(0, users.length);
-		setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
 			  Ei.atom('event'),          // Function
@@ -110,7 +109,6 @@ exowebUserServices.factory('UserList', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseListReply(reply, callback);
 			 });
-	    }, 100);
 	};
 	
 
@@ -264,8 +262,7 @@ exowebUserServices.factory('User', ['ExowebError',
 
 	var update = function(user, callback) {
 	    window.console.debug("User to update = " + JSON.stringify(user));
-	    setTimeout(function () {
-		Wse.call('exoweb_js', 'wrapper', 
+	    Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
 			  Ei.atom('event'),          // Function
 			  Ei.tuple(Ei.atom('update'), // Args
@@ -282,13 +279,11 @@ exowebUserServices.factory('User', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseUserReply(reply, user, callback);
 			 });
-	    }, 100);
 	}
 
 	var changepassword = function(user, callback) {
 	    window.console.debug("User to change password for = " +
 				 JSON.stringify(user));
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
 			  Ei.atom('event'),          // Function
@@ -302,12 +297,10 @@ exowebUserServices.factory('User', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseUserReply(reply, user, callback);
 			 });
-	    }, 100);
 	}
 
 	var remove = function(user, callback) {
 	    window.console.debug("User to delete = " + JSON.stringify(user));
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
 			  Ei.atom('event'),          // Function
@@ -319,11 +312,9 @@ exowebUserServices.factory('User', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseUserReply(reply, user, callback);
 			 });
-	    }, 100);
 	}
 
 	var create = function(user, callback) {
-	    setTimeout(function () {
 		Wse.call('exoweb_js', 'wrapper', 
 			 [Ei.atom('exoweb_user'),  // Module
 			  Ei.atom('event'),          // Function
@@ -343,7 +334,6 @@ exowebUserServices.factory('User', ['ExowebError',
 			     window.console.debug("Value = " +reply);
 			     parseUserReply(reply, user, callback);
 			 });
-	    }, 100);
 	}
 
 	return {
