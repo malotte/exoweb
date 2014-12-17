@@ -36,6 +36,19 @@ exowebUserControllers.controller('UserListCtrl', [
 	$scope.myModel = {myUsers:[],
 			  totalItems:0};
 
+	var filter1 = {
+	    roles: [{name: "view", selectable: false}, 
+		    {name: "config", selectable: false}, 
+		    {name: "execute", selectable: false}, 
+		    {name: "admin", selectable: false},
+		    {name: "initial-admin", selectable: true}]};
+	var filter2 = {
+	    roles: [{name: "view", selectable: true}, 
+		    {name: "config", selectable: true}, 
+		    {name: "execute", selectable: true}, 
+		    {name: "admin", selectable: true},
+		    {name: "initial-admin", selectable: false}]};
+
 	var scroll = function(rowItem, event){
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
 		var grid = $scope.gridOptions.ngGrid;
@@ -72,23 +85,14 @@ exowebUserControllers.controller('UserListCtrl', [
 	var detailCallback = function() {
 	    $scope.user = UserDetail.user;
 
-	    if ($scope.user.role == "initial-admin") {
-		$scope.filter = {
-		    roles: [{name: "view", selectable: false}, 
-			    {name: "config", selectable: false}, 
-			    {name: "execute", selectable: false}, 
-			    {name: "admin", selectable: false},
-			    {name: "initial-admin", selectable: true}]};
-		    window.console.debug("Filter = " +
-					 JSON.stringify($scope.filter)); 
-	    }
+	    window.console.debug("Filter before = " +
+				 JSON.stringify($scope.filter)); 
+	    if ($scope.user.role == "initial-admin") 
+		$scope.filter = filter1;
 	    else
-		$scope.filter = {
-		    roles: [{name: "view", selectable: true}, 
-			    {name: "config", selectable: true}, 
-			    {name: "execute", selectable: true}, 
-			    {name: "admin", selectable: true},
-			    {name: "initial-admin", selectable: false}]};
+		$scope.filter = filter2;
+	    window.console.debug("Filter after = " +
+				 JSON.stringify($scope.filter)); 
 
 	    window.console.debug("User details = " + 
 				 JSON.stringify($scope.user));
@@ -262,6 +266,14 @@ exowebUserControllers.controller('ReadUserCtrl', ['$scope',
 exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
     function ($scope, User, ngDialog) {
 	window.console.debug('Loading EditUserCtrl');
+	
+	// Two parent levels needed because of ng-repeat
+	$scope.$parent.$parent.filter = {
+	    roles: [{name: "view", selectable: true}, 
+		    {name: "config", selectable: true}, 
+		    {name: "execute", selectable: true}, 
+		    {name: "admin", selectable: true},
+		    {name: "initial-admin", selectable: false}]};
 
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");
@@ -294,6 +306,7 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 		scope: $scope
 	    });
 	};
+
 		
     }
 ]);
