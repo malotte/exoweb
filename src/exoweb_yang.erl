@@ -48,6 +48,16 @@ event({delete, Args} = Event) ->
 event({select, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     call(select, Args); 
+event({reserve, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    %% Lock not implemented in exodm yet
+    %% call(reserve, Args); 
+    ok;
+event({release, Args} = Event) ->
+    ?dbg("event: ~p",[Event]),
+    %% Unlock not implemented in exodm yet
+    %% call(release, Args); 
+    ok;
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),
     ok.

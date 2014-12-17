@@ -46,7 +46,18 @@ exowebUserServices.factory('UserList', ['ExowebError',
 		// Add fields not yet available
 		user["changed"] = "00-00-00";
 		user["created"] = "00-00-00";
+		/// For test
+
+		if (user["name"] == 't') user["reserved"] = 2189378;
+
+		if (user["reserved"] == exodmSession)
+		    user["locked"] = false;
+		else if (user["reserved"] !== undefined) // Which value ??
+		    user["locked"] = true;
+		else
+		    user["locked"] = false;
 		users[i] = user;
+
 		window.console.debug("User " + i + " = " + JSON.stringify(users[i]));
 	    }
 	    callback();
@@ -102,6 +113,7 @@ exowebUserServices.factory('UserList', ['ExowebError',
 	    }, 100);
 	};
 	
+
 	return {
 	    users: users,
 	    getData: getData
@@ -157,7 +169,28 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 	  };
 	};
 
-	
+	var parseReply = function(reply) {
+	  if (reply.value[0] == "ok") {		       
+	      if (reply.value[0] == "ok") {
+		  // Call performed
+		  var result = reply.value[1];
+		  window.console.debug("Result = " +result.value[1]);
+		  if (result.value[0] == "ok") {
+		      // call successful => {ok, ok}
+		      window.console.debug("User call ok");
+		      }
+		  else if (result.value[0] == "error") {
+		      // Call failed => {ok,{error,Reason}}
+		      ExowebError(result.value[1]);
+		  }
+	      }
+	      else if (reply.value[0] == "error") {
+		  // Call not performed => {error, Reason}
+		  window.alert("Error: " +reply.value[1]);
+	      }
+	  };
+	};
+		
 	var getData = function(username, callback) {
 	    user.name = username;
 	    Wse.call('exoweb_js', 'wrapper', 
@@ -172,9 +205,38 @@ exowebUserServices.factory('UserDetail', ['ExowebError',
 		     });
 	}
 
+	var reserve = function(username) {
+	    Wse.call('exoweb_js', 'wrapper', 
+		     [Ei.atom('exoweb_user'),  // Module
+		      Ei.atom('event'),          // Function
+		      Ei.tuple(Ei.atom('reserve'), // Args
+			       [Ei.tuple(Ei.atom('name'), username),
+				Ei.tuple(Ei.atom('session'), exodmSession)])], 
+		     // reply callback
+		     function(obj,ref,reply) {  
+			 window.console.debug("Value = " +reply);
+			 parseReply(reply);
+		     });
+	}
+	    
+	var release = function(username) {
+	    Wse.call('exoweb_js', 'wrapper', 
+		     [Ei.atom('exoweb_user'),  // Module
+		      Ei.atom('event'),          // Function
+		      Ei.tuple(Ei.atom('release'), // Args
+			       [Ei.tuple(Ei.atom('name'), username),
+				Ei.tuple(Ei.atom('session'), exodmSession)])], 
+		     // reply callback
+		     function(obj,ref,reply) {  
+			 window.console.debug("Value = " +reply);
+			 parseReply(reply);
+		     });
+	}
 	return {
 	    user: user,
-	    getData: getData
+	    getData: getData,
+	    reserve: reserve,
+	    release: release
 	}
     }]);
 		

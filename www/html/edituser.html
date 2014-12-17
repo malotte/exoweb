@@ -1,6 +1,11 @@
 <div class="tab" ng-controller="EditUserCtrl">
   <form action="" method="post" name="editform" class="edit-form" 
 	id="editform">
+    <toggle-switch ng-model="edit.mode" 
+		   knob-label="Edit mode"
+		   ng-change="editModeChange(edit)">
+    </toggle-switch>
+
   <table>
     <tr> 
       <td>Name: </td> 
@@ -20,8 +25,7 @@
     </tr>
     <tr> 
       <td>Role:</td>
-      <td><select required ng-model="user.role" class="text-input"
-		  ng-init="user.role">
+      <td><select required ng-model="user.role" class="text-input">
 	  <option ng-repeat="role in filter.roles" 
 		  ng-disabled="!role.selectable"
 		  value="{{role.name}}" >{{role.name}}</option>
@@ -31,12 +35,15 @@
   <div class="info-footer">
     <div class="buttons">
     <input name="save" type="submit" class="button-input" 
-	   id="save" value="Save" ng-click="update(user)" />
+	   id="save" value="Save" ng-click="update(user)" 
+	   ng-disabled="buttonsEnabled==false" />
     <input name="passwordchange" type="submit" class="button-input" 
-	   id="passwordchange" value="Change Password" ng-click="open()" />
+	   id="passwordchange" value="Change Password" ng-click="open()"
+	   ng-disabled="buttonsEnabled==false" />
     <br/>
     <input name="delete" type="submit" class="danger-button-input" 
-	   id="save" value="Delete" ng-click="remove(user)" />
+	   id="save" value="Delete" ng-click="remove(user)"
+	   ng-disabled="buttonsEnabled==false" />
     </div>
   </div>
 </form>

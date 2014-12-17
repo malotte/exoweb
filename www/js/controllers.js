@@ -27,7 +27,6 @@
 var exowebControllers = 
     angular.module('exowebControllers', ['ngRoute']);
 
-
 exowebControllers.controller('ApplyCtrl', [
     '$scope', 'ExowebUser',
     function($scope, ExowebUser) {
@@ -92,7 +91,7 @@ exowebControllers.controller('LoginCtrl', ['$scope', 'ExowebUser',
 	  window.console.debug("User = " +JSON.stringify(user));
  	  ExowebUser.login(user, okCallback, nokCallback);
      }
-
+	
 
   }]);
 

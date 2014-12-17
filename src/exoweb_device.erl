@@ -56,15 +56,15 @@ event({update, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     %% Update not implemented in exodm yet
     call(create, Args); 
-event({lock, Args} = Event) ->
+event({reserve, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     %% Lock not implemented in exodm yet
-    %% call(lock, Args); 
+    %% call(reserve, Args); 
     ok;
-event({unlock, Args} = Event) ->
+event({release, Args} = Event) ->
     ?dbg("event: ~p",[Event]),
     %% Unlock not implemented in exodm yet
-    %% call(unlock, Args); 
+    %% call(release, Args); 
     ok;
 event(Event) ->
     ?dbg("event: unknown event ~p",[Event]),

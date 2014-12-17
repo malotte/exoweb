@@ -24,12 +24,13 @@
 'use strict';
 
 var wseDeviceNotify = new WseNotifyClass();
-var exodmSession;
 
 /* Controllers */
 
 var exowebDeviceControllers = 
     angular.module('exowebDeviceControllers', ['ngGrid']);
+
+var exodmSession;
 
 exowebDeviceControllers.controller('DeviceListCtrl', [
     '$scope', 'DeviceList', 'DeviceDetail',
@@ -128,6 +129,7 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 		$scope.buttonsEnabled = true;
 	    else
 		$scope.buttonsEnabled = false;
+
 	    $scope.$apply();
 	}
 
@@ -137,9 +139,19 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    $scope.selectedLocked = rowItem.getProperty('locked')
 	    $scope.selectedRowIndex = rowItem.rowIndex;
 	    $scope.selectedItem = deviceid;
-	    window.console.debug("Row = " +rowItem.rowIndex);
-	    window.console.debug("Event = " +event);
-	    window.console.debug("Id = " +$scope.deviceid);
+	    if ($scope.reservedItem !== undefined) {
+		// Release previous selection in exodm
+		DeviceDetail.release($scope.reservedItem);
+		$scope.reservedItem = undefined;
+	    }
+	    if ($scope.editMode == true && $scope.selectedLocked == false) {
+		// Reserve this selection in exodm
+		DeviceDetail.reserve(deviceid);
+		$scope.reservedItem = $scope.selectedItem;
+	    }
+	    window.console.debug("Row = " + rowItem.rowIndex);
+	    window.console.debug("Event = " + event);
+	    window.console.debug("Id = " + deviceid);
 	    DeviceDetail.getData(deviceid, detailCallback);
 	};
 
@@ -158,14 +170,29 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
 	    window.console.debug("Selected locked = " + $scope.selectedLocked);
 	    window.console.debug("Buttons enabled = " + $scope.buttonsEnabled);
 	    if ($scope.editMode == true && 
-		$scope.selectedLocked == false)
+		$scope.selectedLocked == false) {
 		$scope.buttonsEnabled = true;
-	    else
+		// Reserve current selection in exodm
+		if ($scope.selectedItem !== undefined) {
+		    DeviceDetail.reserve($scope.selectedItem);
+		    $scope.reservedItem = $scope.selectedItem;
+		}
+	    }
+	    else {
 		$scope.buttonsEnabled = false;
+		if ($scope.reservedItem !== undefined) {
+		    // Release current selection in exodm
+		    DeviceDetail.release($scope.reservedItem);
+		    $scope.reservedItem = undefined;
+		}
+	    }
 	}
 	$scope.editMode = false;
 	$scope.selectedLocked = true;
 	$scope.buttonsEnabled = false;
+
+	// Session id to use when reserving in exodm
+	exodmSession = Math.floor((Math.random() * 100000) + 1);	
 
 	$scope.totalItems = 0;
 	$scope.pagingOptions = {
@@ -183,9 +210,6 @@ exowebDeviceControllers.controller('DeviceListCtrl', [
             useExternalFilter: false
 	}; 
 
-	// Session id to use when reserving in exodm
-	exodmSession = Math.floor((Math.random() * 100000) + 1);	
-	
 	DeviceList.getData($scope.pagingOptions, 
 			   $scope.selectOptions, 
 			   $scope.filterOptions,

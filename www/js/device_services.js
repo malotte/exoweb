@@ -179,6 +179,27 @@ exowebDeviceServices.factory('DeviceDetail', ['ExowebError',
 	  };
 	};
 
+	var parseReply = function(reply) {
+	  if (reply.value[0] == "ok") {		       
+	      if (reply.value[0] == "ok") {
+		  // Call performed
+		  var result = reply.value[1];
+		  window.console.debug("Result = " +result.value[1]);
+		  if (result.value[0] == "ok") {
+		      // call successful => {ok, ok}
+		      window.console.debug("Device call ok");
+		      }
+		  else if (result.value[0] == "error") {
+		      // Call failed => {ok,{error,Reason}}
+		      ExowebError(result.value[1]);
+		  }
+	      }
+	      else if (reply.value[0] == "error") {
+		  // Call not performed => {error, Reason}
+		  window.alert("Error: " +reply.value[1]);
+	      }
+	  };
+	};
 	
 	var getData = function(deviceid, callback) {
 	    device.did = deviceid;
@@ -194,9 +215,39 @@ exowebDeviceServices.factory('DeviceDetail', ['ExowebError',
 		     });
 	}
 
+	var reserve = function(deviceid) {
+	    Wse.call('exoweb_js', 'wrapper', 
+		     [Ei.atom('exoweb_device'),  // Module
+		      Ei.atom('event'),          // Function
+		      Ei.tuple(Ei.atom('reserve'), // Args
+			       [Ei.tuple(Ei.atom('device-id'), deviceid),
+				Ei.tuple(Ei.atom('session'), exodmSession)])], 
+		     // reply callback
+		     function(obj,ref,reply) {  
+			 window.console.debug("Value = " +reply);
+			 parseReply(reply);
+		     });
+	}
+	    
+	var release = function(deviceid) {
+	    Wse.call('exoweb_js', 'wrapper', 
+		     [Ei.atom('exoweb_device'),  // Module
+		      Ei.atom('event'),          // Function
+		      Ei.tuple(Ei.atom('release'), // Args
+			       [Ei.tuple(Ei.atom('device-id'), deviceid),
+				Ei.tuple(Ei.atom('session'), exodmSession)])], 
+		     // reply callback
+		     function(obj,ref,reply) {  
+			 window.console.debug("Value = " +reply);
+			 parseReply(reply);
+		     });
+	}
+
 	return {
 	    device: device,
-	    getData: getData
+	    getData: getData,
+	    reserve: reserve,
+	    release: release
 	}
     }]);
 		

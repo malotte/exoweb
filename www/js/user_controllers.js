@@ -26,6 +26,8 @@
 var exowebUserControllers = 
     angular.module('exowebUserControllers', ['ngGrid', 'ngDialog']);
 
+var exodmSession;
+
 var wseUserNotify = new WseNotifyClass();
 
 exowebUserControllers.controller('UserListCtrl', [
@@ -54,30 +56,70 @@ exowebUserControllers.controller('UserListCtrl', [
 		    $scope.pagingOptions.currentPage;
 		$scope.selectOptions.lastId = 
 		    (users[users.length - 1])["name"];
-		window.console.debug("Total = " + 
-				     $scope.totalItems);
-		window.console.debug("Total = " + 
-				     $scope.gridOptions.totalServerItems);
-		window.console.debug("Last = " + 
-				     $scope.selectOptions.lastId);
-		window.console.debug("Last page = " + 
-				     $scope.selectOptions.lastPage);
 	    }
+	    if ($scope.selectedItem !== undefined)
+		$scope.gridOptions.selectItem($scope.selectedItem, true);
+	    window.console.debug("Total = " + 
+				 $scope.totalItems);
+	    window.console.debug("Total = " + 
+				 $scope.gridOptions.totalServerItems);
+	    window.console.debug("Last = " + 
+				 $scope.selectOptions.lastId);
+	    window.console.debug("Last page = " + 
+				 $scope.selectOptions.lastPage);
 	};
 	    
 	var detailCallback = function() {
 	    $scope.user = UserDetail.user;
+
+	    if ($scope.user.role == "initial-admin") {
+		$scope.filter = {
+		    roles: [{name: "view", selectable: false}, 
+			    {name: "config", selectable: false}, 
+			    {name: "execute", selectable: false}, 
+			    {name: "admin", selectable: false},
+			    {name: "initial-admin", selectable: true}]};
+		    window.console.debug("Filter = " +
+					 JSON.stringify($scope.filter)); 
+	    }
+	    else
+		$scope.filter = {
+		    roles: [{name: "view", selectable: true}, 
+			    {name: "config", selectable: true}, 
+			    {name: "execute", selectable: true}, 
+			    {name: "admin", selectable: true},
+			    {name: "initial-admin", selectable: false}]};
+
 	    window.console.debug("User details = " + 
 				 JSON.stringify($scope.user));
+	    if ($scope.editMode == true && 
+		$scope.selectedLocked == false)
+		$scope.buttonsEnabled = true;
+	    else
+		$scope.buttonsEnabled = false;
+
 	    $scope.$apply();
 	}
 
 
 	var rowSelected = function(rowItem, event) {
 	    var username = rowItem.getProperty('name');
-	    window.console.debug("Row = " +rowItem.rowIndex);
-	    window.console.debug("Event = " +event);
-	    window.console.debug("Name = " +username);
+	    $scope.selectedLocked = rowItem.getProperty('locked')
+	    $scope.selectedRowIndex = rowItem.rowIndex;
+	    $scope.selectedItem = username;
+	    if ($scope.reservedItem !== undefined) {
+		// Release previous selection in exodm
+		UserDetail.release($scope.reservedItem);
+		$scope.reservedItem = undefined;
+	    }
+	    if ($scope.editMode == true && $scope.selectedLocked == false) {
+		// Reserve this selection in exodm
+		UserDetail.reserve(username);
+		$scope.reservedItem = $scope.selectedItem;
+	    }
+	    window.console.debug("Row = " + rowItem.rowIndex);
+	    window.console.debug("Event = " + event);
+	    window.console.debug("Name = " + username);
 	    UserDetail.getData(username, detailCallback);
 	};
 
@@ -88,13 +130,43 @@ exowebUserControllers.controller('UserListCtrl', [
 	    $scope.myModel.totalItems = data.length; 
 	    $scope.gridOptions.totalServerItems = data.length;
 	    if (!$scope.$$phase) {
-		window.console.debug("set data apply" + 
-				     JSON.stringify($scope.myUsers));
 		$scope.$apply();
 	    }
 	};
-	
 
+	// Edit mode switch
+	$scope.editModeChange = function(edit) {
+	    $scope.editMode = edit.mode;
+	    window.console.debug("Edit mode = " + edit.mode);
+	    window.console.debug("Edit mode = " + $scope.editMode);
+	    window.console.debug("Selected locked = " + $scope.selectedLocked);
+	    window.console.debug("Buttons enabled = " + $scope.buttonsEnabled);
+	    if ($scope.editMode == true && 
+		$scope.selectedLocked == false) {
+		$scope.buttonsEnabled = true;
+		// Reserve current selection in exodm
+		if ($scope.selectedItem !== undefined) {
+		    UserDetail.reserve($scope.selectedItem);
+		    $scope.reservedItem = $scope.selectedItem;
+		}
+	    }
+	    else {
+		$scope.buttonsEnabled = false;
+		if ($scope.reservedItem !== undefined) {
+		    // Release current selection in exodm
+		    UserDetail.release($scope.reservedItem);
+		    $scope.reservedItem = undefined;
+		}
+	    }
+	}
+	$scope.editMode = false;
+	$scope.selectedLocked = true;
+	$scope.buttonsEnabled = false;
+	
+	// Session id to use when reserving in exodm
+	exodmSession = Math.floor((Math.random() * 100000) + 1);	
+
+	$scope.totalItems = 0;
 	$scope.pagingOptions = {
 	    totalServerItems: 0,
             pageSizes: [10, 20, 50],
@@ -157,10 +229,12 @@ exowebUserControllers.controller('UserListCtrl', [
 	$scope.gridOptions = {
             data: 'myModel.myUsers',  // Watch this variable
 	    primaryKey: 'id',
- 	    columnDefs: [{field:'name', width: 150}, 
-			 {field:'role', width: 150}, 
-			 {field:'changed', width: 100}, 
-			 {field:'created', width: 100}],
+ 	    columnDefs: [{field:'name', width: 140}, 
+			 {field:'role', width: 140}, 
+			 {field:'changed', width: 90}, 
+			 {field:'created', width: 90},
+			 {field:'locked', width: 40, 
+			  cellTemplate : 'html/lockIcon.html'}],
 	    headerRowHeight:0,
             totalServerItems: 'myModel.totalItems', // Watch this variable
             pagingOptions: $scope.pagingOptions,
@@ -188,12 +262,6 @@ exowebUserControllers.controller('ReadUserCtrl', ['$scope',
 exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
     function ($scope, User, ngDialog) {
 	window.console.debug('Loading EditUserCtrl');
-	$scope.filter = {
-	    roles: [{name: "view", selectable: true}, 
-		    {name: "config", selectable: true}, 
-		    {name: "execute", selectable: true}, 
-		    {name: "admin", selectable: true},
-		    {name: "initial-admin", selectable: false}]};
 
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");
@@ -205,7 +273,7 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 
 	$scope.update = function (user) {
 	    if (user.phone == undefined) user.phone = "";
-	    window.console.debug("User = " +JSON.stringify(user));
+	    window.console.debug("User = " + JSON.stringify(user));
 	    if (user.name == undefined) 
 		window.alert("No user selected!");
 	    else 
@@ -213,7 +281,7 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 	};
 
 	$scope.remove = function (user) {
-	    window.console.debug("User = " +JSON.stringify(user));
+	    window.console.debug("User = " + JSON.stringify(user));
 	    if (user.name == undefined) 
 		window.alert("No user selected!");
 	    else 
@@ -226,7 +294,7 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 		scope: $scope
 	    });
 	};
-	
+		
     }
 ]);
 
