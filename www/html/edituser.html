@@ -27,7 +27,7 @@
       <td>Role:</td>
       <td><select required ng-model="user.role" class="text-input">
 	  <option ng-repeat="role in roles.list" 
-		  ng-disabled="!role.selectable"
+		  ng-disabled="!selectable(role.name, user.role)"
 		  value="{{role.name}}" >{{role.name}}</option>
 	  </select></td>
     </tr>

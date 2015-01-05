@@ -26,8 +26,10 @@
 var exowebUserControllers = 
     angular.module('exowebUserControllers', ['ngGrid', 'ngDialog']);
 
+// Sessions number when reserving in exodm
 var exodmSession;
 
+// Receives notifications from exodm
 var wseUserNotify = new WseNotifyClass();
 
 exowebUserControllers.controller('UserListCtrl', [
@@ -36,18 +38,12 @@ exowebUserControllers.controller('UserListCtrl', [
 	$scope.myModel = {myUsers:[],
 			  totalItems:0};
 
-	var roles1 = {
+	var roles = {	    
 	    list: [{name: "view", selectable: true}, 
 		   {name: "config", selectable: true}, 
 		   {name: "execute", selectable: true}, 
 		   {name: "admin", selectable: true},
 		   {name: "initial-admin", selectable: false}]};
-	var roles2 = {
-	    list: [{name: "view", selectable: false}, 
-		   {name: "config", selectable: false}, 
-		   {name: "execute", selectable: false}, 
-		   {name: "admin", selectable: false},
-		   {name: "initial-admin", selectable: true}]};
 
 	var scroll = function(rowItem, event){
            if(!event.ctrlKey && !event.shiftKey && event.type != 'click'){
@@ -85,15 +81,6 @@ exowebUserControllers.controller('UserListCtrl', [
 	var detailCallback = function() {
 	    $scope.user = UserDetail.user;
 
-	    window.console.debug("Roles before = " +
-				 JSON.stringify($scope.roles)); 
-	    if ($scope.user.role == "initial-admin") 
-		$scope.roles = roles2;
-	    else
-		$scope.roles = roles1;
-	    window.console.debug("Roles after = " +
-				 JSON.stringify($scope.roles)); 
-
 	    window.console.debug("User details = " + 
 				 JSON.stringify($scope.user));
 	    if ($scope.editMode == true && 
@@ -104,7 +91,6 @@ exowebUserControllers.controller('UserListCtrl', [
 
 	    $scope.$apply();
 	}
-
 
 	var rowSelected = function(rowItem, event) {
 	    var username = rowItem.getProperty('name');
@@ -135,6 +121,26 @@ exowebUserControllers.controller('UserListCtrl', [
 	    $scope.gridOptions.totalServerItems = data.length;
 	    if (!$scope.$$phase) {
 		$scope.$apply();
+	    }
+	};
+
+	// Determines which roles that are selectable for a given user.
+	$scope.selectable = function (role, selecteduserrole) {
+	    window.console.debug("Role = " + role);
+	    window.console.debug("Selected Role = " + selecteduserrole);
+	    // Initial-admin can only be initial-admin
+	    // All others can never be initial-admin
+	    if (selecteduserrole == "initial-admin") {
+		if (role == "initial-admin")
+		    return true;
+		else 
+		    return false;
+	    }
+	    else {
+		if (role ==  "initial-admin")
+		    return false;
+		else 
+		    return true;
 	    }
 	};
 
@@ -170,10 +176,10 @@ exowebUserControllers.controller('UserListCtrl', [
 	// Session id to use when reserving in exodm
 	exodmSession = Math.floor((Math.random() * 100000) + 1);	
 
-	$scope.roles = roles1;
-	    window.console.debug("First roles = " +
-				 JSON.stringify($scope.roles)); 
+	$scope.roles = roles;
+	window.console.debug("First roles = " + JSON.stringify($scope.roles)); 
 
+	// ng-grid options
 	$scope.pagingOptions = {
 	    totalServerItems: 0,
             pageSizes: [10, 20, 50],
@@ -188,14 +194,13 @@ exowebUserControllers.controller('UserListCtrl', [
             filterText: "",
             useExternalFilter: false
 	}; 
-						    
+		
+	// Initialize table
 	UserList.getData($scope.pagingOptions, 
 			 $scope.selectOptions, 
 			 $scope.filterOptions,
 			 listCallback);
 
-
-	
 	$scope.$watch('pagingOptions', function (newVal, oldVal) {
             if (newVal !== oldVal) {
 		if (newVal.pageSize !== oldVal.pageSize) {
