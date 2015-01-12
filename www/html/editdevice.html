@@ -35,17 +35,17 @@
     </tr>
   </table> 
   <p>Events in queue: <span class="text-input">{{inqueue}} </span></p>
-  <input name="save" type="submit" class="button-input" 
+  <input name="save" class="button-input" 
 	 id="save" value="Save" ng-click="update(device)"
 	 ng-disabled="buttonsEnabled==false" />
-  <input name="connect" type="submit" class="button-input" 
+  <input name="connect" class="button-input" 
 	 id="connect" value="Connect" ng-click="connect(device)"
 	 ng-disabled="buttonsEnabled==false" />
-  <input name="deletequeue" type="submit" class="button-input" 
+  <input name="deletequeue" class="button-input" 
 	 id="deletequeue" value="Empty Queue" ng-click="deletequeue(device)"
 	 ng-disabled="buttonsEnabled==false" />
   <br/>
-  <input name="delete" type="submit" class="danger-button-input" 
+  <input name="delete" class="danger-button-input" 
 	 id="delete" value="Delete" ng-click="remove(device)" 
 	 ng-disabled="buttonsEnabled==false" />
 </form>

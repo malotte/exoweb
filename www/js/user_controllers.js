@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2007 - 2014, Rogvall Invest AB, <tony@rogvall.se>
+// Copyright (C) 2007 - 2015, Rogvall Invest AB, <tony@rogvall.se>
 //
 // This software is licensed as described in the file COPYRIGHT, which
 // you should have received as part of this distribution. The terms
@@ -275,9 +275,6 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
     function ($scope, User, ngDialog) {
 	window.console.debug('Loading EditUserCtrl');
 
-	// Two parent levels needed because of ng-repeat in select
-	$scope.roles = $scope.$parent.$parent.roles;
-
 	var updateCallback = function(user) {
 	    window.alert("User " + user.name + " updated");
 	}
@@ -304,6 +301,7 @@ exowebUserControllers.controller('EditUserCtrl', ['$scope', 'User', 'ngDialog',
 	};
 
 	$scope.open = function () {
+	    window.console.debug("Open dialog");
 	    ngDialog.open({
 		templateUrl: 'html/password.html',
 		scope: $scope

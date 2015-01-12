@@ -102,10 +102,12 @@ store(Cookie) when is_record(Cookie, exoweb_cookie) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec retreive(Id::integer() | string() | pid()) -> 
+-spec retreive(Id::integer() | string() | pid() | undefined) -> 
 		      {ok, Cookie::#exoweb_cookie{}} | 
 		      {error, Error::atom()}.
 
+retreive(undefined)  ->
+    {error, illegal_cookie};
 retreive(Id) when is_list(Id) ->
     call(Id, fun retreive/1);
 retreive(Id) when is_pid(Id) ->
@@ -121,10 +123,12 @@ retreive(Id) when is_integer(Id) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec read(Id::integer() | string() | pid()) -> 
+-spec read(Id::integer() | string() | pid() | undefined) -> 
 		      {ok, Cookie::#exoweb_cookie{}} | 
 		      {error, Error::atom()}.
 
+read(undefined)  ->
+    {error, illegal_cookie};
 read(Id) when is_list(Id) ->
     call(Id, fun read/1);
 read(Id) when is_pid(Id) ->

@@ -71,7 +71,8 @@ start_link() ->
     ?dbg("start_link: link result ~p, ~p",  [Res1, Res2]),
     ?dbg("start_link: starting yaws",  []),
     Id = "exoweb",
-    GconfList = [{id, Id}],
+    GconfList = [{id, Id},
+		 {logdir,exoweb:log_dir()}],
     Docroot = "/tmp",
     SconfList = [{port, exoweb:port()},
                  {servername, exoweb:servername()},
@@ -86,6 +87,7 @@ start_link() ->
 	    yaws:stop(), 
 	    yaws:start_embedded(Docroot, SconfList, GconfList, Id)
     end,
+    ?dbg("start_link: yaws started",  []),
     {ok, self()}.
 
 %%--------------------------------------------------------------------
