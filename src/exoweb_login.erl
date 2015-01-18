@@ -42,6 +42,7 @@ event({login, Args} = Event) ->
     User = proplists:get_value(name, Args),
     Pass = proplists:get_value(password, Args),
 
+    ?dbg("event: user ~p, pass ~p",[User, Pass]),
     case login(User, Pass) of
 	ok ->
 	    ?dbg("event: login ~p ok.", [User]),
@@ -69,5 +70,5 @@ e2string(_Reason) ->
     "Login failed".
 
 login(User, Pass) ->
-    exoweb_data_if:login(#exoweb_user{name = User, password = Pass}).
+    exoweb_data_if:login(User, Pass).
 

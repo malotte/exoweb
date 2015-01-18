@@ -27,7 +27,7 @@
 -define(EXOWEB_HRL, true).
 
 -include_lib("lager/include/log.hrl").
--include_lib("gettext/include/gettext.hrl").
+%%-include_lib("gettext/include/gettext.hrl").
 
 -define(EXOWEB, exoweb).
 

@@ -27,7 +27,6 @@
 %%%-------------------------------------------------------------------
 -module(exoweb_inets).
 -include_lib("inets/include/httpd.hrl").
--include_lib ("nitrogen_core/include/wf.hrl").
 -include("exoweb.hrl").
 
 %% API

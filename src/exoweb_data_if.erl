@@ -27,7 +27,7 @@
 -include("exoweb.hrl").
 
 %% Exodm access
--export([login/1,
+-export([login/2,
 	 contact/0]).
 -export([select/1,
 	 create/1,
@@ -43,7 +43,8 @@
 %%%===================================================================
 %%% Exodm access
 %%%===================================================================
-login(#exoweb_user{name = Name, password = Pass}) ->
+login(Name, Pass) ->
+    ?dbg("login: user ~p, pass ~p.", [Name, Pass]),
     case accounts(Name, {Name, Pass}) of
 	[{A,_R}] ->
 	    %% Only one account and role
@@ -187,13 +188,13 @@ select({device, Account, Id, Access}) ->
     case result(lookup_device_attributes(Account, Id, Access),
 		      {list, "attributes"}) of
 	[] ->
-	    ?dbg("read: device ~p not found !!.", [Id]),
+	    ?dbg("select: device ~p not found !!.", [Id]),
 	    {error, "Not found"};
 	AttributesStructList when is_list(AttributesStructList) ->
-	    ?dbg("attributes: ~p.", [AttributesStructList]),
+	    ?dbg("select: ~p.", [AttributesStructList]),
 	    {ok, AttributesStructList};
 	{error, _Reason} = E ->
-	    ?dbg("read: device ~p, error ~p.", [Id, _Reason]),
+	    ?dbg("select: device ~p, error ~p.", [Id, _Reason]),
 	    E
     end.
     
@@ -224,8 +225,10 @@ fetch({yang, Rows, Last, Direction, {Account, User, Pass}})
 accounts(Name, Access) ->
     case result(list_user_accounts(Name, Access), {list, "accounts"}) of
 	AccountStructList when is_list(AccountStructList) ->
+	    ?dbg("accounts: ~p.", [AccountStructList]),
 	    decode(AccountStructList, []);
 	{error, _Reason} = E ->
+	    ?dbg("accounts: error ~p.", [_Reason]),
 	    E
     end.
 	
@@ -282,7 +285,10 @@ remove_roles(Account, Name, [Role | Rest], Access) ->
 lookup_user(Name, Access) ->
     exodm_json_api:lookup_user(Name, opts(Access)).
 list_user_accounts(Name, Access) ->
-    exodm_json_api:list_user_accounts(Name, opts(Access)).
+    Res = exodm_json_api:list_user_accounts(Name, opts(Access)), 
+    ?dbg("list_user_accounts: name ~p access ~p, result ~p.", 
+	 [Name, Access, Res]),
+    Res.
 create_account(Name, Email, Pass) ->
     exodm_json_api:create_account(Name, Email, Pass, Name, opts(root)).
 delete_account(Name) ->
@@ -347,6 +353,7 @@ result({error, econnrefused} = E, _Wanted) ->
     ?dbg("result: result ~p", [E]),
     {error, no_contact_with_host};
 result(ResultStruct, Wanted) ->
+    ?dbg("result: wanted ~p, result ~p", [Wanted, ResultStruct]),
     try 
 	exodm_json_api:parse_result(ResultStruct, Wanted)
     catch
@@ -380,7 +387,8 @@ opts(root) ->
     [{url, get_env(exodm_url, "")},
      {user, get_env(exodm_user, "")},
      {password, get_env(exodm_password, "")}];
-opts({User, Pass}) ->
+opts(_Access = {User, Pass}) ->
+    ?dbg("opts:  access ~p.", [_Access]),
     [{url, get_env(exodm_url, "")},
      {user,  User},
      {password, Pass}];

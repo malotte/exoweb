@@ -169,13 +169,13 @@ mandatory([Env | Rest], Opts) ->
 %% @private
 start() ->
     call([crypto, asn1, public_key, ssl,
-	  sasl, gettext, lager, ale, gen_smtp, exoweb], 
+	  sasl, lager, ale, gen_smtp, exoweb], 
 	 start),
     wse_server:start(?WSE_PORT, [{name, exoweb_wse_server}]).
 
 start_dbg() ->
     call([crypto, asn1, public_key, ssl,
-	  sasl, gettext, lager, ale, gen_smtp], 
+	  sasl, lager, ale, gen_smtp], 
 	 start),
     ale:debug_gl([exoweb, 
 		  exoweb_sup, 
@@ -200,7 +200,7 @@ start_dbg() ->
 stop() ->
     wse_server:stop(exoweb_wse_server),
     yaws:stop(), 
-    call([exoweb, gen_smtp, ale, lager, nprocreg, gettext],
+    call([exoweb, gen_smtp, ale, lager, nprocreg],
 	 stop).
 
 call([], _F) ->
