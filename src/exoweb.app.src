@@ -1,5 +1,5 @@
 %% -*- erlang -*-
-{application, exoweb_js,
+{application, exoweb,
  [{description, "Exodm web interface."},
   {vsn, git},
   {registered, [exoweb]},
@@ -8,10 +8,6 @@
                   stdlib,
 		  sasl,
 		  gen_smtp,
-		  yaws,
-		  wse,
-		  exo,
-		  exodmapi,
 		  lager
                  ]},
   {modules,[exoweb, exoweb_sup]},

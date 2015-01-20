@@ -128,10 +128,7 @@ account(Email) when is_list(Email) ->
 
 %%--------------------------------------------------------------------
 url(Account, Email, Session) ->
-    Host = case exoweb:external_hostname() of
-	"localhost"= H -> H ++":" ++ integer_to_list(exoweb:port());
-	_H -> ?WEBSITE %% ??
-    end,
+    Host = exoweb:external_hostname() ++":" ++ integer_to_list(exoweb:port()),
     "http://" ++ Host ++ "/#/confirm?account=" ++ Account ++
     "&email=" ++ Email ++ "&session=" ++ integer_to_list(Session).
 

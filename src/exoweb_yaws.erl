@@ -49,15 +49,11 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-    %%
-    %% !!!! Change exoweb_js to exoweb when moved !!!!!!!
-    %%
-
     ?dbg("start_link: set up links to wse.js and ej.js", []),
     WseWse = filename:join([code:lib_dir(wse), "priv", "wse.js"]),
-    ExowebWse = filename:join([code:lib_dir(exoweb_js), "www", "js", "wse.js"]),
+    ExowebWse = filename:join([code:lib_dir(?EXOWEB), "www", "js", "wse.js"]),
     WseEj = filename:join([code:lib_dir(wse), "priv", "ej.js"]),
-    ExowebEj = filename:join([code:lib_dir(exoweb_js), "www", "js", "ej.js"]),
+    ExowebEj = filename:join([code:lib_dir(?EXOWEB), "www", "js", "ej.js"]),
     Res1 = 
     case filelib:is_file(ExowebWse) of
 	true -> ok;
