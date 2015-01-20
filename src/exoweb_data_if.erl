@@ -174,11 +174,12 @@ select({user, Account, Name, Access}) ->
 	[] ->
 	    ?dbg("read: user ~p not found !!.", [Name]),
 	    {error, "Not found"};
-	AttributesList when is_list(AttributesList) ->
+	[{struct, AttributesList}] when is_list(AttributesList) ->
 	    ?dbg("attributes: ~p.", [AttributesList]),
 	    Roles = [R || {A, R} <- accounts(Name, Access), A == Account],
 	    ?dbg("roles: ~p.", [Roles]),
-	    {ok, [{"role", exoweb_lib:roles2string(Roles)} | AttributesList]};
+	    {ok, [{struct, [{"role", exoweb_lib:roles2string(Roles)} | 
+			    AttributesList]}]};
 	{error, _Reason} = E ->
 	    ?dbg("read: user ~p, error ~p.", [Name, _Reason]),
 	    E

@@ -126,8 +126,6 @@ exowebUserControllers.controller('UserListCtrl', [
 
 	// Determines which roles that are selectable for a given user.
 	$scope.selectable = function (role, selecteduserrole) {
-	    window.console.debug("Role = " + role);
-	    window.console.debug("Selected Role = " + selecteduserrole);
 	    // Initial-admin can only be initial-admin
 	    // All others can never be initial-admin
 	    if (selecteduserrole == "initial-admin") {

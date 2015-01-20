@@ -200,7 +200,7 @@ start_dbg() ->
 stop() ->
     wse_server:stop(exoweb_wse_server),
     yaws:stop(), 
-    call([exoweb, gen_smtp, ale, lager, nprocreg],
+    call([exoweb, gen_smtp, ale, lager],
 	 stop).
 
 call([], _F) ->
