@@ -179,10 +179,20 @@ select({user, Account, Name, Access}) ->
 	    Roles = [R || {A, R} <- accounts(Name, Access), A == Account],
 	    ?dbg("roles: ~p.", [Roles]),
 	    {ok, [{struct, [{"role", exoweb_lib:roles2string(Roles)} | 
-			    AttributesList]}]};
+	    	            AttributesList]}]};
+        AttributesList when is_list(AttributesList) ->
+    	    %% Format confusion ...
+	    ?dbg("attributes: ~p.", [AttributesList]),
+	    Roles = [R || {A, R} <- accounts(Name, Access), A == Account],
+	    ?dbg("roles: ~p.", [Roles]),
+	    {ok, [{struct, [{"role", exoweb_lib:roles2string(Roles)} | 
+	     	           AttributesList]}]};
 	{error, _Reason} = E ->
 	    ?dbg("read: user ~p, error ~p.", [Name, _Reason]),
-	    E
+	    E;
+	Other ->
+            ?dbg("read: user ~p, unexpected result ~p.", [Name, Other]), 
+	    {ok, Other}
     end;
 
 select({device, Account, Id, Access}) ->
