@@ -70,7 +70,7 @@ exowebApp.config(['$routeProvider', '$locationProvider',
             templateUrl: 'html/howto.html'
 	}).
 	otherwise({
-            redirectTo: '/device'
+            redirectTo: '/login'
 	});
  
     // $locationProvider.html5Mode(true);
