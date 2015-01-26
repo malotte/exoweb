@@ -1,6 +1,5 @@
 <div class="tab" ng-controller="EditUserCtrl">
-  <form action="" method="post" name="editform" class="edit-form" 
-	id="editform">
+  <form name="edituser" class="edit-form" novalidate >
     <toggle-switch ng-model="edit.mode" 
 		   knob-label="Edit mode"
 		   ng-change="editModeChange(edit)">
@@ -13,7 +12,7 @@
     </tr>
     <tr> 
       <td>Email: </td>
-      <td><input name="user.email" placeholder="Email" type="text" 
+      <td><input name="user.email" placeholder="Email" type="email" 
 		 class="text-input" 
 		 ng-model="user.email"/></td>
     </tr>
@@ -34,14 +33,14 @@
   </table> 
   <div class="info-footer">
     <div class="buttons">
-    <input name="save" class="button-input" 
+    <input name="save" class="button-input" type="button"
 	   id="save" value="Save" ng-click="update(user)" 
-	   ng-disabled="buttonsEnabled==false" />
-    <input name="passwordchange" class="button-input" 
+	   ng-disabled="(buttonsEnabled==false) || edituser.$invalid" />
+    <input name="passwordchange" class="button-input" type="button"
 	   id="passwordchange" value="Change Password" ng-click="open()"
 	   ng-disabled="buttonsEnabled==false" />
     <br/>
-    <input name="delete" class="danger-button-input" 
+    <input name="delete" class="danger-button-input" type="button"
 	   id="save" value="Delete" ng-click="remove(user)"
 	   ng-disabled="buttonsEnabled==false" />
     </div>

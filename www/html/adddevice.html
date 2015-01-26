@@ -1,6 +1,5 @@
 <div class="tab" ng-controller="AddDeviceCtrl">
-  <form action="" method="post" name="addform" class="edit-form" 
-	id="addform">
+  <form class="edit-form" novalidate >
   <table>
     <tr> 
       <td>Device id: </td> 
@@ -27,7 +26,7 @@
 		 ng-model="device.msisdn" /></td>
     </tr>
   </table> 
-  <input name="add" class="button-input" 
+  <input name="add" class="button-input" type="button"
 	 id="add" value="Add" ng-click="add(device)" />
 </form>
 </div>

@@ -1,6 +1,5 @@
 <div class="tab" ng-controller="AddUserCtrl">
-  <form action="" method="post" name="addform" class="edit-form" 
-	id="addform">
+  <form name="adduser" class="edit-form" novalidate >
   <table>
     <tr> 
       <td>Name: </td> 
@@ -10,7 +9,7 @@
     </tr>
     <tr> 
       <td>Email: </td>
-      <td><input name="user.email" placeholder="Email" type="text"
+      <td><input name="user.email" placeholder="Email" type="email"
 		 class="text-input" required
 		 ng-model="user.email"/></td>
     </tr>
@@ -41,9 +40,9 @@
 		  ng-init="user.role"/></td>
     </tr>
   </table> 
-  <input name="add" class="button-input" 
+  <input name="add" class="button-input" type="button"
 	 id="add" value="Add" ng-click="add(user)" 
-	 ng-disabled="addform.$invalid || !passwordConfirmed(user)"/>
+	 ng-disabled="adduser.$invalid || !passwordConfirmed(user)"/>
 </form>
 </div>
 

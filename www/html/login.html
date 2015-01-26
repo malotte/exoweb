@@ -13,8 +13,8 @@
   <div class="action-text" id="action-text">Log in</div>
 
   <div ng-controller="LoginCtrl">
-    <form action="" method="post" name="loginform" class="action-form" 
-	  id="loginform">
+    <form name="loginform" class="action-form" id="loginform" 
+	  novalidate  >
       <table border="0" cellpadding="0" cellspacing="0">
 	<tr>
           <td colspan="2" align="center">
@@ -36,7 +36,7 @@
 	  </td>
           <td align="center">
 	    <input name="login" class="button-input" 
-		   id="login" value="Log in" 
+		   id="login" value="Log in" type="submit"
 		   ng-click="login(user)" ng-disabled="loginform.$invalid"/>
 	  </td>
 	</tr>

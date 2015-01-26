@@ -1,13 +1,12 @@
 <div class="tab" ng-controller="EditYangCtrl">
-  <form action="" method="post" name="editform" class="edit-form" 
-	id="editform">
+  <form class="edit-form" novalidate >
   <table>
     <tr> 
       <td>Name: </td> 
       <td class="text-info"> {{yangname}} </td> 
     </tr>
   </table> 
-  <input name="remove" class="danger-button-input" 
+  <input name="remove" class="danger-button-input" type="button"
 	 id="remove" value="Delete" ng-click="remove(yangname)" />
 </form>
 </div>

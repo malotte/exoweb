@@ -1,10 +1,9 @@
 <div class="tab" ng-controller="AddYangCtrl">
-  <form action="" method="post" name="addform" class="edit-form" 
-	id="addform">
+  <form class="edit-form" novalidate >
     <input name="filename" type="file" 
 	   class="text-input" required
 	   file-model="yang.filename"/>
-    <input name="add" class="button-input" 
+    <input name="add" class="button-input" type="button" 
 	   id="add" value="Add" ng-click="add()" />
   </form>
 </div>
