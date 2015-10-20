@@ -16,7 +16,6 @@
 -module(exoweb_cookie_handler).
 -behaviour(gen_server).
 
--include_lib("lager/include/log.hrl").
 -include("exoweb.hrl").
 
 %% general api
@@ -68,7 +67,7 @@
 			{error, Error::term()}.
 
 start_link(Opts) ->
-    lager:info("~p: start_link: args = ~p\n", [?MODULE, Opts]),
+    lager:info("args = ~p\n", [Opts]),
     gen_server:start_link({local, ?SERVER}, ?MODULE, Opts, []).
 
 
@@ -176,7 +175,7 @@ clean() ->
 		  {stop, Reason::term()}.
 
 init(_Args) ->
-    lager:info("~p: init: args = ~p,\n pid = ~p\n", [?MODULE, _Args, self()]),
+    lager:info("args = ~p,\n pid = ~p\n", [_Args, self()]),
     CookieTable = ets:new(exoweb_cookie_table, 
 			   [private, ordered_set, named_table,
 			    {keypos, #exoweb_cookie.id}]),
@@ -218,7 +217,7 @@ init(_Args) ->
 
 handle_call({store, Cookie=#exoweb_cookie{pid = Pid}}, _From, 
 	    Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) ->
-    ?dbg("handle_call: store ~p", [Cookie]),
+    lager:debug("store ~p", [Cookie]),
     <<Id:64>> = crypto:rand_bytes(8),
     
     %% Cookie expiration time set in environment, default 24 hours
@@ -232,7 +231,7 @@ handle_call({store, Cookie=#exoweb_cookie{pid = Pid}}, _From,
 
 handle_call({retreive, Pid}, _From, Ctx=#ctx {pid2cookie = P2C}) 
   when is_pid(Pid)->
-    ?dbg("handle_call: retreive ~p", [Pid]),
+    lager:debug("retreive ~p", [Pid]),
     
     Reply = 
 	case ets:lookup(P2C, Pid) of
@@ -247,7 +246,7 @@ handle_call({retreive, Pid}, _From, Ctx=#ctx {pid2cookie = P2C})
 
 handle_call({retreive, Id}, _From, Ctx) 
   when is_integer(Id)->
-    ?dbg("handle_call: retreive ~p", [Id]),
+    lager:debug("retreive ~p", [Id]),
     
     Reply = retreive(Id, Ctx),
     clean_tables(Ctx),
@@ -256,7 +255,7 @@ handle_call({retreive, Id}, _From, Ctx)
 
 handle_call({read, Pid}, _From, Ctx=#ctx {pid2cookie = P2C}) 
  when is_pid(Pid)->
-    ?dbg("handle_call: read ~p", [Pid]),
+    lager:debug("read ~p", [Pid]),
     
     Reply = 
 	case ets:lookup(P2C, Pid) of
@@ -270,7 +269,7 @@ handle_call({read, Pid}, _From, Ctx=#ctx {pid2cookie = P2C})
 
 handle_call({read, Id}, _From, Ctx) 
   when is_integer(Id) ->
-    ?dbg("handle_call: read ~p", [Id]),
+    lager:debug("read ~p", [Id]),
     
     Reply = read(Id, Ctx),
     clean_tables(Ctx),
@@ -296,11 +295,11 @@ handle_call(clean, _From,
     {reply, ok, Ctx};
 
 handle_call(stop, _From, Ctx) ->
-    ?dbg("stop:",[]),
+    lager:debug("stop:",[]),
     {stop, normal, ok, Ctx};
 
 handle_call(_Request, _From, Ctx) ->
-    ?dbg("handle_call: unknown request ~p", [_Request]),
+    lager:debug("unknown request ~p", [_Request]),
     {reply, {error, bad_call}, Ctx}.
 
 %%--------------------------------------------------------------------
@@ -318,7 +317,7 @@ handle_call(_Request, _From, Ctx) ->
 			 {stop, Reason::term(), Ctx::#ctx{}}.
 
 handle_cast(_Msg, Ctx) ->
-    ?dbg("handle_cast: unknown msg ~p", [_Msg]),
+    lager:debug("unknown msg ~p", [_Msg]),
     {noreply, Ctx}.
 
 %%--------------------------------------------------------------------
@@ -337,7 +336,7 @@ handle_cast(_Msg, Ctx) ->
 			 {stop, Reason::term(), Ctx::#ctx{}}.
 
 handle_info(_Info, Ctx) ->
-    ?dbg("handle_info: unknown info ~p", [_Info]),
+    lager:debug("unknown info ~p", [_Info]),
     {noreply, Ctx}.
 
 %%--------------------------------------------------------------------
@@ -347,7 +346,7 @@ handle_info(_Info, Ctx) ->
 		       no_return().
 
 terminate(_Reason, _Ctx=#ctx {state = State}) ->
-    ?dbg("terminate: terminating in state ~p, reason = ~p",
+    lager:debug("terminating in state ~p, reason = ~p",
 	 [State, _Reason]),
     ok.
 %%--------------------------------------------------------------------
@@ -361,7 +360,7 @@ terminate(_Reason, _Ctx=#ctx {state = State}) ->
 			 {ok, NewCtx::#ctx{}}.
 
 code_change(_OldVsn, Ctx, _Extra) ->
-    ?dbg("code_change: old version ~p", [_OldVsn]),
+    lager:debug("old version ~p", [_OldVsn]),
     {ok, Ctx}.
 
 
@@ -403,7 +402,7 @@ clean_tables(_Ctx=#ctx {cookies = Cookies, pid2cookie = P2C, queue = Queue}) ->
     Now = sec(),
     OldCookies = 
 	ets:select(Queue, [{{'$1','$2', '_'},[{'<', '$1', Now}], ['$2']}]),
-    ?dbg("clean: old cookies ~p.", [OldCookies]),
+    lager:debug("old cookies ~p.", [OldCookies]),
     lists:foreach(fun(Id) -> 
 			  case ets:lookup(Cookies, Id) of
 			      [_Cookie=#exoweb_cookie {pid = Pid}] ->
@@ -421,6 +420,6 @@ call(Id, F) ->
 	I -> apply(F, [I])
     catch
 	error: _E ->
-	    ?dbg("call: ~p not integer.", [Id]),
+	    lager:debug("~p not integer.", [Id]),
 	    {error, illegal_id}
     end.

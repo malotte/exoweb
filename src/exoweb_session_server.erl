@@ -16,7 +16,6 @@
 -module(exoweb_session_server).
 -behaviour(gen_server).
 
--include_lib("lager/include/log.hrl").
 -include("exoweb.hrl").
 
 %% general api
@@ -66,7 +65,7 @@
 			{error, Error::term()}.
 
 start_link(Opts) ->
-    lager:info("~p: start_link: args = ~p\n", [?MODULE, Opts]),
+    lager:info("args = ~p\n", [Opts]),
     gen_server:start_link({local, ?SERVER}, ?MODULE, Opts, []).
 
 
@@ -153,7 +152,7 @@ dump() ->
 		  {stop, Reason::term()}.
 
 init(_Args) ->
-    lager:info("~p: init: args = ~p,\n pid = ~p\n", [?MODULE, _Args, self()]),
+    lager:info("args = ~p,\n pid = ~p\n", [_Args, self()]),
     SessionTable = ets:new(exoweb_session_table, 
 			   [private, ordered_set, named_table,
 			    {keypos, #exoweb_session.id}]),
@@ -187,7 +186,7 @@ init(_Args) ->
 
 handle_call({store, Session=#exoweb_session{}}, _From, 
 	    Ctx=#ctx {sessions = Sessions, queue = Queue}) ->
-    ?dbg("handle_call: store ~p", [Session]),
+    lager:debug("store ~p", [Session]),
     <<Id:64>> = crypto:rand_bytes(8),
     
     %% Session will expire in 24 hours
@@ -200,7 +199,7 @@ handle_call({store, Session=#exoweb_session{}}, _From,
 
 handle_call({retreive, Id}, _From, 
 	    Ctx=#ctx {sessions = Sessions, queue = Queue}) ->
-    ?dbg("handle_call: retreive ~p", [Id]),
+    lager:debug("retreive ~p", [Id]),
     
     Reply = 
 	case ets:lookup(Sessions, Id) of
@@ -216,7 +215,7 @@ handle_call({retreive, Id}, _From,
     {reply, Reply, Ctx};
 
 handle_call({read, Id}, _From, Ctx=#ctx {sessions = Sessions}) ->
-    ?dbg("handle_call: read ~p", [Id]),
+    lager:debug("read ~p", [Id]),
     
     Reply = 
 	case ets:lookup(Sessions, Id) of
@@ -238,11 +237,11 @@ handle_call(dump, _From, Ctx=#ctx {sessions = Sessions, queue = Queue}) ->
     {reply, ok, Ctx};
 
 handle_call(stop, _From, Ctx) ->
-    ?dbg("stop:",[]),
+    lager:debug("stop:",[]),
     {stop, normal, ok, Ctx};
 
 handle_call(_Request, _From, Ctx) ->
-    ?dbg("handle_call: unknown request ~p", [_Request]),
+    lager:debug("unknown request ~p", [_Request]),
     {reply, {error,bad_call}, Ctx}.
 
 %%--------------------------------------------------------------------
@@ -260,7 +259,7 @@ handle_call(_Request, _From, Ctx) ->
 			 {stop, Reason::term(), Ctx::#ctx{}}.
 
 handle_cast(_Msg, Ctx) ->
-    ?dbg("handle_cast: unknown msg ~p", [_Msg]),
+    lager:debug("unknown msg ~p", [_Msg]),
     {noreply, Ctx}.
 
 %%--------------------------------------------------------------------
@@ -279,7 +278,7 @@ handle_cast(_Msg, Ctx) ->
 			 {stop, Reason::term(), Ctx::#ctx{}}.
 
 handle_info(_Info, Ctx) ->
-    ?dbg("handle_info: unknown info ~p", [_Info]),
+    lager:debug("unknown info ~p", [_Info]),
     {noreply, Ctx}.
 
 %%--------------------------------------------------------------------
@@ -289,7 +288,7 @@ handle_info(_Info, Ctx) ->
 		       no_return().
 
 terminate(_Reason, _Ctx=#ctx {state = State}) ->
-    ?dbg("terminate: terminating in state ~p, reason = ~p",
+    lager:debug("terminating in state ~p, reason = ~p",
 	 [State, _Reason]),
     ok.
 %%--------------------------------------------------------------------
@@ -303,7 +302,7 @@ terminate(_Reason, _Ctx=#ctx {state = State}) ->
 			 {ok, NewCtx::#ctx{}}.
 
 code_change(_OldVsn, Ctx, _Extra) ->
-    ?dbg("code_change: old version ~p", [_OldVsn]),
+    lager:debug("old version ~p", [_OldVsn]),
     {ok, Ctx}.
 
 
@@ -325,7 +324,7 @@ clean_tables(_Ctx=#ctx {sessions = Sessions, queue = Queue}) ->
     Now = sec(),
     OldSessions = 
 	ets:select(Queue, [{{'$1','$2'},[{'<', '$1', Now}], ['$2']}]),
-    ?dbg("clean: old sessions ~p.", [OldSessions]),
+    lager:debug("old sessions ~p.", [OldSessions]),
     ets:select_delete(Queue, [{{'$1','$2'},[{'<', '$1', Now}], [true]}]),
     lists:foreach(fun(S) -> ets:delete(Sessions, S) end, OldSessions),
     ok.
@@ -336,6 +335,6 @@ call(Id, F) ->
 	I -> apply(F, [I])
     catch
 	error: _E ->
-	    ?dbg("call: ~p not integer.", [Id]),
+	    lager:debug("~p not integer.", [Id]),
 	    {error, illegal_id}
     end.
