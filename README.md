@@ -23,7 +23,7 @@ exoweb also requires the following erlang applications to be installed:
 <li>sync - https://github.com/rustyio/sync</li>
 <li>gettext - https://github.com/Feuerlabs/gettext/li>
 <li>gen_smtp - https://github.com/Vagabond/gen_smtp</li>
-<li>lager - https://github.com/Feuerlabs/lager</li>
+<li>lager - https://github.com/basho/lager</li>
 </ul>
 
 If you want to run in debug mode add:
